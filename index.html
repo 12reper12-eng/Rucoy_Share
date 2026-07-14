@@ -15,73 +15,28 @@
         color: white;
         text-align: center;
         min-height: 100vh;
-        /* Fondo base muy oscuro para que resalten las líneas */
-        background: #020617;
+        
+        /* USAMOS LAS ONDAS NEÓN EXACTAS DE TU IMAGEN */
+        background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1920&q=80'), 
+                          linear-gradient(135deg, #0a0015, #020617); /* Respaldo oscuro */
+        background-size: 140% 140%;
+        background-position: center;
+        
+        /* Animación para que las ondas se muevan vivas de fondo */
+        animation: moverOndasNeon 20s ease-in-out infinite alternate;
         background-attachment: fixed;
         position: relative;
         overflow-x: hidden;
     }
 
-    /* CONTENEDOR DE LAS LÍNEAS NEÓN */
-    .lineas-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 0;
-        pointer-events: none;
-        overflow: hidden;
+    /* Hace que las ondas se desplacen y respiren suavemente de fondo */
+    @keyframes moverOndasNeon {
+        0% { background-position: 0% 20%; background-size: 130% 130%; }
+        50% { background-position: 50% 80%; background-size: 150% 150%; }
+        100% { background-position: 100% 40%; background-size: 130% 130%; }
     }
 
-    /* ESTILO DE CADA LÍNEA/RAYO */
-    .rayo-neon {
-        position: absolute;
-        width: 180%;
-        height: 15px; /* Grosor de la línea */
-        opacity: 0.7;
-        filter: blur(20px); /* Hace que brillen como neón */
-        transform: rotate(-30deg);
-    }
-
-    /* Línea Azul Eléctrico */
-    .rayo-azul {
-        background: #00f2ff;
-        box-shadow: 0 0 30px #00f2ff, 0 0 60px #00f2ff;
-        top: 15%;
-        left: -40%;
-        animation: moverRayoAncho 9s ease-in-out infinite alternate;
-    }
-
-    /* Línea Oro/Amarilla */
-    .rayo-amarillo {
-        background: #ffd700;
-        box-shadow: 0 0 30px #ffd700, 0 0 60px #ffd700;
-        top: 45%;
-        left: -30%;
-        animation: moverRayoAncho 12s ease-in-out infinite alternate-reverse;
-    }
-
-    /* Línea Verde WhatsApp/Ptrain */
-    .rayo-verde {
-        background: #25D366;
-        box-shadow: 0 0 30px #25D366, 0 0 60px #25D366;
-        top: 75%;
-        left: -40%;
-        animation: moverRayoAncho 10s ease-in-out infinite alternate;
-    }
-
-    /* Animación para que las líneas se desplacen de lado a lado */
-    @keyframes moverRayoAncho {
-        0% {
-            transform: translate(-10%, -10px) rotate(-35deg);
-        }
-        100% {
-            transform: translate(15%, 40px) rotate(-25deg);
-        }
-    }
-
-    /* Malla cuadriculada gamer por encima de las líneas */
+    /* Malla cuadriculada gamer por encima de las ondas para integrar el diseño */
     body::before {
         content: "";
         position: fixed;
@@ -110,7 +65,7 @@
         letter-spacing: 1px;
     }
 
-    /* Cuadro para las Horas de Trabajo */
+    /* Tu horario de trabajo de 9 a 7 */
     .horario-box {
         background: rgba(255, 215, 0, 0.08);
         border: 1px solid rgba(255, 215, 0, 0.5);
@@ -129,13 +84,14 @@
         padding: 25px;
         display: inline-block;
         border-radius: 14px;
-        background: rgba(4, 8, 16, 0.93); 
-        box-shadow: 0 0 30px rgba(0,242,255,0.5), inset 0 0 30px rgba(0,242,255,0.03);
+        /* Fondo bien oscuro y difuminado para que las letras se lean claritas sobre las líneas brillantes */
+        background: rgba(3, 7, 18, 0.94); 
+        box-shadow: 0 0 35px rgba(0,242,255,0.6), inset 0 0 30px rgba(0,242,255,0.03);
         max-width: 480px;
         width: 92%;
         position: relative;
-        z-index: 2; /* Por encima de los rayos neón */
-        backdrop-filter: blur(10px);
+        z-index: 2;
+        backdrop-filter: blur(12px);
     }
 
     label {
@@ -248,18 +204,10 @@
 </head>
 <body>
 
-    <!-- LAS LÍNEAS NEÓN EN MOVIMIENTO -->
-    <div class="lineas-container">
-        <div class="rayo-neon rayo-azul"></div>
-        <div class="rayo-neon rayo-amarillo"></div>
-        <div class="rayo-neon rayo-verde"></div>
-    </div>
-
     <div class="caja">
         <h1>🛡️ SAFEGAMING SERVICE 🛡️</h1>
         <div class="subtitle">RUCOY ONLINE: SHARE &amp; SKILLEO PROFESIONAL</div>
         
-        <!-- Tu horario de trabajo -->
         <div class="horario-box">
             🕒 <b>HORARIO DE TRABAJO:</b> 9:00 AM - 7:00 PM
         </div>
