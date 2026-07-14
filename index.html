@@ -6,68 +6,127 @@
 <title>Safegaming Service - Rucoy Online</title>
 <style>
     * { box-sizing: border-box; }
-    body { margin: 0; padding: 20px; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; background-repeat: no-repeat; transition: background-image 1s ease-in-out; }
-    
-    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; }
 
-    /* Estilos recuperados */
-    .estado { background: rgba(37, 211, 102, 0.2); border: 1px solid #25D366; color: #25D366; padding: 5px; text-align: center; border-radius: 6px; font-size: 11px; margin-bottom: 10px; font-weight: bold; }
-    .ventajas { display: flex; justify-content: space-around; margin-bottom: 15px; font-size: 10px; color: #aaa; }
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        background-color: #030008;
+        background-position: center;
+        background-size: cover;
+        background-attachment: fixed;
+        transition: background-image 1s ease-in-out;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .caja {
+        border: 2px solid rgba(0, 242, 255, 0.7);
+        padding: 25px;
+        border-radius: 16px;
+        background: rgba(6, 2, 16, 0.85); 
+        backdrop-filter: blur(8px);
+        box-shadow: 0 0 30px rgba(0,242,255,0.3);
+        width: 100%;
+        max-width: 450px;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    #mensaje-bienvenida { text-align: center; font-size: 15px; color: #00f2ff; margin-bottom: 15px; font-weight: bold; }
     h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; }
-    .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 12px; text-align: center; }
-    .horario-box { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; padding: 6px; margin-bottom: 15px; text-align: center; font-size: 11px; color: #ffd700; }
+    .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 13px; text-align: center; }
+    .horario-box { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; }
     
-    /* Sección Referencias */
-    .referencias { margin-top: 15px; text-align: center; }
-    .referencias h3 { font-size: 12px; color: #00f2ff; margin-bottom: 8px; }
-    .referencias img { width: 100%; border-radius: 6px; border: 1px solid rgba(0, 242, 255, 0.3); margin-bottom: 10px; }
+    label { display: block; margin: 10px 0 4px 0; font-size: 13px; color: #ccc; }
+    input, select { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid rgba(0, 242, 255, 0.5); background: rgba(7, 13, 26, 0.8); color: white; margin-bottom: 5px; cursor: pointer;}
     
-    label { display: block; margin: 10px 0 4px 0; font-size: 13px; color: #e0e6ed; }
-    input, select { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid rgba(0, 242, 255, 0.5); background: rgba(7, 13, 26, 0.8); color: white; cursor: pointer; }
-    
-    .faq-container { margin-top: 15px; border-top: 1px solid rgba(0, 242, 255, 0.2); padding-top: 10px; }
-    .pregunta { font-size: 12px; color: #00f2ff; margin-bottom: 5px; cursor: pointer; }
-    .respuesta { font-size: 11px; color: #ccc; margin-bottom: 10px; display: none; padding-left: 10px; }
-    
-    .resultado-caja { background: rgba(0, 242, 255, 0.1); border: 1px dashed rgba(0, 242, 255, 0.5); padding: 10px; margin-top: 15px; border-radius: 6px; text-align: center; }
-    .total-oro { color: #ffd700; font-size: 18px; font-weight: bold; }
-    .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; }
-    .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.5); font-size: 11px; text-align: center; }
+    .resultado-caja { background: rgba(0, 242, 255, 0.1); border: 1px dashed rgba(0, 242, 255, 0.5); padding: 12px; margin-top: 15px; border-radius: 6px; text-align: center; }
+    .total-oro { color: #ffd700; font-size: 20px; font-weight: bold; }
+    .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; transition: 0.3s; }
+    .btn-wa:hover { background: #128c7e; transform: scale(1.02); }
+    .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center; }
+
+    @media (min-width: 769px) { body { align-items: flex-start; padding-left: 10%; justify-content: center; } }
 </style>
 </head>
 <body>
 
     <div class="caja">
-        <div class="estado">✅ ESTADO: CUPOS DISPONIBLES</div>
-        
+        <div id="mensaje-bienvenida">¡Bienvenido, guerrero! 👋</div>
         <h1>🛡️ SAFEGAMING SERVICE 🛡️</h1>
+        <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
+        <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
         
-        <!-- SECCIÓN DE REFERENCIAS (Aquí pones tus imágenes) -->
-        <div class="referencias">
-            <h3>⭐ Referencias de Clientes</h3>
-            <!-- Solo tienes que reemplazar los links de abajo por los links de tus fotos subidas a un host -->
-            <img src="LINK_DE_TU_IMAGEN_1.jpg" alt="Referencia 1">
-            <img src="LINK_DE_TU_IMAGEN_2.jpg" alt="Referencia 2">
+        <label>Nombre del Personaje:</label>
+        <input type="text" id="personaje" placeholder="Ej: RucoyPro" oninput="actualizarSaludo()">
+
+        <label>Elige tu Profesión:</label>
+        <select id="clase" onchange="actualizarSaludo()">
+            <option value="Melee">⚔️ Melee</option>
+            <option value="Distance">🏹 Distancia</option>
+            <option value="Magic">✨ Magia</option>
+        </select>
+
+        <label>Servicio:</label>
+        <select id="servicio" onchange="calcularTotal()">
+            <option value="300">Skill Normal - $300k / hr</option>
+            <option value="360">Power Training - $360k / hr</option>
+            <option value="600">Subida de Nivel - $600k / hr</option>
+            <option value="1400">Pack Maraton (5h Skill) - 1.4KK</option>
+            <option value="1700">Pack Ptrain Pro (5h Ptrain) - 1.7KK</option>
+        </select>
+
+        <div id="caja-horas">
+            <label>Cantidad de Horas:</label>
+            <input type="number" id="horas" value="1" min="1" max="24" oninput="calcularTotal()">
         </div>
 
-        <label>Personaje:</label>
-        <input type="text" id="personaje" oninput="calcularTotal()">
-
-        <!-- ...resto de tu contenido igual... -->
-        
-        <div class="faq-container">
-            <div class="pregunta" onclick="toggle(this)">+ ¿Seguridad?</div>
-            <div class="respuesta">100% seguro. Protocolos anti-scam garantizados.</div>
-            <div class="pregunta" onclick="toggle(this)">+ ¿Si mi personaje muere?</div>
-            <div class="respuesta">Me hago responsable de la experiencia perdida en skill y coordinamos reposición de nivel.</div>
+        <div class="resultado-caja">
+            <div class="total-oro" id="precio-final">300k gold</div>
         </div>
 
-        <a href="#" id="boton-whatsapp" class="btn-wa" target="_blank">💬 APARTAR CUPO</a>
+        <a href="#" id="boton-whatsapp" class="btn-wa" target="_blank">💬 APARTAR CUPO POR WHATSAPP</a>
     </div>
 
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
+
     <script>
-        function toggle(el) { el.nextElementSibling.style.display = (el.nextElementSibling.style.display === "block") ? "none" : "block"; }
-        // ... (Tu script original de rotación y cálculo sigue igual)
+        function actualizarSaludo() {
+            let nick = document.getElementById("personaje").value;
+            let claseSeleccionada = document.getElementById("clase");
+            let claseTexto = claseSeleccionada.options[claseSeleccionada.selectedIndex].text;
+            let saludo = document.getElementById("mensaje-bienvenida");
+            
+            saludo.innerText = (nick.length > 0) ? "¡Bienvenido, " + nick + " (" + claseTexto + ")! 👋" : "¡Bienvenido, guerrero de " + claseTexto + "! 👋";
+            calcularTotal();
+        }
+
+        function calcularTotal() {
+            let personaje = document.getElementById("personaje").value;
+            let clase = document.getElementById("clase").options[document.getElementById("clase").selectedIndex].text;
+            let servicioSelect = document.getElementById("servicio");
+            let precioBase = parseInt(servicioSelect.value);
+            let nombreServicio = servicioSelect.options[servicioSelect.selectedIndex].text.split('-')[0].trim();
+            let horas = parseInt(document.getElementById("horas").value) || 1;
+            
+            let totalK = (precioBase === 1400 || precioBase === 1700) ? precioBase : (precioBase * horas);
+            let textoPrecio = (totalK >= 1000) ? (totalK / 1000) + "KK gold" : totalK + "k gold";
+
+            document.getElementById("precio-final").innerText = textoPrecio;
+            let mensaje = "Hola Safegaming! Quiero agendar:\nPersonaje: " + (personaje || "Anónimo") + "\nProfesión: " + clase + "\nServicio: " + nombreServicio + "\nTotal: " + textoPrecio;
+            document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(mensaje);
+        }
+
+        const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg", "https://imgsrv.crunchyroll.com/cdn-cgi/image/fit=cover,format=auto,quality=85,width=1920/keyart/GDKHZEJ0K-backdrop_wide"];
+        let i = 0;
+        function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
+        window.onload = () => { rotar(); setInterval(rotar, 30000); calcularTotal(); };
     </script>
 </body>
 </html>
