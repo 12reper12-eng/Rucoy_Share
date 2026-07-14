@@ -18,16 +18,17 @@
         position: relative;
         overflow-x: hidden;
         
-        /* Configuración del fondo para que cubra toda la pantalla */
+        /* Ajustes para el renderizado correcto de tus imágenes de fondo */
         background-color: #030008;
         background-position: center;
         background-size: cover;
         background-attachment: fixed;
         background-repeat: no-repeat;
-        transition: background-image 0.5s ease-in-out; /* Transición suave al cambiar */
+        /* Transición suave de 1 segundo para el cambio de imagen */
+        transition: background-image 1s ease-in-out;
     }
 
-    /* Capa oscura por encima de la imagen para que el texto se lea perfecto */
+    /* Filtro oscuro para asegurar que los textos resalten impecables sobre el fondo */
     body::before {
         content: "";
         position: fixed;
@@ -71,7 +72,7 @@
         padding: 25px;
         display: inline-block;
         border-radius: 14px;
-        background: rgba(6, 2, 16, 0.88); /* Un toque más opaco para que resalte del fondo */
+        background: rgba(6, 2, 16, 0.88); 
         box-shadow: 0 0 35px rgba(0,242,255,0.4);
         max-width: 480px;
         width: 92%;
@@ -240,18 +241,21 @@
     </div>
 
     <script>
-        // LISTA DE FONDOS AL AZAR (Puedes cambiar estos enlaces por los tuyos)
+        // TUS TRES ENLACES OFICIALES CONFIGURADOS
         const fondos = [
-            "https://a.storyblok.com/f/178900/960x540/5963690076/solo-leveling-episode-25.jpg/m/filters:quality(95)format(webp)
-            "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"
-            "https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png"  
+            "https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png",
+            "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg",
+            "https://imgsrv.crunchyroll.com/cdn-cgi/image/fit=cover,format=auto,quality=85,width=1920/keyart/GDKHZEJ0K-backdrop_wide"
         ];
 
-        function cambiarFondoAlAzar() {
-            // Elige un número aleatorio de la lista
-            const indiceAleatorio = Math.floor(Math.random() * fondos.length);
-            // Aplica la imagen al fondo del body
-            document.body.style.backgroundImage = "url('" + fondos[indiceAleatorio] + "')";
+        let indiceActual = 0;
+
+        // Función que cambia las imágenes de forma ordenada
+        function rotarFondos() {
+            document.body.style.backgroundImage = "url('" + fondos[indiceActual] + "')";
+            
+            // Avanza a la siguiente imagen, si llega al final vuelve a la 0
+            indiceActual = (indiceActual + 1) % fondos.length;
         }
 
         function calcularTotal() {
@@ -294,9 +298,12 @@
             document.getElementById("boton-whatsapp").href = urlWhatsApp;
         }
 
-        // Ejecutar funciones al cargar la página
         window.onload = function() {
-            cambiarFondoAlAzar();
+            rotarFondos(); // Pone el primer fondo al cargar la página
+            
+            // Cambia de fondo de forma automática cada 30 segundos (30000 milisegundos)
+            setInterval(rotarFondos, 30000); 
+            
             calcularTotal();
         };
         
