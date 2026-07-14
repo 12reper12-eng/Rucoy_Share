@@ -39,13 +39,12 @@
     }
 
     #mensaje-bienvenida { text-align: center; font-size: 15px; color: #00f2ff; margin-bottom: 15px; font-weight: bold; }
-
     h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; }
     .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 13px; text-align: center; }
     .horario-box { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; }
     
     label { display: block; margin: 10px 0 4px 0; font-size: 13px; color: #ccc; }
-    input, select { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid rgba(0, 242, 255, 0.5); background: rgba(7, 13, 26, 0.8); color: white; margin-bottom: 5px;}
+    input, select { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid rgba(0, 242, 255, 0.5); background: rgba(7, 13, 26, 0.8); color: white; margin-bottom: 5px; cursor: pointer;}
     
     .resultado-caja { background: rgba(0, 242, 255, 0.1); border: 1px dashed rgba(0, 242, 255, 0.5); padding: 12px; margin-top: 15px; border-radius: 6px; text-align: center; }
     .total-oro { color: #ffd700; font-size: 20px; font-weight: bold; }
@@ -67,11 +66,11 @@
         <label>Nombre del Personaje:</label>
         <input type="text" id="personaje" placeholder="Ej: RucoyPro" oninput="actualizarSaludo()">
 
-        <label>Clase de Skill:</label>
+        <label>Elige tu Profesión:</label>
         <select id="clase" onchange="actualizarSaludo()">
-            <option value="Melee">Melee</option>
-            <option value="Distance">Distance</option>
-            <option value="Magic">Magic</option>
+            <option value="Melee">⚔️ Melee</option>
+            <option value="Distance">🏹 Distancia</option>
+            <option value="Magic">✨ Magia</option>
         </select>
 
         <label>Servicio:</label>
@@ -100,15 +99,17 @@
     <script>
         function actualizarSaludo() {
             let nick = document.getElementById("personaje").value;
-            let clase = document.getElementById("clase").value;
+            let claseSeleccionada = document.getElementById("clase");
+            let claseTexto = claseSeleccionada.options[claseSeleccionada.selectedIndex].text;
             let saludo = document.getElementById("mensaje-bienvenida");
-            saludo.innerText = (nick.length > 0) ? "¡Bienvenido, " + nick + " (" + clase + ")! 👋" : "¡Bienvenido, guerrero de " + clase + "! 👋";
+            
+            saludo.innerText = (nick.length > 0) ? "¡Bienvenido, " + nick + " (" + claseTexto + ")! 👋" : "¡Bienvenido, guerrero de " + claseTexto + "! 👋";
             calcularTotal();
         }
 
         function calcularTotal() {
             let personaje = document.getElementById("personaje").value;
-            let clase = document.getElementById("clase").value;
+            let clase = document.getElementById("clase").options[document.getElementById("clase").selectedIndex].text;
             let servicioSelect = document.getElementById("servicio");
             let precioBase = parseInt(servicioSelect.value);
             let nombreServicio = servicioSelect.options[servicioSelect.selectedIndex].text.split('-')[0].trim();
@@ -118,11 +119,10 @@
             let textoPrecio = (totalK >= 1000) ? (totalK / 1000) + "KK gold" : totalK + "k gold";
 
             document.getElementById("precio-final").innerText = textoPrecio;
-            let mensaje = "Hola Safegaming! Quiero agendar:\nPersonaje: " + personaje + "\nClase: " + clase + "\nServicio: " + nombreServicio + "\nTotal: " + textoPrecio;
+            let mensaje = "Hola Safegaming! Quiero agendar:\nPersonaje: " + (personaje || "Anónimo") + "\nProfesión: " + clase + "\nServicio: " + nombreServicio + "\nTotal: " + textoPrecio;
             document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(mensaje);
         }
 
-        // Fondo y carga
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg", "https://imgsrv.crunchyroll.com/cdn-cgi/image/fit=cover,format=auto,quality=85,width=1920/keyart/GDKHZEJ0K-backdrop_wide"];
         let i = 0;
         function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
