@@ -15,61 +15,24 @@
         color: white;
         text-align: center;
         min-height: 100vh;
-        background: #030008; /* Fondo oscuro místico */
         position: relative;
         overflow-x: hidden;
+        
+        /* Configuración del fondo para que cubra toda la pantalla */
+        background-color: #030008;
+        background-position: center;
+        background-size: cover;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        transition: background-image 0.5s ease-in-out; /* Transición suave al cambiar */
     }
 
-    /* CONTENEDOR DE ENERGÍA ELECTRANTE EN MOVIMIENTO LENTO */
-    .fondo-energia {
-        position: fixed;
-        top: -20%;
-        left: -20%;
-        width: 140%;
-        height: 140%;
-        z-index: 0;
-        pointer-events: none;
-    }
-
-    .fondo-energia svg {
-        width: 100%;
-        height: 100%;
-    }
-
-    /* ANIMACIÓN SUAVE, CONSTANTE Y ELEGANTE */
-    .haz-luz {
-        transform-origin: center;
-        animation: fluirEnergia 22s ease-in-out infinite alternate;
-        opacity: 0.65;
-    }
-
-    /* Tiempos desfasados para que cada color se mueva a su propio ritmo */
-    .haz-azul   { animation-duration: 26s; animation-delay: 0s; }
-    .haz-verde  { animation-duration: 32s; animation-delay: -4s; }
-    .haz-oro    { animation-duration: 20s; animation-delay: -8s; }
-    .haz-fucsia { animation-duration: 28s; animation-delay: -12s; }
-
-    @keyframes fluirEnergia {
-        0% {
-            transform: scale(1) rotate(0deg) translate(0px, 0px);
-        }
-        50% {
-            transform: scale(1.12) rotate(4deg) translate(40px, -30px);
-        }
-        100% {
-            transform: scale(1) rotate(-3deg) translate(-30px, 40px);
-        }
-    }
-
-    /* Malla digital gamer que da profundidad */
+    /* Capa oscura por encima de la imagen para que el texto se lea perfecto */
     body::before {
         content: "";
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background-image:
-            linear-gradient(rgba(0, 242, 255, 0.02) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 242, 255, 0.02) 1px, transparent 1px);
-        background-size: 40px 40px;
+        background: rgba(0, 0, 0, 0.65); 
         pointer-events: none;
         z-index: 1;
     }
@@ -108,9 +71,8 @@
         padding: 25px;
         display: inline-block;
         border-radius: 14px;
-        /* Efecto Cristal Oscuro para resaltar el texto sobre el fondo */
-        background: rgba(6, 2, 16, 0.92); 
-        box-shadow: 0 0 35px rgba(0,242,255,0.4), inset 0 0 20px rgba(0,242,255,0.05);
+        background: rgba(6, 2, 16, 0.88); /* Un toque más opaco para que resalte del fondo */
+        box-shadow: 0 0 35px rgba(0,242,255,0.4);
         max-width: 480px;
         width: 92%;
         position: relative;
@@ -228,49 +190,6 @@
 </head>
 <body>
 
-    <!-- RED DE LÍNEAS NEÓN DINÁMICAS (ESTILO ENERGÍA DE COMBATE) -->
-    <div class="fondo-energia">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" preserveAspectRatio="none">
-            <defs>
-                <!-- Filtro de resplandor premium -->
-                <filter id="glow-premium" x="-30%" y="-30%" width="160%" height="160%">
-                    <feGaussianBlur stdDeviation="8" result="blur1" />
-                    <feGaussianBlur stdDeviation="22" result="blur2" />
-                    <feMerge>
-                        <feMergeNode in="blur2" />
-                        <feMergeNode in="blur1" />
-                        <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                </filter>
-            </defs>
-            
-            <!-- Haces de luz cruzados Azul Eléctrico (Maná/Magia) -->
-            <g class="haz-luz haz-azul" stroke="#00f2ff" stroke-width="3.5" filter="url(#glow-premium)">
-                <line x1="150" y1="-100" x2="1050" y2="1300" />
-                <line x1="-100" y1="400" x2="1300" y2="500" />
-                <line x1="1000" y1="-50" x2="200" y2="1250" />
-            </g>
-
-            <!-- Haces Verde Neón (Skill de Distancia / WhatsApp Gamer) -->
-            <g class="haz-luz haz-verde" stroke="#25D366" stroke-width="3" filter="url(#glow-premium)">
-                <line x1="-50" y1="200" x2="1250" y2="1000" />
-                <line x1="450" y1="-100" x2="750" y2="1300" />
-            </g>
-            
-            <!-- Haces Amarillo Oro (Rucoy Coins / Monedas de Oro) -->
-            <g class="haz-luz haz-oro" stroke="#ffd700" stroke-width="2.5" filter="url(#glow-premium)">
-                <line x1="50" y1="-50" x2="1150" y2="1150" />
-                <line x1="-100" y1="800" x2="1300" y2="300" />
-            </g>
-
-            <!-- Toque Fucsia Neón (Fondo de Contraste) -->
-            <g class="haz-luz haz-fucsia" stroke="#ff00aa" stroke-width="2" opacity="0.5" filter="url(#glow-premium)">
-                <line x1="850" y1="-100" x2="350" y2="1300" />
-                <line x1="-50" y1="550" x2="1250" y2="650" />
-            </g>
-        </svg>
-    </div>
-
     <div class="caja">
         <h1>🛡️ SAFEGAMING SERVICE 🛡️</h1>
         <div class="subtitle">RUCOY ONLINE: SHARE &amp; SKILLEO PROFESIONAL</div>
@@ -321,6 +240,20 @@
     </div>
 
     <script>
+        // LISTA DE FONDOS AL AZAR (Puedes cambiar estos enlaces por los tuyos)
+        const fondos = [
+            "https://a.storyblok.com/f/178900/960x540/5963690076/solo-leveling-episode-25.jpg/m/filters:quality(95)format(webp)
+            "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"
+            "https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png"  
+        ];
+
+        function cambiarFondoAlAzar() {
+            // Elige un número aleatorio de la lista
+            const indiceAleatorio = Math.floor(Math.random() * fondos.length);
+            // Aplica la imagen al fondo del body
+            document.body.style.backgroundImage = "url('" + fondos[indiceAleatorio] + "')";
+        }
+
         function calcularTotal() {
             let personaje = document.getElementById("personaje").value;
             let servicioSelect = document.getElementById("servicio");
@@ -361,7 +294,12 @@
             document.getElementById("boton-whatsapp").href = urlWhatsApp;
         }
 
-        window.onload = calcularTotal;
+        // Ejecutar funciones al cargar la página
+        window.onload = function() {
+            cambiarFondoAlAzar();
+            calcularTotal();
+        };
+        
         document.getElementById("personaje").oninput = calcularTotal;
     </script>
 </body>
