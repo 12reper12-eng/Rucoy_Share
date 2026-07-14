@@ -20,7 +20,7 @@
         align-items: center;
         padding-left: 8%; /* Espaciado desde el borde izquierdo */
         
-        /* Ajustes de fondo limpios y sin filtros oscuros encima */
+        /* Ajustes de fondo limpios y sin filtros oscuros fijos encima */
         background-color: #030008;
         background-position: center;
         background-size: cover;
@@ -29,13 +29,13 @@
         transition: background-image 1s ease-in-out;
     }
 
-    /* MENÚ AL LADO IZQUIERDO Y TRANSPARENTE */
+    /* MENÚ AL LADO IZQUIERDO Y TRANSPARENTE CON EFECTO CRISTAL */
     .caja {
         border: 2px solid rgba(0, 242, 255, 0.7);
         padding: 30px 25px;
         border-radius: 16px;
         
-        /* Fondo oscuro pero con suficiente transparencia para ver el fondo */
+        /* Fondo oscuro pero con suficiente transparencia para ver las imágenes */
         background: rgba(6, 2, 16, 0.75); 
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
@@ -163,7 +163,7 @@
         z-index: 2;
     }
 
-    /* Ajuste para celulares: el menú vuelve al centro para que no se corte */
+    /* Adaptabilidad para dispositivos móviles */
     @media (max-width: 768px) {
         body {
             justify-content: center;
@@ -232,10 +232,11 @@
     </div>
 
     <script>
+        // TUS NUEVAS IMÁGENES DE SOLO LEVELING DE LA WEB CONFIGURADAS
         const fondos = [
-            "https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png",
-            "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg",
-            "https://imgsrv.crunchyroll.com/cdn-cgi/image/fit=cover,format=auto,quality=85,width=1920/keyart/GDKHZEJ0K-backdrop_wide"
+            "https://images.alphacoders.com/134/1346610.jpeg",
+            "https://images7.alphacoders.com/134/1349141.png",
+            "https://images8.alphacoders.com/134/1346611.png"
         ];
 
         let indiceActual = 0;
@@ -286,7 +287,7 @@
 
         window.onload = function() {
             rotarFondos();
-            setInterval(rotarFondos, 30000);
+            setInterval(rotarFondos, 30000); // Cambia automáticamente cada 30 segundos
             calcularTotal();
         };
         
