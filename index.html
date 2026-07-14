@@ -15,15 +15,25 @@
         color: white;
         text-align: center;
         min-height: 100vh;
-        /* FONDO NUEVO: Oscuro, limpio y con una sutil luz azul central */
-        background:
-            radial-gradient(circle at 50% 20%, rgba(0, 242, 255, 0.08) 0%, transparent 50%),
-            linear-gradient(160deg, #030712 0%, #06101e 40%, #0a1a2e 70%, #030712 100%);
+        
+        /* NUEVO GRADIENTE: Azul neón, cian, oro y verde moviéndose juntos */
+        background: linear-gradient(135deg, #020617, #005577, #00f2ff, #cca100, #005a2b, #020617);
+        background-size: 400% 400%;
+        animation: gradienteGamer 12s ease infinite;
+        
         background-attachment: fixed;
         position: relative;
         overflow-x: hidden;
     }
 
+    /* Animación fluida para mezclar tus colores de Rucoy */
+    @keyframes gradienteGamer {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Malla cuadriculada para darle el toque de fondo de juego */
     body::before {
         content: "";
         position: fixed;
@@ -31,7 +41,7 @@
         background-image:
             linear-gradient(rgba(0, 242, 255, 0.04) 1px, transparent 1px),
             linear-gradient(90deg, rgba(0, 242, 255, 0.04) 1px, transparent 1px);
-        background-size: 40px 40px;
+        background-size: 35px 35px;
         pointer-events: none;
         z-index: 0;
     }
@@ -55,10 +65,10 @@
         z-index: 1;
     }
 
-    /* ESTILO NUEVO: Cuadro para las Horas de Trabajo */
+    /* Cuadro estético para tus Horas de Trabajo */
     .horario-box {
-        background: rgba(255, 215, 0, 0.07);
-        border: 1px solid rgba(255, 215, 0, 0.4);
+        background: rgba(255, 215, 0, 0.08);
+        border: 1px solid rgba(255, 215, 0, 0.5);
         border-radius: 8px;
         padding: 8px 15px;
         margin: 0 auto 20px auto;
@@ -66,7 +76,7 @@
         font-size: 13px;
         color: #ffd700;
         letter-spacing: 0.5px;
-        box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+        box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
     }
 
     .caja {
@@ -74,13 +84,14 @@
         padding: 25px;
         display: inline-block;
         border-radius: 14px;
-        background: rgba(6,16,30,0.92);
-        box-shadow: 0 0 25px rgba(0,242,255,0.5), inset 0 0 30px rgba(0,242,255,0.03);
+        /* Fondo oscuro semi-transparente para que el neón de atrás no moleste al leer */
+        background: rgba(4, 8, 16, 0.95); 
+        box-shadow: 0 0 30px rgba(0,242,255,0.6), inset 0 0 30px rgba(0,242,255,0.03);
         max-width: 480px;
         width: 92%;
         position: relative;
         z-index: 1;
-        backdrop-filter: blur(4px);
+        backdrop-filter: blur(10px);
     }
 
     label {
@@ -183,7 +194,7 @@
 
     .footer {
         margin-top: 25px;
-        color: #5a6472;
+        color: #a0aab5;
         font-size: 12px;
         line-height: 1.6;
         position: relative;
@@ -197,7 +208,7 @@
         <h1>🛡️ SAFEGAMING SERVICE 🛡️</h1>
         <div class="subtitle">RUCOY ONLINE: SHARE &amp; SKILLEO PROFESIONAL</div>
         
-        <!-- SECCIÓN DE HORARIO ACTUALIZADA -->
+        <!-- Tu horario de trabajo -->
         <div class="horario-box">
             🕒 <b>HORARIO DE TRABAJO:</b> 9:00 AM - 7:00 PM
         </div>
