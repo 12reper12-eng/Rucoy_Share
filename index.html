@@ -4,83 +4,104 @@
 <meta charset="UTF-8">
 <title>Safegaming Service</title>
 <style>
-    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; background-color: #030008; background-size: cover; background-position: center; transition: background-image 1s ease-in-out; }
+    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; background-color: #030008; background-size: cover; background-position: center; background-repeat: no-repeat; transition: background-image 1s ease-in-out; }
     .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.9); width: 100%; max-width: 450px; backdrop-filter: blur(10px); }
-    #estado-servicio { text-align: center; margin-bottom: 10px; font-weight: bold; padding: 8px; border-radius: 5px; font-size: 13px; cursor: pointer; }
-    h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 15px 0; text-align: center; }
-    label { display: block; margin: 10px 0 4px 0; font-size: 13px; color: #ccc; }
-    select, input { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid #00f2ff; background: #070d1a; color: white; }
-    /* Brillo dorado */
-    .oro-brillo { color: #ffd700; text-shadow: 0 0 8px #ffd700; font-weight: bold; text-align: center; margin: 15px 0; font-size: 18px; }
-    .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; }
+    #estado-servicio { text-align: center; margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 8px; cursor: pointer; border: 1px solid rgba(0,242,255,0.3); }
+    h1 { color: #00f2ff; text-shadow: 0 0 15px #00f2ff; font-size: 22px; margin: 0 0 15px 0; text-align: center; }
+    label { display: block; margin: 8px 0 2px 0; font-size: 12px; color: #aaa; }
+    input, select { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid #00f2ff; background: #070d1a; color: white; margin-bottom: 10px; }
+    .oro-brillo { color: #ffd700; text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700; font-weight: bold; text-align: center; margin: 15px 0; font-size: 22px; }
+    .btn-wa { background: #25D366; color: white; padding: 12px; font-weight: bold; border-radius: 6px; display: block; text-align: center; text-decoration: none; cursor: pointer; }
+    #panel-admin, #vista-privada { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
 </style>
 </head>
 <body>
 
 <div class="caja">
-    <div id="estado-servicio">Cargando...</div>
-    <h1 ondblclick="abrirAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
-    
-    <label>Servicio:</label>
-    <select id="servicio" onchange="calcularTotal()">
-        <option value="300">Skill Normal - $300k / hr</option>
-        <option value="360">Power Training - $360k / hr</option>
-        <option value="600">Subida de Nivel - $600k / hr</option>
-        <option value="1400">Pack Maraton (5h) - 1.4KK</option>
-        <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
-    </select>
+    <div id="vista-privada">
+        <h2 id="cliente-nombre" style="color:#00f2ff">Seguimiento</h2>
+        <div id="reloj" style="font-size: 30px; font-weight: bold; text-align: center;">00:00:00</div>
+    </div>
 
-    <label>Horas:</label>
-    <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
+    <div id="formulario-normal">
+        <div id="estado-servicio">Cargando...</div>
+        <h1 ondblclick="abrirAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
+        
+        <label>Nombre del Personaje:</label>
+        <input type="text" id="personaje" placeholder="Ej: RucoyPro">
+        
+        <label>Profesión:</label>
+        <select id="clase">
+            <option value="Melee">⚔️ Melee</option>
+            <option value="Distance">🏹 Distancia</option>
+            <option value="Magic">✨ Magia</option>
+        </select>
 
-    <div id="total-final" class="oro-brillo">300k gold</div>
-    
-    <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirSonido(); enviarWhatsApp()">💬 APARTAR CUPO</a>
+        <label>Servicio:</label>
+        <select id="servicio" onchange="calcularTotal()">
+            <option value="300">Skill Normal - $300k / hr</option>
+            <option value="360">Power Training - $360k / hr</option>
+            <option value="600">Subida de Nivel - $600k / hr</option>
+            <option value="1400">Pack Maraton (5h) - 1.4KK</option>
+            <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
+        </select>
+
+        <label>Horas:</label>
+        <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
+
+        <div id="total-final" class="oro-brillo">300k gold</div>
+        
+        <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirSonido(); enviarWhatsApp()">💬 APARTAR CUPO</a>
+    </div>
+
+    <div id="panel-admin">
+        <input type="text" id="admin-nombre" placeholder="Nombre cliente">
+        <input type="number" id="admin-horas" placeholder="Horas">
+        <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer;">GENERAR LINK</button>
+        <div id="link-generado" style="color:#ffd700; font-size:11px; margin-top:10px; word-break:break-all;"></div>
+    </div>
 </div>
 
-<!-- Sonido -->
 <audio id="sonido-click" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = {
+    const db = getDatabase(initializeApp({
         apiKey: "AIzaSyAmJhCtpBQoE_amS6uR9rdNKCx6AbayTIc",
         authDomain: "shareskill-8d1fe.firebaseapp.com",
         databaseURL: "https://shareskill-8d1fe-default-rtdb.firebaseio.com",
-        projectId: "shareskill-8d1fe",
-        storageBucket: "shareskill-8d1fe.firebasestorage.app",
-        messagingSenderId: "1044347975822",
-        appId: "1:1044347975822:web:f91a7fb96a11358e8bb1df"
-    };
+        projectId: "shareskill-8d1fe"
+    }));
 
-    const db = getDatabase(initializeApp(firebaseConfig));
+    // Sincronización estado
     const estadoRef = ref(db, 'disponible');
-
-    onValue(estadoRef, (snapshot) => {
-        window.estaDisponible = snapshot.val();
+    onValue(estadoRef, (s) => {
+        window.estaDisponible = s.val();
         let el = document.getElementById("estado-servicio");
         el.innerText = window.estaDisponible ? "🟢 Estado: Disponible" : "🔴 Estado: No disponible";
         el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
         document.getElementById("boton-whatsapp").style.pointerEvents = window.estaDisponible ? "auto" : "none";
     });
+    document.getElementById("estado-servicio").onclick = () => set(estadoRef, !window.estaDisponible);
 
-    window.toggleEstadoCloud = () => set(estadoRef, !window.estaDisponible);
-    document.getElementById("estado-servicio").onclick = toggleEstadoCloud;
-
+    // Funciones
     window.calcularTotal = () => {
         let s = document.getElementById('servicio').value, h = document.getElementById('horas').value;
         let t = (s >= 1400) ? s : s * h;
         document.getElementById('total-final').innerText = (t >= 1000) ? (t/1000) + "KK gold" : t + "k gold";
     };
-
     window.reproducirSonido = () => document.getElementById('sonido-click').play();
-
     window.enviarWhatsApp = () => {
-        let s = document.getElementById('servicio').options[document.getElementById('servicio').selectedIndex].text;
-        window.open("https://wa.me/584123576579?text=" + encodeURIComponent(`Hola, quiero el servicio: ${s}`), '_blank');
+        let p = document.getElementById('personaje').value, s = document.getElementById('servicio').options[document.getElementById('servicio').selectedIndex].text;
+        window.open("https://wa.me/584123576579?text=" + encodeURIComponent(`Hola, quiero ${s} para el personaje: ${p}`), '_blank');
     };
+    window.abrirAdmin = () => { if(prompt("Contraseña:") === "Iscarlos2908") document.getElementById('panel-admin').style.display = 'block'; };
+    
+    // Rotación fondos
+    const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
+    let i = 0; setInterval(() => { document.body.style.backgroundImage = `url('${fondos[i]}')`; i = (i + 1) % fondos.length; }, 8000);
 </script>
 </body>
 </html>
