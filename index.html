@@ -15,12 +15,12 @@
         color: white;
         text-align: center;
         min-height: 100vh;
-        background: #060214; /* Fondo oscuro base */
+        background: #060214; 
         position: relative;
         overflow-x: hidden;
     }
 
-    /* CONTENEDOR DEL FONDO DE ONDAS NEÓN */
+    
     .fondo-ondas {
         position: fixed;
         top: 0;
@@ -37,23 +37,23 @@
         object-fit: cover;
     }
 
-    /* Animación para que las líneas se muevan de forma fluida */
+    
     .linea-animada {
-        animation: ondular 8s ease-in-out infinite alternate;
+        animation: ondular 3.5s ease-in-out infinite alternate; /* Bajado de 8s a 3.5s */
         transform-origin: center;
     }
 
-    .linea-2 { animation-duration: 11s; animation-delay: -2s; }
-    .linea-3 { animation-duration: 14s; animation-delay: -5s; }
-    .linea-4 { animation-duration: 9s; animation-delay: -3s; }
+    .linea-2 { animation-duration: 4.5s; animation-delay: -1s; } /* Bajado de 11s a 4.5s */
+    .linea-3 { animation-duration: 5.5s; animation-delay: -2s; } /* Bajado de 14s a 5.5s */
+    .linea-4 { animation-duration: 4s; animation-delay: -1.5s; } /* Bajado de 9s a 4s */
 
     @keyframes ondular {
         0% { transform: scale(1) rotate(0deg) translate(0px, 0px); }
-        50% { transform: scale(1.05) rotate(2deg) translate(10px, -15px); }
-        100% { transform: scale(1) rotate(-1deg) translate(-10px, 15px); }
+        50% { transform: scale(1.08) rotate(3deg) translate(15px, -25px); }
+        100% { transform: scale(1) rotate(-2deg) translate(-15px, 25px); }
     }
 
-    /* Malla cuadriculada por encima de las ondas */
+    
     body::before {
         content: "";
         position: fixed;
@@ -219,10 +219,9 @@
 </head>
 <body>
 
-    <!-- ONDAS NEÓN VECTORIALES EN MOVIMIENTO (IGUAL A TU IMAGEN) -->
+    
     <div class="fondo-ondas">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
-            <!-- Filtro de brillo neón extremo -->
             <defs>
                 <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
                     <feGaussianBlur stdDeviation="6" result="blur1" />
@@ -230,23 +229,22 @@
                     <feMerge>
                         <feMergeNode in="blur2" />
                         <feMergeNode in="blur1" />
-                        <feMergeNode in="補" />
                         <feMergeNode in="SourceGraphic" />
                     </feMerge>
                 </filter>
             </defs>
             
-            <!-- Onda Azul Ciano -->
+            
             <path class="linea-animada linea-1" d="M-100,200 C300,50 600,450 1000,150 C1200,50 1400,250 1600,100" fill="none" stroke="#00f2ff" stroke-width="4" filter="url(#neon-glow)" />
             <path class="linea-animada linea-1" d="M-100,220 C300,70 600,470 1000,170 C1200,70 1400,270 1600,120" fill="none" stroke="#00aaff" stroke-width="2" opacity="0.6" />
 
-            <!-- Onda Verde Rucoy / WhatsApp -->
+            
             <path class="linea-animada linea-2" d="M-100,450 C200,650 500,200 900,550 C1200,700 1300,400 1600,500" fill="none" stroke="#25D366" stroke-width="5" filter="url(#neon-glow)" />
             
-            <!-- Onda Amarillo Oro -->
+            
             <path class="linea-animada linea-3" d="M-100,700 C400,500 700,850 1100,400 C1300,200 1400,600 1600,550" fill="none" stroke="#ffd700" stroke-width="4" filter="url(#neon-glow)" />
             
-            <!-- Onda Magenta / Neón Fucsia -->
+            
             <path class="linea-animada linea-4" d="M-100,300 C300,600 800,100 1100,700 C1300,900 1500,500 1600,750" fill="none" stroke="#ff00aa" stroke-width="4" filter="url(#neon-glow)" />
         </svg>
     </div>
