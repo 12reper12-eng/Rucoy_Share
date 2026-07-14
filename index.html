@@ -38,7 +38,8 @@
     }
 
     #mensaje-bienvenida { text-align: center; font-size: 15px; color: #00f2ff; margin-bottom: 15px; font-weight: bold; }
-    h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; }
+    /* El h1 ahora tiene cursor pointer para indicar que es interactivo para el admin */
+    h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: default; }
     .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 13px; text-align: center; }
     .horario-box { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; }
     
@@ -59,7 +60,8 @@
     <div class="caja">
         <div id="estado-servicio" style="background-color: rgba(0, 255, 0, 0.2); color: #00ff00;">🟢 Estado: Disponible</div>
         <div id="mensaje-bienvenida">¡Bienvenido, guerrero! 👋</div>
-        <h1>🛡️ SAFEGAMING SERVICE 🛡️</h1>
+        <!-- Doble clic aquí para acceder a admin -->
+        <h1 ondblclick="accederAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
         <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
         <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
         
@@ -93,8 +95,7 @@
 
         <a href="#" id="boton-whatsapp" class="btn-wa" target="_blank">💬 APARTAR CUPO POR WHATSAPP</a>
         
-        <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br>
-        <button onclick="accederAdmin()" style="background: transparent; border: none; color: #444; font-size: 9px; cursor: pointer; margin-top: 10px;">Admin</button></div>
+        <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
     </div>
 
     <script>
