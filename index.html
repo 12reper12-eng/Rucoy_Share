@@ -9,18 +9,18 @@
 
     body {
         margin: 0;
-        padding: 30px 20px;
+        padding: 30px;
         font-family: 'Segoe UI', Arial, sans-serif;
         color: white;
         min-height: 100vh;
         
-        /* Centrado flexible y limpio */
+        /* Alineamos el contenido a la izquierda y centrado verticalmente */
         display: flex;
-        flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: center;
+        padding-left: 8%; /* Espaciado desde el borde izquierdo */
         
-        /* Ajustes para tus imágenes de fondo */
+        /* Ajustes de fondo limpios y sin filtros oscuros encima */
         background-color: #030008;
         background-position: center;
         background-size: cover;
@@ -29,29 +29,19 @@
         transition: background-image 1s ease-in-out;
     }
 
-    /* Filtro oscuro general más sutil para que luzca la imagen */
-    body::before {
-        content: "";
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0, 0, 0, 0.45); 
-        pointer-events: none;
-        z-index: 1;
-    }
-
-    /* MENÚ ESTILO CRISTAL TRANSPARENTE */
+    /* MENÚ AL LADO IZQUIERDO Y TRANSPARENTE */
     .caja {
-        border: 2px solid rgba(0, 242, 255, 0.6);
-        padding: 35px 25px;
+        border: 2px solid rgba(0, 242, 255, 0.7);
+        padding: 30px 25px;
         border-radius: 16px;
         
-        /* Fondo hiper transparente con desenfoque de fondo */
-        background: rgba(6, 2, 16, 0.4); 
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        /* Fondo oscuro pero con suficiente transparencia para ver el fondo */
+        background: rgba(6, 2, 16, 0.75); 
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         
-        box-shadow: 0 8px 32px rgba(0, 242, 255, 0.2);
-        max-width: 480px;
+        box-shadow: 0 0 30px rgba(0,242,255,0.3);
+        max-width: 450px;
         width: 100%;
         position: relative;
         z-index: 2;
@@ -60,7 +50,7 @@
     h1 {
         color: #00f2ff;
         text-shadow: 0 0 10px #00f2ff, 0 0 20px rgba(0,242,255,0.3);
-        font-size: 30px;
+        font-size: 28px;
         margin-top: 0;
         margin-bottom: 5px;
     }
@@ -68,7 +58,7 @@
     .subtitle {
         color: #ffd700;
         font-weight: bold;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         font-size: 13px;
         letter-spacing: 1px;
     }
@@ -77,111 +67,116 @@
         background: rgba(255, 215, 0, 0.1);
         border: 1px solid rgba(255, 215, 0, 0.4);
         border-radius: 8px;
-        padding: 8px 15px;
-        margin-bottom: 25px;
+        padding: 6px 12px;
+        margin-bottom: 15px;
         display: inline-block;
-        font-size: 13px;
+        font-size: 12px;
         color: #ffd700;
     }
 
     label {
         display: block;
         text-align: left;
-        margin: 15px 0 5px 0;
+        margin: 12px 0 4px 0;
         color: #e0e6ed;
         font-size: 14px;
-        font-weight: 500;
     }
 
-    /* Inputs transparentes a juego */
     input, select {
-        padding: 12px;
+        padding: 10px;
         width: 100%;
         border-radius: 6px;
         border: 1px solid rgba(0, 242, 255, 0.5);
-        background: rgba(7, 13, 26, 0.6);
+        background: rgba(7, 13, 26, 0.8);
         color: white;
-        font-size: 16px;
-        transition: all 0.2s ease;
+        font-size: 15px;
     }
 
     input:focus, select:focus {
         outline: none;
         border-color: #00f2ff;
-        box-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
-        background: rgba(7, 13, 26, 0.8);
+        box-shadow: 0 0 8px rgba(0, 242, 255, 0.5);
     }
 
     .resultado-caja {
         background: rgba(0, 242, 255, 0.1);
-        border: 1px dashed rgba(0, 242, 255, 0.6);
-        padding: 15px;
-        margin-top: 25px;
+        border: 1px dashed rgba(0, 242, 255, 0.5);
+        padding: 12px;
+        margin-top: 15px;
         border-radius: 6px;
     }
 
     .total-oro {
         color: #ffd700;
-        font-size: 24px;
+        font-size: 22px;
         font-weight: bold;
-        text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+        text-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
     }
 
     .btn-wa {
         background: #25D366;
         color: white;
-        padding: 14px 25px;
+        padding: 12px 20px;
         text-decoration: none;
         font-weight: bold;
         border-radius: 6px;
         display: inline-block;
-        margin-top: 20px;
-        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        margin-top: 15px;
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
         width: 100%;
-        font-size: 16px;
+        font-size: 15px;
         transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .btn-wa:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+        box-shadow: 0 6px 15px rgba(37, 211, 102, 0.5);
     }
 
     hr { border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(0,242,255,0.5), transparent); margin: 15px 0; }
-
-    .separador {
-        margin: 25px 0 15px 0;
-        color: #a0aab5;
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
+    .separador { margin: 20px 0 10px 0; color: #a0aab5; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
 
     .btn-personalizado {
         display: inline-block;
         width: 100%;
-        padding: 12px 18px;
+        padding: 10px 15px;
         border-radius: 6px;
-        border: 1px solid rgba(255, 215, 0, 0.5);
+        border: 1px solid rgba(255, 215, 0, 0.4);
         background: rgba(255, 215, 0, 0.05);
         color: #ffd700;
         font-weight: bold;
         font-size: 13px;
         text-decoration: none;
-        transition: all 0.2s ease;
     }
     .btn-personalizado:hover {
         transform: translateY(-2px);
-        background: rgba(255, 215, 0, 0.15);
-        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        background: rgba(255, 215, 0, 0.12);
+        box-shadow: 0 4px 10px rgba(255, 215, 0, 0.2);
     }
 
     .footer {
-        margin-top: 30px;
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 12px;
-        line-height: 1.6;
-        position: relative;
+        position: absolute;
+        bottom: 15px;
+        left: 30px;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 11px;
+        text-align: left;
         z-index: 2;
+    }
+
+    /* Ajuste para celulares: el menú vuelve al centro para que no se corte */
+    @media (max-width: 768px) {
+        body {
+            justify-content: center;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        .footer {
+            position: relative;
+            bottom: 0;
+            left: 0;
+            text-align: center;
+            margin-top: 20px;
+        }
     }
 </style>
 </head>
@@ -291,7 +286,7 @@
 
         window.onload = function() {
             rotarFondos();
-            setInterval(rotarFondos, 30000); // Rota cada 30 segundos
+            setInterval(rotarFondos, 30000);
             calcularTotal();
         };
         
