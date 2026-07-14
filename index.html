@@ -96,6 +96,13 @@
     <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
 
     <script>
+        // Desbloqueo de audio para navegadores
+        document.addEventListener('click', function unlockAudio() {
+            const audio = document.getElementById('sonido-level');
+            audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
+            document.removeEventListener('click', unlockAudio);
+        }, { once: true });
+
         function verificarAdmin() {
             let pass = prompt("Ingrese contraseña de administrador:");
             if(pass === "Iscarlos2006") {
@@ -108,7 +115,7 @@
         function reproducirYRedirigir() {
             const audio = document.getElementById('sonido-level');
             audio.play();
-            setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 500);
+            setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
         }
 
         const params = new URLSearchParams(window.location.search);
