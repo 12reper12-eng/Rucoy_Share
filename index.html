@@ -2,68 +2,44 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Safegaming Service</title>
 <style>
-    * { box-sizing: border-box; }
-    /* Corrección de imagen de fondo para que cubra todo */
-    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; background-color: #030008; background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; transition: background-image 1s ease-in-out; }
+    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; background-color: #030008; background-size: cover; background-position: center; transition: background-image 1s ease-in-out; }
     .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.9); width: 100%; max-width: 450px; backdrop-filter: blur(10px); }
-    #estado-servicio { text-align: center; margin-bottom: 10px; font-weight: bold; padding: 8px; border-radius: 5px; font-size: 13px; cursor: pointer; transition: 0.3s; }
-    h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 15px 0; text-align: center; cursor: pointer; }
+    #estado-servicio { text-align: center; margin-bottom: 10px; font-weight: bold; padding: 8px; border-radius: 5px; font-size: 13px; cursor: pointer; }
+    h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 15px 0; text-align: center; }
     label { display: block; margin: 10px 0 4px 0; font-size: 13px; color: #ccc; }
-    input, select { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid #00f2ff; background: #070d1a; color: white; }
-    .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; }
-    #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
-    #vista-privada { display: none; text-align: center; }
-    .barra-exterior { width: 100%; height: 20px; background: #333; border-radius: 10px; margin: 15px 0; border: 1px solid #00f2ff; }
-    #barra-xp { width: 0%; height: 100%; background: #00f2ff; transition: width 0.5s; }
+    select, input { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid #00f2ff; background: #070d1a; color: white; }
+    /* Brillo dorado */
+    .oro-brillo { color: #ffd700; text-shadow: 0 0 8px #ffd700; font-weight: bold; text-align: center; margin: 15px 0; font-size: 18px; }
+    .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; }
 </style>
 </head>
 <body>
 
 <div class="caja">
-    <div id="vista-privada">
-        <h2 id="cliente-nombre" style="color:#00f2ff">Seguimiento</h2>
-        <div class="barra-exterior"><div id="barra-xp"></div></div>
-        <div id="reloj" style="font-size: 30px; font-weight: bold;">00:00:00</div>
-    </div>
+    <div id="estado-servicio">Cargando...</div>
+    <h1 ondblclick="abrirAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
+    
+    <label>Servicio:</label>
+    <select id="servicio" onchange="calcularTotal()">
+        <option value="300">Skill Normal - $300k / hr</option>
+        <option value="360">Power Training - $360k / hr</option>
+        <option value="600">Subida de Nivel - $600k / hr</option>
+        <option value="1400">Pack Maraton (5h) - 1.4KK</option>
+        <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
+    </select>
 
-    <div id="formulario-normal">
-        <div id="estado-servicio" onclick="toggleEstadoCloud()">Cargando estado...</div>
-        <h1 ondblclick="abrirAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
-        
-        <label>Nombre del Personaje:</label>
-        <input type="text" id="personaje" placeholder="Ej: RucoyPro">
-        
-        <label>Profesión:</label>
-        <select id="clase">
-            <option value="Melee">⚔️ Melee</option>
-            <option value="Distance">🏹 Distancia</option>
-            <option value="Magic">✨ Magia</option>
-        </select>
-        
-        <label>Servicio:</label>
-        <select id="servicio" onchange="calcularTotal()">
-            <option value="300">Skill Normal - $300k / hr</option>
-            <option value="1700">Pack Ptrain Pro - 1.7KK</option>
-        </select>
+    <label>Horas:</label>
+    <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
 
-        <label>Cantidad de Horas:</label>
-        <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
-
-        <div style="text-align:center; margin-top:15px; font-weight:bold; color:#ffd700;" id="total-final">300k gold</div>
-        
-        <a href="#" id="boton-whatsapp" class="btn-wa" onclick="enviarWhatsApp()">💬 APARTAR CUPO POR WHATSAPP</a>
-    </div>
-
-    <div id="panel-admin">
-        <input type="text" id="admin-nombre" placeholder="Nombre cliente">
-        <input type="number" id="admin-horas" placeholder="Horas">
-        <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer;">GENERAR LINK</button>
-        <div id="link-generado" style="color:#ffd700; font-size:11px; margin-top:10px; word-break:break-all;"></div>
-    </div>
+    <div id="total-final" class="oro-brillo">300k gold</div>
+    
+    <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirSonido(); enviarWhatsApp()">💬 APARTAR CUPO</a>
 </div>
+
+<!-- Sonido -->
+<audio id="sonido-click" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -76,8 +52,7 @@
         projectId: "shareskill-8d1fe",
         storageBucket: "shareskill-8d1fe.firebasestorage.app",
         messagingSenderId: "1044347975822",
-        appId: "1:1044347975822:web:f91a7fb96a11358e8bb1df",
-        measurementId: "G-L4BTZQ7SB8"
+        appId: "1:1044347975822:web:f91a7fb96a11358e8bb1df"
     };
 
     const db = getDatabase(initializeApp(firebaseConfig));
@@ -85,42 +60,27 @@
 
     onValue(estadoRef, (snapshot) => {
         window.estaDisponible = snapshot.val();
-        actualizarUI();
+        let el = document.getElementById("estado-servicio");
+        el.innerText = window.estaDisponible ? "🟢 Estado: Disponible" : "🔴 Estado: No disponible";
+        el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
+        document.getElementById("boton-whatsapp").style.pointerEvents = window.estaDisponible ? "auto" : "none";
     });
 
     window.toggleEstadoCloud = () => set(estadoRef, !window.estaDisponible);
+    document.getElementById("estado-servicio").onclick = toggleEstadoCloud;
 
-    function actualizarUI() {
-        let el = document.getElementById("estado-servicio"), btn = document.getElementById("boton-whatsapp");
-        el.innerText = window.estaDisponible ? "🟢 Estado: Disponible" : "🔴 Estado: No disponible";
-        el.style.backgroundColor = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
-        btn.style.pointerEvents = window.estaDisponible ? "auto" : "none";
-        btn.style.opacity = window.estaDisponible ? "1" : "0.5";
-    }
-
-    // Funciones de lógica
     window.calcularTotal = () => {
         let s = document.getElementById('servicio').value, h = document.getElementById('horas').value;
         let t = (s >= 1400) ? s : s * h;
         document.getElementById('total-final').innerText = (t >= 1000) ? (t/1000) + "KK gold" : t + "k gold";
     };
 
+    window.reproducirSonido = () => document.getElementById('sonido-click').play();
+
     window.enviarWhatsApp = () => {
-        let p = document.getElementById('personaje').value, s = document.getElementById('servicio').options[document.getElementById('servicio').selectedIndex].text;
-        window.open("https://wa.me/584123576579?text=" + encodeURIComponent(`Hola, quiero: ${s} para ${p}`), '_blank');
+        let s = document.getElementById('servicio').options[document.getElementById('servicio').selectedIndex].text;
+        window.open("https://wa.me/584123576579?text=" + encodeURIComponent(`Hola, quiero el servicio: ${s}`), '_blank');
     };
-
-    window.abrirAdmin = () => { if(prompt("Contraseña:") === "Iscarlos2908") document.getElementById('panel-admin').style.display = 'block'; };
-
-    window.generarLink = () => {
-        let n = document.getElementById('admin-nombre').value, h = document.getElementById('admin-horas').value;
-        let f = new Date().getTime() + (h * 3600000);
-        document.getElementById('link-generado').innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}`;
-    };
-
-    // Fondo rotatorio
-    const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
-    let i = 0; setInterval(() => { document.body.style.backgroundImage = `url('${fondos[i]}')`; i = (i + 1) % fondos.length; }, 10000);
 </script>
 </body>
 </html>
