@@ -91,12 +91,13 @@
         </div>
     </div>
 
-    <audio id="sonido-level" src="https://www.myinstants.com/media/sounds/level-up-sound-effect.mp3" preload="auto"></audio>
+    <!-- Archivo local subido a tu repo -->
+    <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
     <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
 
     <script>
-        // Desbloqueo de audio para navegadores
+        // Lógica de desbloqueo al primer clic
         document.addEventListener('click', function unlockAudio() {
             const audio = document.getElementById('sonido-level');
             audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
