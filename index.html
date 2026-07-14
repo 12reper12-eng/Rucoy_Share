@@ -13,7 +13,6 @@
         color: white;
         min-height: 100vh;
         display: flex;
-        flex-direction: column;
         justify-content: center;
         align-items: center;
         padding: 20px;
@@ -51,13 +50,14 @@
     .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; transition: 0.3s; }
     .btn-wa:hover { background: #128c7e; transform: scale(1.02); }
     .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center; }
-
-    @media (min-width: 769px) { body { align-items: flex-start; padding-left: 10%; justify-content: center; } }
+    
+    #estado-servicio { text-align: center; margin-bottom: 10px; font-weight: bold; padding: 5px; border-radius: 5px; font-size: 12px; }
 </style>
 </head>
 <body>
 
     <div class="caja">
+        <div id="estado-servicio" style="background-color: rgba(0, 255, 0, 0.2); color: #00ff00;">🟢 Estado: Disponible</div>
         <div id="mensaje-bienvenida">¡Bienvenido, guerrero! 👋</div>
         <h1>🛡️ SAFEGAMING SERVICE 🛡️</h1>
         <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
@@ -92,17 +92,42 @@
         </div>
 
         <a href="#" id="boton-whatsapp" class="btn-wa" target="_blank">💬 APARTAR CUPO POR WHATSAPP</a>
+        
+        <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br>
+        <button onclick="accederAdmin()" style="background: transparent; border: none; color: #444; font-size: 9px; cursor: pointer; margin-top: 10px;">Admin</button></div>
     </div>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
-
     <script>
+        let estaDisponible = true;
+        function accederAdmin() {
+            let pass = prompt("Introduce la contraseña de administrador:");
+            if (pass === "Iscarlos2908") { 
+                estaDisponible = !estaDisponible;
+                let el = document.getElementById("estado-servicio");
+                let btn = document.getElementById("boton-whatsapp");
+                if (estaDisponible) {
+                    el.innerText = "🟢 Estado: Disponible";
+                    el.style.backgroundColor = "rgba(0, 255, 0, 0.2)";
+                    el.style.color = "#00ff00";
+                    btn.style.pointerEvents = "auto";
+                    btn.style.opacity = "1";
+                    btn.innerText = "💬 APARTAR CUPO POR WHATSAPP";
+                } else {
+                    el.innerText = "🔴 Estado: No disponible";
+                    el.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
+                    el.style.color = "#ff0000";
+                    btn.style.pointerEvents = "none";
+                    btn.style.opacity = "0.5";
+                    btn.innerText = "❌ SERVICIO PAUSADO";
+                }
+            } else { alert("Acceso denegado"); }
+        }
+
         function actualizarSaludo() {
             let nick = document.getElementById("personaje").value;
             let claseSeleccionada = document.getElementById("clase");
             let claseTexto = claseSeleccionada.options[claseSeleccionada.selectedIndex].text;
             let saludo = document.getElementById("mensaje-bienvenida");
-            
             saludo.innerText = (nick.length > 0) ? "¡Bienvenido, " + nick + " (" + claseTexto + ")! 👋" : "¡Bienvenido, guerrero de " + claseTexto + "! 👋";
             calcularTotal();
         }
@@ -114,10 +139,8 @@
             let precioBase = parseInt(servicioSelect.value);
             let nombreServicio = servicioSelect.options[servicioSelect.selectedIndex].text.split('-')[0].trim();
             let horas = parseInt(document.getElementById("horas").value) || 1;
-            
             let totalK = (precioBase === 1400 || precioBase === 1700) ? precioBase : (precioBase * horas);
             let textoPrecio = (totalK >= 1000) ? (totalK / 1000) + "KK gold" : totalK + "k gold";
-
             document.getElementById("precio-final").innerText = textoPrecio;
             let mensaje = "Hola Safegaming! Quiero agendar:\nPersonaje: " + (personaje || "Anónimo") + "\nProfesión: " + clase + "\nServicio: " + nombreServicio + "\nTotal: " + textoPrecio;
             document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(mensaje);
