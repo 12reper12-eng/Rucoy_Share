@@ -53,7 +53,7 @@
 
         <div id="vista-formulario">
             <div id="estado-servicio">Cargando...</div>
-            <h1 ondblclick="document.getElementById('panel-admin').style.display='block'">🛡️ SAFEGAMING SERVICE 🛡️</h1>
+            <h1 ondblclick="verificarAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
             <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
             <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
             
@@ -79,7 +79,6 @@
                 <div class="total-oro" id="precio-final">300k gold</div>
             </div>
 
-            <!-- Botón con disparador de audio -->
             <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirYRedirigir()">💬 APARTAR CUPO POR WHATSAPP</a>
             
             <div id="panel-admin">
@@ -92,12 +91,20 @@
         </div>
     </div>
 
-    <!-- Audio precargado -->
     <audio id="sonido-level" src="https://www.myinstants.com/media/sounds/level-up-sound-effect.mp3" preload="auto"></audio>
 
     <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
 
     <script>
+        function verificarAdmin() {
+            let pass = prompt("Ingrese contraseña de administrador:");
+            if(pass === "Iscarlos2006") {
+                document.getElementById('panel-admin').style.display = 'block';
+            } else {
+                alert("Contraseña incorrecta");
+            }
+        }
+
         function reproducirYRedirigir() {
             const audio = document.getElementById('sonido-level');
             audio.play();
