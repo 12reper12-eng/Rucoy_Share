@@ -9,179 +9,175 @@
 
     body {
         margin: 0;
-        padding-top: 30px;
-        padding-bottom: 30px;
+        padding: 30px 20px;
         font-family: 'Segoe UI', Arial, sans-serif;
         color: white;
-        text-align: center;
         min-height: 100vh;
-        position: relative;
-        overflow-x: hidden;
         
-        /* Ajustes para el renderizado correcto de tus imágenes de fondo */
+        /* Centrado flexible y limpio */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        
+        /* Ajustes para tus imágenes de fondo */
         background-color: #030008;
         background-position: center;
         background-size: cover;
         background-attachment: fixed;
         background-repeat: no-repeat;
-        /* Transición suave de 1 segundo para el cambio de imagen */
         transition: background-image 1s ease-in-out;
     }
 
-    /* Filtro oscuro para asegurar que los textos resalten impecables sobre el fondo */
+    /* Filtro oscuro general más sutil para que luzca la imagen */
     body::before {
         content: "";
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0, 0, 0, 0.65); 
+        background: rgba(0, 0, 0, 0.45); 
         pointer-events: none;
         z-index: 1;
     }
 
+    /* MENÚ ESTILO CRISTAL TRANSPARENTE */
+    .caja {
+        border: 2px solid rgba(0, 242, 255, 0.6);
+        padding: 35px 25px;
+        border-radius: 16px;
+        
+        /* Fondo hiper transparente con desenfoque de fondo */
+        background: rgba(6, 2, 16, 0.4); 
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        
+        box-shadow: 0 8px 32px rgba(0, 242, 255, 0.2);
+        max-width: 480px;
+        width: 100%;
+        position: relative;
+        z-index: 2;
+    }
+
     h1 {
         color: #00f2ff;
-        text-shadow: 0 0 10px #00f2ff, 0 0 25px rgba(0,242,255,0.4);
-        font-size: 32px;
+        text-shadow: 0 0 10px #00f2ff, 0 0 20px rgba(0,242,255,0.3);
+        font-size: 30px;
+        margin-top: 0;
         margin-bottom: 5px;
-        position: relative;
     }
 
     .subtitle {
         color: #ffd700;
         font-weight: bold;
-        margin-bottom: 15px;
-        font-size: 14px;
+        margin-bottom: 20px;
+        font-size: 13px;
         letter-spacing: 1px;
     }
 
     .horario-box {
-        background: rgba(255, 215, 0, 0.08);
-        border: 1px solid rgba(255, 215, 0, 0.5);
+        background: rgba(255, 215, 0, 0.1);
+        border: 1px solid rgba(255, 215, 0, 0.4);
         border-radius: 8px;
         padding: 8px 15px;
-        margin: 0 auto 20px auto;
+        margin-bottom: 25px;
         display: inline-block;
         font-size: 13px;
         color: #ffd700;
-        letter-spacing: 0.5px;
-        box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
-    }
-
-    .caja {
-        border: 2px solid #00f2ff;
-        padding: 25px;
-        display: inline-block;
-        border-radius: 14px;
-        background: rgba(6, 2, 16, 0.88); 
-        box-shadow: 0 0 35px rgba(0,242,255,0.4);
-        max-width: 480px;
-        width: 92%;
-        position: relative;
-        z-index: 2;
-        backdrop-filter: blur(12px);
     }
 
     label {
         display: block;
         text-align: left;
-        margin: 10px 0 5px 0;
-        color: #a0aab5;
+        margin: 15px 0 5px 0;
+        color: #e0e6ed;
         font-size: 14px;
+        font-weight: 500;
     }
 
+    /* Inputs transparentes a juego */
     input, select {
-        padding: 10px;
+        padding: 12px;
         width: 100%;
-        border-radius: 5px;
-        border: 1px solid #00f2ff;
-        background: #070d1a;
+        border-radius: 6px;
+        border: 1px solid rgba(0, 242, 255, 0.5);
+        background: rgba(7, 13, 26, 0.6);
         color: white;
         font-size: 16px;
+        transition: all 0.2s ease;
     }
 
     input:focus, select:focus {
         outline: none;
-        box-shadow: 0 0 8px #00f2ff;
+        border-color: #00f2ff;
+        box-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+        background: rgba(7, 13, 26, 0.8);
     }
 
     .resultado-caja {
-        background: rgba(0, 242, 255, 0.08);
-        border: 1px dashed #00f2ff;
+        background: rgba(0, 242, 255, 0.1);
+        border: 1px dashed rgba(0, 242, 255, 0.6);
         padding: 15px;
-        margin-top: 20px;
-        border-radius: 5px;
+        margin-top: 25px;
+        border-radius: 6px;
     }
 
     .total-oro {
         color: #ffd700;
-        font-size: 22px;
+        font-size: 24px;
         font-weight: bold;
-        text-shadow: 0 0 5px #ffd700;
+        text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
     }
 
     .btn-wa {
         background: #25D366;
         color: white;
-        padding: 12px 25px;
+        padding: 14px 25px;
         text-decoration: none;
         font-weight: bold;
-        border-radius: 5px;
+        border-radius: 6px;
         display: inline-block;
-        margin-top: 15px;
-        box-shadow: 0 0 10px #25D366;
+        margin-top: 20px;
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
         width: 100%;
         font-size: 16px;
         transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .btn-wa:hover {
         transform: translateY(-2px);
-        box-shadow: 0 0 18px #25D366;
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
     }
 
-    hr { border-color: #00f2ff; opacity: 0.4; }
+    hr { border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(0,242,255,0.5), transparent); margin: 15px 0; }
 
     .separador {
-        margin-top: 22px;
-        margin-bottom: 10px;
-        color: #6b7684;
-        font-size: 12px;
+        margin: 25px 0 15px 0;
+        color: #a0aab5;
+        font-size: 11px;
         text-transform: uppercase;
         letter-spacing: 1px;
-        position: relative;
-    }
-    .separador::before, .separador::after {
-        content: "";
-        display: inline-block;
-        width: 30px;
-        height: 1px;
-        background: #2a3646;
-        vertical-align: middle;
-        margin: 0 8px;
     }
 
     .btn-personalizado {
         display: inline-block;
         width: 100%;
         padding: 12px 18px;
-        border-radius: 5px;
-        border: 1px solid #ffd700;
-        background: rgba(255, 215, 0, 0.08);
+        border-radius: 6px;
+        border: 1px solid rgba(255, 215, 0, 0.5);
+        background: rgba(255, 215, 0, 0.05);
         color: #ffd700;
         font-weight: bold;
-        font-size: 14px;
+        font-size: 13px;
         text-decoration: none;
-        box-shadow: 0 0 8px rgba(255, 215, 0, 0.25);
-        transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+        transition: all 0.2s ease;
     }
     .btn-personalizado:hover {
         transform: translateY(-2px);
         background: rgba(255, 215, 0, 0.15);
-        box-shadow: 0 0 16px rgba(255, 215, 0, 0.45);
+        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
     }
 
     .footer {
-        margin-top: 25px;
-        color: #a0aab5;
+        margin-top: 30px;
+        color: rgba(255, 255, 255, 0.6);
         font-size: 12px;
         line-height: 1.6;
         position: relative;
@@ -231,7 +227,7 @@
 
         <a href="https://wa.me/584123576579?text=Hola%20Safegaming!%20Quiero%20una%20cotizaci%C3%B3n%20personalizada%20para%20un%20servicio%20que%20no%20veo%20en%20la%20lista."
            class="btn-personalizado" target="_blank">
-            📩 Envíame un mensaje y obtén una cotización más personalizada
+            📩 Obtén una cotización personalizada
         </a>
     </div>
 
@@ -241,7 +237,6 @@
     </div>
 
     <script>
-        // TUS TRES ENLACES OFICIALES CONFIGURADOS
         const fondos = [
             "https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png",
             "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg",
@@ -250,11 +245,8 @@
 
         let indiceActual = 0;
 
-        // Función que cambia las imágenes de forma ordenada
         function rotarFondos() {
             document.body.style.backgroundImage = "url('" + fondos[indiceActual] + "')";
-            
-            // Avanza a la siguiente imagen, si llega al final vuelve a la 0
             indiceActual = (indiceActual + 1) % fondos.length;
         }
 
@@ -286,7 +278,6 @@
             document.getElementById("precio-final").innerText = textoPrecio;
 
             let miTelefono = "584123576579";
-
             let mensaje = "Hola Safegaming! Vengo de la web. Quiero agendar un cupo:\n\n" +
                           "Personaje: " + personaje + "\n" +
                           "Servicio: " + nombreServicio + "\n" +
@@ -299,11 +290,8 @@
         }
 
         window.onload = function() {
-            rotarFondos(); // Pone el primer fondo al cargar la página
-            
-            // Cambia de fondo de forma automática cada 30 segundos (30000 milisegundos)
-            setInterval(rotarFondos, 30000); 
-            
+            rotarFondos();
+            setInterval(rotarFondos, 30000); // Rota cada 30 segundos
             calcularTotal();
         };
         
