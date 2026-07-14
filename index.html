@@ -13,7 +13,6 @@
         databaseURL: "https://shareskill-8d1fe-default-rtdb.firebaseio.com"
     }));
 
-    // Sincronización Estado
     const estadoRef = ref(db, 'disponible');
     onValue(estadoRef, (s) => {
         window.estaDisponible = s.val();
@@ -28,24 +27,19 @@
 <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; animation: fadeIn 0.8s ease-out; }
-    
+    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; }
     #estado-servicio { text-align: center; margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 8px; cursor: pointer; border: 1px solid #00f2ff; }
     #vista-seguimiento { display: none; text-align: center; }
     h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: pointer; }
     .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 13px; text-align: center; }
     .horario-box { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; }
-    
     label { display: block; margin: 10px 0 4px 0; font-size: 13px; color: #ccc; }
     input, select { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid rgba(0, 242, 255, 0.5); background: rgba(7, 13, 26, 0.8); color: white; margin-bottom: 5px; cursor: pointer;}
-    
     .resultado-caja { background: rgba(0, 242, 255, 0.1); border: 1px dashed rgba(0, 242, 255, 0.5); padding: 12px; margin-top: 15px; border-radius: 6px; text-align: center; }
     .total-oro { color: #ffd700; font-size: 20px; font-weight: bold; }
     .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; transition: 0.3s; }
     .btn-wa:hover { background: #128c7e; transform: scale(1.02); }
     .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center; }
-    
     #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
 </style>
 </head>
@@ -89,6 +83,7 @@
                 <div class="total-oro" id="precio-final">300k gold</div>
             </div>
 
+            <!-- Botón con sonido -->
             <a href="#" id="boton-whatsapp" class="btn-wa" target="_blank" onclick="document.getElementById('sonido-level').play()">💬 APARTAR CUPO POR WHATSAPP</a>
             
             <div id="panel-admin">
