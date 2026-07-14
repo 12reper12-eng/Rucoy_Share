@@ -12,7 +12,6 @@
     .destello { animation: pulseGold 0.4s ease-out; }
     .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; animation: fadeIn 0.8s ease-out; }
 
-    /* Estilos de la vista privada */
     #vista-privada { display: none; text-align: center; }
     .barra-exterior { width: 100%; height: 20px; background: #333; border-radius: 10px; margin: 15px 0; overflow: hidden; border: 1px solid #00f2ff; }
     #barra-xp { width: 0%; height: 100%; background: #00f2ff; transition: width 1s linear; }
@@ -27,6 +26,7 @@
     .total-oro { color: #ffd700; font-size: 20px; font-weight: bold; transition: all 0.3s; }
     .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; }
     #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
+    #estado-servicio { text-align: center; margin-bottom: 10px; font-weight: bold; padding: 5px; border-radius: 5px; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -41,18 +41,27 @@
 
         <!-- VISTA FORMULARIO ORIGINAL -->
         <div id="formulario-normal">
+            <div id="estado-servicio" style="background-color: rgba(0, 255, 0, 0.2); color: #00ff00;">🟢 Estado: Disponible</div>
             <div id="mensaje-bienvenida">¡Bienvenido, guerrero! 👋</div>
-            <h1 ondblclick="document.getElementById('panel-admin').style.display='block'">🛡️ SAFEGAMING SERVICE 🛡️</h1>
-            <div id="cupos-info">🔥 Cupos disponibles hoy: 2</div>
+            <h1 ondblclick="accederAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
             <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
             <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
             
             <label>Nombre del Personaje:</label>
             <input type="text" id="personaje" placeholder="Ej: RucoyPro">
+            <label>Elige tu Profesión:</label>
+            <select id="clase">
+                <option value="Melee">⚔️ Melee</option>
+                <option value="Distance">🏹 Distancia</option>
+                <option value="Magic">✨ Magia</option>
+            </select>
             <label>Servicio:</label>
             <select id="servicio" onchange="calcularTotal()">
                 <option value="300">Skill Normal - $300k / hr</option>
-                <option value="1700">Pack Ptrain Pro - 1.7KK</option>
+                <option value="360">Power Training - $360k / hr</option>
+                <option value="600">Subida de Nivel - $600k / hr</option>
+                <option value="1400">Pack Maraton (5h Skill) - 1.4KK</option>
+                <option value="1700">Pack Ptrain Pro (5h Ptrain) - 1.7KK</option>
             </select>
             <div class="resultado-caja"><div class="total-oro" id="precio-final">300k gold</div></div>
             <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirSonido()">💬 APARTAR CUPO POR WHATSAPP</a>
@@ -68,17 +77,17 @@
     </div>
 
     <script>
-        // Lógica de detección de link privado
+        let estaDisponible = true;
         const params = new URLSearchParams(window.location.search);
+
         if (params.has('n')) {
             document.getElementById('formulario-normal').style.display = 'none';
             document.getElementById('vista-privada').style.display = 'block';
-            let fin = parseInt(params.get('f'));
-            let inicio = fin - (parseInt(params.get('h')) * 3600000);
+            let fin = parseInt(params.get('f')), dur = parseInt(params.get('h'));
+            let inicio = fin - (dur * 3600000);
             document.getElementById('cliente-nombre').innerText = "Cliente: " + params.get('n');
             setInterval(() => {
-                let ahora = new Date().getTime();
-                let restante = fin - ahora;
+                let ahora = new Date().getTime(), restante = fin - ahora;
                 let porc = Math.min(((ahora - inicio) / (fin - inicio)) * 100, 100);
                 document.getElementById('barra-xp').style.width = porc + "%";
                 if(restante <= 0) document.getElementById('reloj').innerText = "COMPLETADO ✅";
@@ -89,15 +98,27 @@
             }, 1000);
         }
 
+        function accederAdmin() {
+            let pass = prompt("Contraseña:");
+            if (pass === "Iscarlos2908") {
+                estaDisponible = !estaDisponible;
+                let el = document.getElementById("estado-servicio"), btn = document.getElementById("boton-whatsapp");
+                el.innerText = estaDisponible ? "🟢 Estado: Disponible" : "🔴 Estado: No disponible";
+                el.style.backgroundColor = estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
+                el.style.color = estaDisponible ? "#00ff00" : "#ff0000";
+                btn.style.pointerEvents = estaDisponible ? "auto" : "none";
+                document.getElementById('panel-admin').style.display = 'block';
+            } else alert("Denegado");
+        }
+
         function generarLink() {
             let n = document.getElementById('admin-nombre').value, h = document.getElementById('admin-horas').value;
             let f = new Date().getTime() + (h * 3600000);
-            document.getElementById('link-generado').innerText = window.location.href.split('?')[0] + `?n=${n}&h=${h}&f=${f}`;
+            document.getElementById('link-generado').innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}`;
         }
         
         function calcularTotal() {
-            let p = parseInt(document.getElementById('servicio').value);
-            let d = document.getElementById('precio-final');
+            let p = parseInt(document.getElementById('servicio').value), d = document.getElementById('precio-final');
             d.innerText = (p >= 1000) ? (p/1000) + "KK gold" : p + "k gold";
             d.classList.remove('destello'); void d.offsetWidth; d.classList.add('destello');
         }
@@ -105,7 +126,13 @@
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg", "https://imgsrv.crunchyroll.com/cdn-cgi/image/fit=cover,format=auto,quality=85,width=1920/keyart/GDKHZEJ0K-backdrop_wide"];
         let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
         window.onload = () => { rotar(); setInterval(rotar, 30000); };
-        function reproducirSonido() { /* Tu función de sonido existente */ }
+        function reproducirSonido() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator(); osc.connect(ctx.destination);
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(500, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.1);
+            osc.start(); osc.stop(ctx.currentTime + 0.2);
+        }
     </script>
 </body>
 </html>
