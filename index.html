@@ -3,186 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safegaming Service - Rucoy Online</title>
+<title>Safegaming Control Center</title>
 <style>
-    * { box-sizing: border-box; }
-
-    body {
-        margin: 0;
-        font-family: 'Segoe UI', Arial, sans-serif;
-        color: white;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        background-color: #030008;
-        background-position: center;
-        background-size: cover;
-        background-attachment: fixed;
-        transition: background-image 1s ease-in-out;
-    }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    /* Animación de destello dorado */
-    @keyframes pulseGold { 0% { transform: scale(1); text-shadow: 0 0 0 #ffd700; } 50% { transform: scale(1.1); text-shadow: 0 0 15px #ffd700; } 100% { transform: scale(1); text-shadow: 0 0 0 #ffd700; } }
-    .destello { animation: pulseGold 0.4s ease-out; }
-
-    .caja {
-        border: 2px solid rgba(0, 242, 255, 0.7);
-        padding: 25px;
-        border-radius: 16px;
-        background: rgba(6, 2, 16, 0.85); 
-        backdrop-filter: blur(8px);
-        box-shadow: 0 0 30px rgba(0,242,255,0.3);
-        width: 100%;
-        max-width: 450px;
-        animation: fadeIn 0.8s ease-out;
-    }
-
-    #mensaje-bienvenida { text-align: center; font-size: 15px; color: #00f2ff; margin-bottom: 15px; font-weight: bold; }
-    h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: default; }
-    .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 13px; text-align: center; }
-    .horario-box { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; }
-    
-    label { display: block; margin: 10px 0 4px 0; font-size: 13px; color: #ccc; }
-    input, select { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid rgba(0, 242, 255, 0.5); background: rgba(7, 13, 26, 0.8); color: white; margin-bottom: 5px; cursor: pointer;}
-    
-    .resultado-caja { background: rgba(0, 242, 255, 0.1); border: 1px dashed rgba(0, 242, 255, 0.5); padding: 12px; margin-top: 15px; border-radius: 6px; text-align: center; }
-    .total-oro { color: #ffd700; font-size: 20px; font-weight: bold; transition: all 0.3s; }
-    .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; transition: 0.3s; }
-    .btn-wa:hover { background: #128c7e; transform: scale(1.02); }
-    .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center; }
-    
-    #estado-servicio { text-align: center; margin-bottom: 10px; font-weight: bold; padding: 5px; border-radius: 5px; font-size: 12px; }
-    #cupos-info { text-align: center; color: #ff4757; font-size: 12px; margin-bottom: 10px; font-weight: bold; }
+    body { background: #030008; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+    .caja { border: 2px solid #00f2ff; padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.95); width: 100%; max-width: 450px; text-align: center; box-shadow: 0 0 20px rgba(0,242,255,0.2); }
+    .barra-exterior { width: 100%; height: 25px; background: #111; border-radius: 15px; margin: 20px 0; overflow: hidden; border: 2px solid #00f2ff; }
+    #barra-xp { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2ff, #0077ff); transition: width 1s linear; }
+    #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; text-align: left; }
+    input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: 1px solid #00f2ff; background: #070d1a; color: white; font-weight: bold; cursor: pointer; }
+    button:hover { background: #00f2ff; color: #000; }
+    #link-generado { background: #000; padding: 10px; border-radius: 5px; color: #ffd700; font-size: 12px; word-break: break-all; margin-top: 10px; border: 1px dashed #ffd700; }
 </style>
 </head>
 <body>
 
-    <div class="caja">
-        <div id="estado-servicio" style="background-color: rgba(0, 255, 0, 0.2); color: #00ff00;">🟢 Estado: Disponible</div>
-        <div id="mensaje-bienvenida">¡Bienvenido, guerrero! 👋</div>
-        <h1 ondblclick="accederAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
-        <div id="cupos-info">🔥 Cupos disponibles hoy: 2</div>
-        <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
-        <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
-        
-        <label>Nombre del Personaje:</label>
-        <input type="text" id="personaje" placeholder="Ej: RucoyPro" oninput="actualizarSaludo()">
-
-        <label>Elige tu Profesión:</label>
-        <select id="clase" onchange="actualizarSaludo()">
-            <option value="Melee">⚔️ Melee</option>
-            <option value="Distance">🏹 Distancia</option>
-            <option value="Magic">✨ Magia</option>
-        </select>
-
-        <label>Servicio:</label>
-        <select id="servicio" onchange="calcularTotal()">
-            <option value="300">Skill Normal - $300k / hr</option>
-            <option value="360">Power Training - $360k / hr</option>
-            <option value="600">Subida de Nivel - $600k / hr</option>
-            <option value="1400">Pack Maraton (5h Skill) - 1.4KK</option>
-            <option value="1700">Pack Ptrain Pro (5h Ptrain) - 1.7KK</option>
-        </select>
-
-        <div id="caja-horas">
-            <label>Cantidad de Horas:</label>
-            <input type="number" id="horas" value="1" min="1" max="24" oninput="calcularTotal()">
-        </div>
-
-        <div class="resultado-caja">
-            <div class="total-oro" id="precio-final">300k gold</div>
-        </div>
-
-        <a href="#" id="boton-whatsapp" class="btn-wa" target="_blank" onclick="reproducirSonido()">💬 APARTAR CUPO POR WHATSAPP</a>
-        
-        <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
+<div class="caja" id="caja-principal">
+    <h1 ondblclick="document.getElementById('panel-admin').style.display='block'" style="cursor:pointer">🛡️ SAFEGAMING</h1>
+    
+    <div id="vista-cliente" style="display:none;">
+        <h2 id="cliente-nombre" style="color:#00f2ff">Cargando...</h2>
+        <div class="barra-exterior"><div id="barra-xp"></div></div>
+        <div id="reloj" style="font-size: 32px; font-weight: bold; text-shadow: 0 0 10px #00f2ff;">00:00:00</div>
+        <p id="estado-servicio" style="margin-top:10px; color:#aaa;"></p>
     </div>
 
-    <script>
-        let estaDisponible = true;
+    <div id="panel-admin">
+        <h3 style="text-align:center; color:#00f2ff">PANEL ADMIN</h3>
+        <input type="text" id="admin-nombre" placeholder="Nombre del cliente">
+        <input type="number" id="admin-horas" placeholder="Duración (Horas)">
+        <button onclick="generarLink()">GENERAR LINK ÚNICO</button>
+        <div id="link-generado"></div>
+        <button onclick="copiarLink()" style="background:#25D366; border:none;">📋 COPIAR LINK</button>
+    </div>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    
+    if (params.has('n')) {
+        document.getElementById('vista-cliente').style.display = 'block';
+        document.querySelector('h1').style.display = 'none';
         
-        function reproducirSonido() {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.2);
-        }
-
-        function accederAdmin() {
-            let pass = prompt("Introduce la contraseña de administrador:");
-            if (pass === "Iscarlos2908") { 
-                estaDisponible = !estaDisponible;
-                let el = document.getElementById("estado-servicio");
-                let btn = document.getElementById("boton-whatsapp");
-                if (estaDisponible) {
-                    el.innerText = "🟢 Estado: Disponible";
-                    el.style.backgroundColor = "rgba(0, 255, 0, 0.2)";
-                    el.style.color = "#00ff00";
-                    btn.style.pointerEvents = "auto";
-                    btn.style.opacity = "1";
-                    btn.innerText = "💬 APARTAR CUPO POR WHATSAPP";
-                } else {
-                    el.innerText = "🔴 Estado: No disponible";
-                    el.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
-                    el.style.color = "#ff0000";
-                    btn.style.pointerEvents = "none";
-                    btn.style.opacity = "0.5";
-                    btn.innerText = "❌ SERVICIO PAUSADO";
-                }
-            } else { alert("Acceso denegado"); }
-        }
-
-        function actualizarSaludo() {
-            let nick = document.getElementById("personaje").value;
-            let claseSeleccionada = document.getElementById("clase");
-            let claseTexto = claseSeleccionada.options[claseSeleccionada.selectedIndex].text;
-            let saludo = document.getElementById("mensaje-bienvenida");
-            saludo.innerText = (nick.length > 0) ? "¡Bienvenido, " + nick + " (" + claseTexto + ")! 👋" : "¡Bienvenido, guerrero de " + claseTexto + "! 👋";
-            calcularTotal();
-        }
-
-        function calcularTotal() {
-            let personaje = document.getElementById("personaje").value;
-            let clase = document.getElementById("clase").options[document.getElementById("clase").selectedIndex].text;
-            let servicioSelect = document.getElementById("servicio");
-            let precioBase = parseInt(servicioSelect.value);
-            let nombreServicio = servicioSelect.options[servicioSelect.selectedIndex].text.split('-')[0].trim();
-            let horas = parseInt(document.getElementById("horas").value) || 1;
-            let totalK = (precioBase === 1400 || precioBase === 1700) ? precioBase : (precioBase * horas);
-            let textoPrecio = (totalK >= 1000) ? (totalK / 1000) + "KK gold" : totalK + "k gold";
+        let nombre = params.get('n');
+        let fin = parseInt(params.get('f'));
+        let duracion = parseInt(params.get('h'));
+        let inicio = fin - (duracion * 3600000);
+        
+        document.getElementById('cliente-nombre').innerText = "Cliente: " + nombre;
+        
+        setInterval(() => {
+            let ahora = new Date().getTime();
+            let total = fin - inicio;
+            let pasado = ahora - inicio;
+            let porcentaje = Math.min((pasado / total) * 100, 100);
             
-            // Aplicar efecto de destello
-            let display = document.getElementById("precio-final");
-            display.innerText = textoPrecio;
-            display.classList.remove('destello');
-            void display.offsetWidth; // Disparador para reiniciar animación
-            display.classList.add('destello');
+            document.getElementById('barra-xp').style.width = porcentaje + "%";
+            
+            let restante = fin - ahora;
+            if (restante <= 0) {
+                document.getElementById('reloj').innerText = "COMPLETADO ✅";
+                document.getElementById('estado-servicio').innerText = "Servicio finalizado con éxito.";
+            } else {
+                let h = Math.floor(restante / 3600000);
+                let m = Math.floor((restante % 3600000) / 60000);
+                let s = Math.floor((restante % 60000) / 1000);
+                document.getElementById('reloj').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            }
+        }, 1000);
+    }
 
-            let mensaje = "Hola Safegaming! Quiero agendar:\nPersonaje: " + (personaje || "Anónimo") + "\nProfesión: " + clase + "\nServicio: " + nombreServicio + "\nTotal: " + textoPrecio;
-            document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(mensaje);
-        }
+    function generarLink() {
+        let nombre = document.getElementById('admin-nombre').value;
+        let horas = document.getElementById('admin-horas').value;
+        if(!nombre || !horas) return alert("Completa los datos");
+        let fin = new Date().getTime() + (horas * 3600000);
+        let link = window.location.origin + window.location.pathname + `?n=${nombre}&h=${horas}&f=${fin}`;
+        document.getElementById('link-generado').innerText = link;
+    }
 
-        const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg", "https://imgsrv.crunchyroll.com/cdn-cgi/image/fit=cover,format=auto,quality=85,width=1920/keyart/GDKHZEJ0K-backdrop_wide"];
-        let i = 0;
-        function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
-        
-        function actualizarCupos() {
-            let n = Math.floor(Math.random() * 3) + 1;
-            document.getElementById("cupos-info").innerText = "🔥 Cupos disponibles hoy: " + n;
-        }
-
-        window.onload = () => { rotar(); setInterval(rotar, 30000); setInterval(actualizarCupos, 10000); calcularTotal(); };
-    </script>
+    function copiarLink() {
+        let texto = document.getElementById('link-generado').innerText;
+        navigator.clipboard.writeText(texto).then(() => alert("¡Link copiado!"));
+    }
+</script>
 </body>
 </html>
