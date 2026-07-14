@@ -6,95 +6,105 @@
 <title>Safegaming Service - Rucoy Online</title>
 <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; background-color: #030008; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
+    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes pulseGold { 0% { transform: scale(1); text-shadow: 0 0 0 #ffd700; } 50% { transform: scale(1.1); text-shadow: 0 0 15px #ffd700; } 100% { transform: scale(1); text-shadow: 0 0 0 #ffd700; } }
     .destello { animation: pulseGold 0.4s ease-out; }
     .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; animation: fadeIn 0.8s ease-out; }
-    
-    /* Estilos nuevos integrados */
-    #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; text-align: left; }
-    #vista-cliente { display: none; text-align: center; }
-    .barra-exterior { width: 100%; height: 25px; background: #111; border-radius: 15px; margin: 20px 0; overflow: hidden; border: 2px solid #00f2ff; }
-    #barra-xp { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2ff, #0077ff); transition: width 1s linear; }
-    
+
+    /* Estilos de la vista privada */
+    #vista-privada { display: none; text-align: center; }
+    .barra-exterior { width: 100%; height: 20px; background: #333; border-radius: 10px; margin: 15px 0; overflow: hidden; border: 1px solid #00f2ff; }
+    #barra-xp { width: 0%; height: 100%; background: #00f2ff; transition: width 1s linear; }
+
+    #mensaje-bienvenida { text-align: center; font-size: 15px; color: #00f2ff; margin-bottom: 15px; font-weight: bold; }
     h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: pointer; }
+    .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 13px; text-align: center; }
+    .horario-box { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; }
+    label { display: block; margin: 10px 0 4px 0; font-size: 13px; color: #ccc; }
+    input, select { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid rgba(0, 242, 255, 0.5); background: rgba(7, 13, 26, 0.8); color: white; margin-bottom: 5px; }
+    .resultado-caja { background: rgba(0, 242, 255, 0.1); border: 1px dashed rgba(0, 242, 255, 0.5); padding: 12px; margin-top: 15px; border-radius: 6px; text-align: center; }
+    .total-oro { color: #ffd700; font-size: 20px; font-weight: bold; transition: all 0.3s; }
     .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; }
-    input, select, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 6px; border: 1px solid #00f2ff; background: #070d1a; color: white; }
+    #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
 </style>
 </head>
 <body>
 
-    <div class="caja" id="caja-principal">
-        <h1 ondblclick="document.getElementById('panel-admin').style.display='block'">🛡️ SAFEGAMING SERVICE 🛡️</h1>
-        
-        <!-- Vista del cliente (Se oculta si el usuario es normal) -->
-        <div id="vista-cliente">
-            <h2 id="cliente-nombre" style="color:#00f2ff">Cargando servicio...</h2>
+    <div class="caja">
+        <!-- VISTA PRIVADA DEL CLIENTE -->
+        <div id="vista-privada">
+            <h2 id="cliente-nombre" style="color:#00f2ff">Seguimiento de Pedido</h2>
             <div class="barra-exterior"><div id="barra-xp"></div></div>
-            <div id="reloj" style="font-size: 32px; font-weight: bold; text-shadow: 0 0 10px #00f2ff;">00:00:00</div>
+            <div id="reloj" style="font-size: 30px; font-weight: bold; color: #00f2ff;">00:00:00</div>
         </div>
 
-        <!-- Formulario Original -->
+        <!-- VISTA FORMULARIO ORIGINAL -->
         <div id="formulario-normal">
-            <div id="mensaje-bienvenida" style="text-align: center; color: #00f2ff; font-weight: bold; margin-bottom:10px;">¡Bienvenido, guerrero! 👋</div>
+            <div id="mensaje-bienvenida">¡Bienvenido, guerrero! 👋</div>
+            <h1 ondblclick="document.getElementById('panel-admin').style.display='block'">🛡️ SAFEGAMING SERVICE 🛡️</h1>
+            <div id="cupos-info">🔥 Cupos disponibles hoy: 2</div>
+            <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
+            <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
+            
             <label>Nombre del Personaje:</label>
             <input type="text" id="personaje" placeholder="Ej: RucoyPro">
             <label>Servicio:</label>
-            <select id="servicio">
+            <select id="servicio" onchange="calcularTotal()">
                 <option value="300">Skill Normal - $300k / hr</option>
                 <option value="1700">Pack Ptrain Pro - 1.7KK</option>
             </select>
-            <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirSonido()">💬 APARTAR CUPO</a>
+            <div class="resultado-caja"><div class="total-oro" id="precio-final">300k gold</div></div>
+            <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirSonido()">💬 APARTAR CUPO POR WHATSAPP</a>
         </div>
 
-        <!-- Panel Admin Oculto -->
+        <!-- PANEL ADMIN -->
         <div id="panel-admin">
-            <h3 style="color:#00f2ff; text-align:center;">PANEL ADMIN</h3>
             <input type="text" id="admin-nombre" placeholder="Nombre cliente">
             <input type="number" id="admin-horas" placeholder="Horas">
-            <button onclick="generarLink()">GENERAR LINK ÚNICO</button>
-            <div id="link-generado" style="font-size:10px; word-break:break-all; color:#ffd700; margin-top:10px;"></div>
+            <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer;">GENERAR LINK ÚNICO</button>
+            <div id="link-generado" style="color:#ffd700; font-size:11px; margin-top:10px; word-break:break-all;"></div>
         </div>
     </div>
 
     <script>
-        // Lógica de detección de Link Privado
+        // Lógica de detección de link privado
         const params = new URLSearchParams(window.location.search);
         if (params.has('n')) {
             document.getElementById('formulario-normal').style.display = 'none';
-            document.getElementById('vista-cliente').style.display = 'block';
-            
+            document.getElementById('vista-privada').style.display = 'block';
             let fin = parseInt(params.get('f'));
-            let duracion = parseInt(params.get('h'));
-            let inicio = fin - (duracion * 3600000);
+            let inicio = fin - (parseInt(params.get('h')) * 3600000);
             document.getElementById('cliente-nombre').innerText = "Cliente: " + params.get('n');
-            
             setInterval(() => {
                 let ahora = new Date().getTime();
                 let restante = fin - ahora;
-                let porcentaje = Math.min(((ahora - inicio) / (duracion * 3600000)) * 100, 100);
-                document.getElementById('barra-xp').style.width = porcentaje + "%";
-                
-                if (restante <= 0) {
-                    document.getElementById('reloj').innerText = "COMPLETADO ✅";
-                } else {
-                    let h = Math.floor(restante / 3600000);
-                    let m = Math.floor((restante % 3600000) / 60000);
-                    let s = Math.floor((restante % 60000) / 1000);
+                let porc = Math.min(((ahora - inicio) / (fin - inicio)) * 100, 100);
+                document.getElementById('barra-xp').style.width = porc + "%";
+                if(restante <= 0) document.getElementById('reloj').innerText = "COMPLETADO ✅";
+                else {
+                    let h = Math.floor(restante/3600000), m = Math.floor((restante%3600000)/60000), s = Math.floor((restante%60000)/1000);
                     document.getElementById('reloj').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
                 }
             }, 1000);
         }
 
         function generarLink() {
-            let nombre = document.getElementById('admin-nombre').value;
-            let horas = document.getElementById('admin-horas').value;
-            let fin = new Date().getTime() + (horas * 3600000);
-            let link = window.location.href.split('?')[0] + `?n=${nombre}&h=${horas}&f=${fin}`;
-            document.getElementById('link-generado').innerText = link;
+            let n = document.getElementById('admin-nombre').value, h = document.getElementById('admin-horas').value;
+            let f = new Date().getTime() + (h * 3600000);
+            document.getElementById('link-generado').innerText = window.location.href.split('?')[0] + `?n=${n}&h=${h}&f=${f}`;
+        }
+        
+        function calcularTotal() {
+            let p = parseInt(document.getElementById('servicio').value);
+            let d = document.getElementById('precio-final');
+            d.innerText = (p >= 1000) ? (p/1000) + "KK gold" : p + "k gold";
+            d.classList.remove('destello'); void d.offsetWidth; d.classList.add('destello');
         }
 
+        const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg", "https://imgsrv.crunchyroll.com/cdn-cgi/image/fit=cover,format=auto,quality=85,width=1920/keyart/GDKHZEJ0K-backdrop_wide"];
+        let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
+        window.onload = () => { rotar(); setInterval(rotar, 30000); };
         function reproducirSonido() { /* Tu función de sonido existente */ }
     </script>
 </body>
