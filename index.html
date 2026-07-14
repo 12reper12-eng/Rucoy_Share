@@ -38,7 +38,6 @@
     }
 
     #mensaje-bienvenida { text-align: center; font-size: 15px; color: #00f2ff; margin-bottom: 15px; font-weight: bold; }
-    /* El h1 ahora tiene cursor pointer para indicar que es interactivo para el admin */
     h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: default; }
     .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 13px; text-align: center; }
     .horario-box { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; }
@@ -53,6 +52,7 @@
     .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center; }
     
     #estado-servicio { text-align: center; margin-bottom: 10px; font-weight: bold; padding: 5px; border-radius: 5px; font-size: 12px; }
+    #cupos-info { text-align: center; color: #ff4757; font-size: 12px; margin-bottom: 10px; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -60,8 +60,8 @@
     <div class="caja">
         <div id="estado-servicio" style="background-color: rgba(0, 255, 0, 0.2); color: #00ff00;">🟢 Estado: Disponible</div>
         <div id="mensaje-bienvenida">¡Bienvenido, guerrero! 👋</div>
-        <!-- Doble clic aquí para acceder a admin -->
         <h1 ondblclick="accederAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
+        <div id="cupos-info">🔥 Cupos disponibles hoy: 2</div>
         <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
         <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
         
@@ -93,13 +93,31 @@
             <div class="total-oro" id="precio-final">300k gold</div>
         </div>
 
-        <a href="#" id="boton-whatsapp" class="btn-wa" target="_blank">💬 APARTAR CUPO POR WHATSAPP</a>
+        <a href="#" id="boton-whatsapp" class="btn-wa" target="_blank" onclick="reproducirSonido()">💬 APARTAR CUPO POR WHATSAPP</a>
         
         <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
     </div>
 
     <script>
         let estaDisponible = true;
+        
+        // Función de sonido de Level Up
+        function reproducirSonido() {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.2);
+        }
+
+        // Función Admin
         function accederAdmin() {
             let pass = prompt("Introduce la contraseña de administrador:");
             if (pass === "Iscarlos2908") { 
@@ -150,7 +168,14 @@
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg", "https://imgsrv.crunchyroll.com/cdn-cgi/image/fit=cover,format=auto,quality=85,width=1920/keyart/GDKHZEJ0K-backdrop_wide"];
         let i = 0;
         function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
-        window.onload = () => { rotar(); setInterval(rotar, 30000); calcularTotal(); };
+        
+        // Contador de cupos
+        function actualizarCupos() {
+            let n = Math.floor(Math.random() * 3) + 1;
+            document.getElementById("cupos-info").innerText = "🔥 Cupos disponibles hoy: " + n;
+        }
+
+        window.onload = () => { rotar(); setInterval(rotar, 30000); setInterval(actualizarCupos, 10000); calcularTotal(); };
     </script>
 </body>
 </html>
