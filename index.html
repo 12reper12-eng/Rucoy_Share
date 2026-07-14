@@ -26,24 +26,22 @@
     .total-oro { color: #ffd700; font-size: 20px; font-weight: bold; transition: all 0.3s; }
     .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; }
     #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
-    #estado-servicio { text-align: center; margin-bottom: 10px; font-weight: bold; padding: 5px; border-radius: 5px; font-size: 12px; }
+    #estado-servicio { text-align: center; margin-bottom: 10px; font-weight: bold; padding: 5px; border-radius: 5px; font-size: 12px; cursor: pointer; }
 </style>
 </head>
 <body>
 
     <div class="caja">
-        <!-- VISTA PRIVADA DEL CLIENTE -->
         <div id="vista-privada">
             <h2 id="cliente-nombre" style="color:#00f2ff">Seguimiento de Pedido</h2>
             <div class="barra-exterior"><div id="barra-xp"></div></div>
             <div id="reloj" style="font-size: 30px; font-weight: bold; color: #00f2ff;">00:00:00</div>
         </div>
 
-        <!-- VISTA FORMULARIO ORIGINAL -->
         <div id="formulario-normal">
-            <div id="estado-servicio" style="background-color: rgba(0, 255, 0, 0.2); color: #00ff00;">🟢 Estado: Disponible</div>
+            <div id="estado-servicio" onclick="toggleEstado()">🟢 Estado: Disponible</div>
             <div id="mensaje-bienvenida">¡Bienvenido, guerrero! 👋</div>
-            <h1 ondblclick="accederAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
+            <h1 ondblclick="abrirAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
             <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
             <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
             
@@ -58,16 +56,12 @@
             <label>Servicio:</label>
             <select id="servicio" onchange="calcularTotal()">
                 <option value="300">Skill Normal - $300k / hr</option>
-                <option value="360">Power Training - $360k / hr</option>
-                <option value="600">Subida de Nivel - $600k / hr</option>
-                <option value="1400">Pack Maraton (5h Skill) - 1.4KK</option>
-                <option value="1700">Pack Ptrain Pro (5h Ptrain) - 1.7KK</option>
+                <option value="1700">Pack Ptrain Pro - 1.7KK</option>
             </select>
             <div class="resultado-caja"><div class="total-oro" id="precio-final">300k gold</div></div>
             <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirSonido()">💬 APARTAR CUPO POR WHATSAPP</a>
         </div>
 
-        <!-- PANEL ADMIN -->
         <div id="panel-admin">
             <input type="text" id="admin-nombre" placeholder="Nombre cliente">
             <input type="number" id="admin-horas" placeholder="Horas">
@@ -77,9 +71,32 @@
     </div>
 
     <script>
-        let estaDisponible = true;
-        const params = new URLSearchParams(window.location.search);
+        // Cargar estado guardado
+        let estaDisponible = localStorage.getItem('servicio_estado') !== 'false';
+        
+        function actualizarEstadoUI() {
+            let el = document.getElementById("estado-servicio"), btn = document.getElementById("boton-whatsapp");
+            el.innerText = estaDisponible ? "🟢 Estado: Disponible" : "🔴 Estado: No disponible";
+            el.style.backgroundColor = estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
+            el.style.color = estaDisponible ? "#00ff00" : "#ff0000";
+            btn.style.pointerEvents = estaDisponible ? "auto" : "none";
+            btn.style.opacity = estaDisponible ? "1" : "0.5";
+        }
 
+        function toggleEstado() {
+            estaDisponible = !estaDisponible;
+            localStorage.setItem('servicio_estado', estaDisponible);
+            actualizarEstadoUI();
+        }
+
+        function abrirAdmin() {
+            let pass = prompt("Contraseña:");
+            if (pass === "Iscarlos2908") document.getElementById('panel-admin').style.display = 'block';
+            else alert("Denegado");
+        }
+
+        // Resto de la lógica igual...
+        const params = new URLSearchParams(window.location.search);
         if (params.has('n')) {
             document.getElementById('formulario-normal').style.display = 'none';
             document.getElementById('vista-privada').style.display = 'block';
@@ -98,19 +115,6 @@
             }, 1000);
         }
 
-        function accederAdmin() {
-            let pass = prompt("Contraseña:");
-            if (pass === "Iscarlos2908") {
-                estaDisponible = !estaDisponible;
-                let el = document.getElementById("estado-servicio"), btn = document.getElementById("boton-whatsapp");
-                el.innerText = estaDisponible ? "🟢 Estado: Disponible" : "🔴 Estado: No disponible";
-                el.style.backgroundColor = estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
-                el.style.color = estaDisponible ? "#00ff00" : "#ff0000";
-                btn.style.pointerEvents = estaDisponible ? "auto" : "none";
-                document.getElementById('panel-admin').style.display = 'block';
-            } else alert("Denegado");
-        }
-
         function generarLink() {
             let n = document.getElementById('admin-nombre').value, h = document.getElementById('admin-horas').value;
             let f = new Date().getTime() + (h * 3600000);
@@ -125,7 +129,7 @@
 
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg", "https://imgsrv.crunchyroll.com/cdn-cgi/image/fit=cover,format=auto,quality=85,width=1920/keyart/GDKHZEJ0K-backdrop_wide"];
         let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
-        window.onload = () => { rotar(); setInterval(rotar, 30000); };
+        window.onload = () => { rotar(); setInterval(rotar, 30000); actualizarEstadoUI(); };
         function reproducirSonido() {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator(); osc.connect(ctx.destination);
