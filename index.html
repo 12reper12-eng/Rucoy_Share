@@ -15,10 +15,9 @@
         color: white;
         text-align: center;
         min-height: 100vh;
+        /* FONDO NUEVO: Oscuro, limpio y con una sutil luz azul central */
         background:
-            radial-gradient(circle at 20% 20%, rgba(0, 242, 255, 0.12) 0%, transparent 40%),
-            radial-gradient(circle at 80% 30%, rgba(255, 215, 0, 0.10) 0%, transparent 45%),
-            radial-gradient(circle at 50% 90%, rgba(37, 211, 102, 0.10) 0%, transparent 50%),
+            radial-gradient(circle at 50% 20%, rgba(0, 242, 255, 0.08) 0%, transparent 50%),
             linear-gradient(160deg, #030712 0%, #06101e 40%, #0a1a2e 70%, #030712 100%);
         background-attachment: fixed;
         position: relative;
@@ -37,24 +36,6 @@
         z-index: 0;
     }
 
-    .glow {
-        position: fixed;
-        border-radius: 50%;
-        filter: blur(40px);
-        opacity: 0.35;
-        pointer-events: none;
-        z-index: 0;
-        animation: float 8s ease-in-out infinite;
-    }
-    .glow1 { width: 180px; height: 180px; background: #00f2ff; top: 10%; left: 8%; animation-delay: 0s; }
-    .glow2 { width: 220px; height: 220px; background: #ffd700; top: 60%; right: 10%; animation-delay: 2s; }
-    .glow3 { width: 150px; height: 150px; background: #25D366; bottom: 5%; left: 20%; animation-delay: 4s; }
-
-    @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-25px); }
-    }
-
     h1 {
         color: #00f2ff;
         text-shadow: 0 0 10px #00f2ff, 0 0 25px rgba(0,242,255,0.4);
@@ -67,11 +48,25 @@
     .subtitle {
         color: #ffd700;
         font-weight: bold;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         font-size: 14px;
         letter-spacing: 1px;
         position: relative;
         z-index: 1;
+    }
+
+    /* ESTILO NUEVO: Cuadro para las Horas de Trabajo */
+    .horario-box {
+        background: rgba(255, 215, 0, 0.07);
+        border: 1px solid rgba(255, 215, 0, 0.4);
+        border-radius: 8px;
+        padding: 8px 15px;
+        margin: 0 auto 20px auto;
+        display: inline-block;
+        font-size: 13px;
+        color: #ffd700;
+        letter-spacing: 0.5px;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
     }
 
     .caja {
@@ -198,13 +193,15 @@
 </head>
 <body>
 
-    <div class="glow glow1"></div>
-    <div class="glow glow2"></div>
-    <div class="glow glow3"></div>
-
     <div class="caja">
         <h1>🛡️ SAFEGAMING SERVICE 🛡️</h1>
         <div class="subtitle">RUCOY ONLINE: SHARE &amp; SKILLEO PROFESIONAL</div>
+        
+        <!-- SECCIÓN DE HORARIO (Puedes editar el texto de abajo con tus horas reales) -->
+        <div class="horario-box">
+            🕒 <b>HORARIO DE TRABAJO:</b> 8:00 AM - 11:00 PM
+        </div>
+        
         <hr>
 
         <label>Nombre de tu Personaje:</label>
