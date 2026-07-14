@@ -15,35 +15,83 @@
         color: white;
         text-align: center;
         min-height: 100vh;
-        
-        /* NUEVO GRADIENTE: Azul neón, cian, oro y verde moviéndose juntos */
-        background: linear-gradient(135deg, #020617, #005577, #00f2ff, #cca100, #005a2b, #020617);
-        background-size: 400% 400%;
-        animation: gradienteGamer 12s ease infinite;
-        
+        /* Fondo base muy oscuro para que resalten las líneas */
+        background: #020617;
         background-attachment: fixed;
         position: relative;
         overflow-x: hidden;
     }
 
-    /* Animación fluida para mezclar tus colores de Rucoy */
-    @keyframes gradienteGamer {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+    /* CONTENEDOR DE LAS LÍNEAS NEÓN */
+    .lineas-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
     }
 
-    /* Malla cuadriculada para darle el toque de fondo de juego */
+    /* ESTILO DE CADA LÍNEA/RAYO */
+    .rayo-neon {
+        position: absolute;
+        width: 180%;
+        height: 15px; /* Grosor de la línea */
+        opacity: 0.7;
+        filter: blur(20px); /* Hace que brillen como neón */
+        transform: rotate(-30deg);
+    }
+
+    /* Línea Azul Eléctrico */
+    .rayo-azul {
+        background: #00f2ff;
+        box-shadow: 0 0 30px #00f2ff, 0 0 60px #00f2ff;
+        top: 15%;
+        left: -40%;
+        animation: moverRayoAncho 9s ease-in-out infinite alternate;
+    }
+
+    /* Línea Oro/Amarilla */
+    .rayo-amarillo {
+        background: #ffd700;
+        box-shadow: 0 0 30px #ffd700, 0 0 60px #ffd700;
+        top: 45%;
+        left: -30%;
+        animation: moverRayoAncho 12s ease-in-out infinite alternate-reverse;
+    }
+
+    /* Línea Verde WhatsApp/Ptrain */
+    .rayo-verde {
+        background: #25D366;
+        box-shadow: 0 0 30px #25D366, 0 0 60px #25D366;
+        top: 75%;
+        left: -40%;
+        animation: moverRayoAncho 10s ease-in-out infinite alternate;
+    }
+
+    /* Animación para que las líneas se desplacen de lado a lado */
+    @keyframes moverRayoAncho {
+        0% {
+            transform: translate(-10%, -10px) rotate(-35deg);
+        }
+        100% {
+            transform: translate(15%, 40px) rotate(-25deg);
+        }
+    }
+
+    /* Malla cuadriculada gamer por encima de las líneas */
     body::before {
         content: "";
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
         background-image:
-            linear-gradient(rgba(0, 242, 255, 0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 242, 255, 0.04) 1px, transparent 1px);
-        background-size: 35px 35px;
+            linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
         pointer-events: none;
-        z-index: 0;
+        z-index: 1;
     }
 
     h1 {
@@ -52,7 +100,6 @@
         font-size: 32px;
         margin-bottom: 5px;
         position: relative;
-        z-index: 1;
     }
 
     .subtitle {
@@ -61,11 +108,9 @@
         margin-bottom: 15px;
         font-size: 14px;
         letter-spacing: 1px;
-        position: relative;
-        z-index: 1;
     }
 
-    /* Cuadro estético para tus Horas de Trabajo */
+    /* Cuadro para las Horas de Trabajo */
     .horario-box {
         background: rgba(255, 215, 0, 0.08);
         border: 1px solid rgba(255, 215, 0, 0.5);
@@ -84,13 +129,12 @@
         padding: 25px;
         display: inline-block;
         border-radius: 14px;
-        /* Fondo oscuro semi-transparente para que el neón de atrás no moleste al leer */
-        background: rgba(4, 8, 16, 0.95); 
-        box-shadow: 0 0 30px rgba(0,242,255,0.6), inset 0 0 30px rgba(0,242,255,0.03);
+        background: rgba(4, 8, 16, 0.93); 
+        box-shadow: 0 0 30px rgba(0,242,255,0.5), inset 0 0 30px rgba(0,242,255,0.03);
         max-width: 480px;
         width: 92%;
         position: relative;
-        z-index: 1;
+        z-index: 2; /* Por encima de los rayos neón */
         backdrop-filter: blur(10px);
     }
 
@@ -198,11 +242,18 @@
         font-size: 12px;
         line-height: 1.6;
         position: relative;
-        z-index: 1;
+        z-index: 2;
     }
 </style>
 </head>
 <body>
+
+    <!-- LAS LÍNEAS NEÓN EN MOVIMIENTO -->
+    <div class="lineas-container">
+        <div class="rayo-neon rayo-azul"></div>
+        <div class="rayo-neon rayo-amarillo"></div>
+        <div class="rayo-neon rayo-verde"></div>
+    </div>
 
     <div class="caja">
         <h1>🛡️ SAFEGAMING SERVICE 🛡️</h1>
