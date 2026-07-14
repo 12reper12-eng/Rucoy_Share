@@ -3,140 +3,147 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safegaming Service - Rucoy Online</title>
+<title>Safegaming Service</title>
 <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes pulseGold { 0% { transform: scale(1); text-shadow: 0 0 0 #ffd700; } 50% { transform: scale(1.1); text-shadow: 0 0 15px #ffd700; } 100% { transform: scale(1); text-shadow: 0 0 0 #ffd700; } }
-    .destello { animation: pulseGold 0.4s ease-out; }
-    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; animation: fadeIn 0.8s ease-out; }
-
-    #vista-privada { display: none; text-align: center; }
-    .barra-exterior { width: 100%; height: 20px; background: #333; border-radius: 10px; margin: 15px 0; overflow: hidden; border: 1px solid #00f2ff; }
-    #barra-xp { width: 0%; height: 100%; background: #00f2ff; transition: width 1s linear; }
-
-    #mensaje-bienvenida { text-align: center; font-size: 15px; color: #00f2ff; margin-bottom: 15px; font-weight: bold; }
+    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.9); width: 100%; max-width: 450px; }
+    #estado-servicio { text-align: center; margin-bottom: 10px; font-weight: bold; padding: 5px; border-radius: 5px; font-size: 12px; cursor: pointer; }
     h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: pointer; }
-    .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 13px; text-align: center; }
-    .horario-box { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; }
     label { display: block; margin: 10px 0 4px 0; font-size: 13px; color: #ccc; }
-    input, select { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid rgba(0, 242, 255, 0.5); background: rgba(7, 13, 26, 0.8); color: white; margin-bottom: 5px; }
-    .resultado-caja { background: rgba(0, 242, 255, 0.1); border: 1px dashed rgba(0, 242, 255, 0.5); padding: 12px; margin-top: 15px; border-radius: 6px; text-align: center; }
-    .total-oro { color: #ffd700; font-size: 20px; font-weight: bold; transition: all 0.3s; }
+    input, select { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid #00f2ff; background: #070d1a; color: white; }
     .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; }
     #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
-    #estado-servicio { text-align: center; margin-bottom: 10px; font-weight: bold; padding: 5px; border-radius: 5px; font-size: 12px; cursor: pointer; }
+    #vista-privada { display: none; text-align: center; }
+    .barra-exterior { width: 100%; height: 20px; background: #333; border-radius: 10px; margin: 15px 0; overflow: hidden; border: 1px solid #00f2ff; }
+    #barra-xp { width: 0%; height: 100%; background: #00f2ff; }
 </style>
 </head>
 <body>
 
-    <div class="caja">
-        <div id="vista-privada">
-            <h2 id="cliente-nombre" style="color:#00f2ff">Seguimiento de Pedido</h2>
-            <div class="barra-exterior"><div id="barra-xp"></div></div>
-            <div id="reloj" style="font-size: 30px; font-weight: bold; color: #00f2ff;">00:00:00</div>
-        </div>
-
-        <div id="formulario-normal">
-            <div id="estado-servicio" onclick="toggleEstado()">🟢 Estado: Disponible</div>
-            <div id="mensaje-bienvenida">¡Bienvenido, guerrero! 👋</div>
-            <h1 ondblclick="abrirAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
-            <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
-            <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
-            
-            <label>Nombre del Personaje:</label>
-            <input type="text" id="personaje" placeholder="Ej: RucoyPro">
-            <label>Elige tu Profesión:</label>
-            <select id="clase">
-                <option value="Melee">⚔️ Melee</option>
-                <option value="Distance">🏹 Distancia</option>
-                <option value="Magic">✨ Magia</option>
-            </select>
-            <label>Servicio:</label>
-            <select id="servicio" onchange="calcularTotal()">
-                <option value="300">Skill Normal - $300k / hr</option>
-                <option value="1700">Pack Ptrain Pro - 1.7KK</option>
-            </select>
-            <div class="resultado-caja"><div class="total-oro" id="precio-final">300k gold</div></div>
-            <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirSonido()">💬 APARTAR CUPO POR WHATSAPP</a>
-        </div>
-
-        <div id="panel-admin">
-            <input type="text" id="admin-nombre" placeholder="Nombre cliente">
-            <input type="number" id="admin-horas" placeholder="Horas">
-            <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer;">GENERAR LINK ÚNICO</button>
-            <div id="link-generado" style="color:#ffd700; font-size:11px; margin-top:10px; word-break:break-all;"></div>
-        </div>
+<div class="caja">
+    <div id="vista-privada">
+        <h2 id="cliente-nombre" style="color:#00f2ff">Seguimiento</h2>
+        <div class="barra-exterior"><div id="barra-xp"></div></div>
+        <div id="reloj" style="font-size: 30px; font-weight: bold;">00:00:00</div>
     </div>
 
-    <script>
-        // Cargar estado guardado
-        let estaDisponible = localStorage.getItem('servicio_estado') !== 'false';
-        
-        function actualizarEstadoUI() {
-            let el = document.getElementById("estado-servicio"), btn = document.getElementById("boton-whatsapp");
-            el.innerText = estaDisponible ? "🟢 Estado: Disponible" : "🔴 Estado: No disponible";
-            el.style.backgroundColor = estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
-            el.style.color = estaDisponible ? "#00ff00" : "#ff0000";
-            btn.style.pointerEvents = estaDisponible ? "auto" : "none";
-            btn.style.opacity = estaDisponible ? "1" : "0.5";
-        }
+    <div id="formulario-normal">
+        <div id="estado-servicio" onclick="toggleEstadoCloud()">Cargando estado...</div>
+        <h1 ondblclick="abrirAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
+        <label>Nombre del Personaje:</label>
+        <input type="text" id="personaje" placeholder="Ej: RucoyPro">
+        <label>Profesión:</label>
+        <select id="clase">
+            <option value="Melee">⚔️ Melee</option>
+            <option value="Distance">🏹 Distancia</option>
+            <option value="Magic">✨ Magia</option>
+        </select>
+        <label>Servicio:</label>
+        <select id="servicio" onchange="calcularTotal()">
+            <option value="300">Skill Normal - $300k / hr</option>
+            <option value="360">Power Training - $360k / hr</option>
+            <option value="600">Subida de Nivel - $600k / hr</option>
+            <option value="1400">Pack Maraton - 1.4KK</option>
+            <option value="1700">Pack Ptrain Pro - 1.7KK</option>
+        </select>
+        <label>Cantidad de Horas:</label>
+        <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
+        <div style="text-align:center; margin-top:15px; font-weight:bold; color:#ffd700;" id="total-final">300k gold</div>
+        <a href="#" id="boton-whatsapp" class="btn-wa" onclick="enviarWhatsApp()">💬 APARTAR CUPO POR WHATSAPP</a>
+    </div>
 
-        function toggleEstado() {
-            estaDisponible = !estaDisponible;
-            localStorage.setItem('servicio_estado', estaDisponible);
-            actualizarEstadoUI();
-        }
+    <div id="panel-admin">
+        <input type="text" id="admin-nombre" placeholder="Nombre cliente">
+        <input type="number" id="admin-horas" placeholder="Horas">
+        <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer;">GENERAR LINK</button>
+        <div id="link-generado" style="color:#ffd700; font-size:11px; margin-top:10px; word-break:break-all;"></div>
+    </div>
+</div>
 
-        function abrirAdmin() {
-            let pass = prompt("Contraseña:");
-            if (pass === "Iscarlos2908") document.getElementById('panel-admin').style.display = 'block';
-            else alert("Denegado");
-        }
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Resto de la lógica igual...
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('n')) {
-            document.getElementById('formulario-normal').style.display = 'none';
-            document.getElementById('vista-privada').style.display = 'block';
-            let fin = parseInt(params.get('f')), dur = parseInt(params.get('h'));
-            let inicio = fin - (dur * 3600000);
-            document.getElementById('cliente-nombre').innerText = "Cliente: " + params.get('n');
-            setInterval(() => {
-                let ahora = new Date().getTime(), restante = fin - ahora;
-                let porc = Math.min(((ahora - inicio) / (fin - inicio)) * 100, 100);
-                document.getElementById('barra-xp').style.width = porc + "%";
-                if(restante <= 0) document.getElementById('reloj').innerText = "COMPLETADO ✅";
-                else {
-                    let h = Math.floor(restante/3600000), m = Math.floor((restante%3600000)/60000), s = Math.floor((restante%60000)/1000);
-                    document.getElementById('reloj').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                }
-            }, 1000);
-        }
+    const firebaseConfig = {
+        apiKey: "AIzaSyAmJhCtpBQoE_amS6uR9rdNKCx6AbayTIc",
+        authDomain: "shareskill-8d1fe.firebaseapp.com",
+        databaseURL: "https://shareskill-8d1fe-default-rtdb.firebaseio.com",
+        projectId: "shareskill-8d1fe",
+        storageBucket: "shareskill-8d1fe.firebasestorage.app",
+        messagingSenderId: "1044347975822",
+        appId: "1:1044347975822:web:f91a7fb96a11358e8bb1df",
+        measurementId: "G-L4BTZQ7SB8"
+    };
 
-        function generarLink() {
-            let n = document.getElementById('admin-nombre').value, h = document.getElementById('admin-horas').value;
-            let f = new Date().getTime() + (h * 3600000);
-            document.getElementById('link-generado').innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}`;
-        }
-        
-        function calcularTotal() {
-            let p = parseInt(document.getElementById('servicio').value), d = document.getElementById('precio-final');
-            d.innerText = (p >= 1000) ? (p/1000) + "KK gold" : p + "k gold";
-            d.classList.remove('destello'); void d.offsetWidth; d.classList.add('destello');
-        }
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const estadoRef = ref(db, 'disponible');
 
-        const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg", "https://imgsrv.crunchyroll.com/cdn-cgi/image/fit=cover,format=auto,quality=85,width=1920/keyart/GDKHZEJ0K-backdrop_wide"];
-        let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
-        window.onload = () => { rotar(); setInterval(rotar, 30000); actualizarEstadoUI(); };
-        function reproducirSonido() {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator(); osc.connect(ctx.destination);
-            osc.type = 'triangle'; osc.frequency.setValueAtTime(500, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.1);
-            osc.start(); osc.stop(ctx.currentTime + 0.2);
-        }
-    </script>
+    window.estaDisponible = true;
+    onValue(estadoRef, (snapshot) => {
+        window.estaDisponible = snapshot.val();
+        actualizarUI();
+    });
+
+    window.toggleEstadoCloud = function() {
+        set(estadoRef, !window.estaDisponible);
+    }
+
+    function actualizarUI() {
+        let el = document.getElementById("estado-servicio"), btn = document.getElementById("boton-whatsapp");
+        el.innerText = window.estaDisponible ? "🟢 Estado: Disponible" : "🔴 Estado: No disponible";
+        el.style.backgroundColor = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
+        el.style.color = window.estaDisponible ? "#00ff00" : "#ff0000";
+        btn.style.pointerEvents = window.estaDisponible ? "auto" : "none";
+        btn.style.opacity = window.estaDisponible ? "1" : "0.5";
+    }
+
+    // Funciones adicionales de cálculo y admin...
+    window.calcularTotal = function() {
+        let serv = document.getElementById('servicio').value;
+        let horas = document.getElementById('horas').value;
+        let total = (serv == 1400 || serv == 1700) ? serv : serv * horas;
+        document.getElementById('total-final').innerText = (total >= 1000) ? (total/1000) + "KK gold" : total + "k gold";
+    }
+
+    window.enviarWhatsApp = function() {
+        let p = document.getElementById('personaje').value;
+        let s = document.getElementById('servicio').options[document.getElementById('servicio').selectedIndex].text;
+        let h = document.getElementById('horas').value;
+        let msg = `Hola! Quiero agendar:\nPersonaje: ${p}\nServicio: ${s}\nHoras: ${h}`;
+        window.open("https://wa.me/584123576579?text=" + encodeURIComponent(msg), '_blank');
+    }
+
+    window.abrirAdmin = function() {
+        if(prompt("Contraseña:") === "Iscarlos2908") document.getElementById('panel-admin').style.display = 'block';
+    }
+
+    window.generarLink = function() {
+        let n = document.getElementById('admin-nombre').value, h = document.getElementById('admin-horas').value;
+        let f = new Date().getTime() + (h * 3600000);
+        document.getElementById('link-generado').innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}`;
+    }
+
+    // Lógica privada igual que antes...
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('n')) {
+        document.getElementById('formulario-normal').style.display = 'none';
+        document.getElementById('vista-privada').style.display = 'block';
+        let fin = parseInt(params.get('f')), dur = parseInt(params.get('h'));
+        let inicio = fin - (dur * 3600000);
+        document.getElementById('cliente-nombre').innerText = "Cliente: " + params.get('n');
+        setInterval(() => {
+            let ahora = new Date().getTime(), restante = fin - ahora;
+            let porc = Math.min(((ahora - inicio) / (fin - inicio)) * 100, 100);
+            document.getElementById('barra-xp').style.width = porc + "%";
+            if(restante <= 0) document.getElementById('reloj').innerText = "COMPLETADO ✅";
+            else {
+                let h = Math.floor(restante/3600000), m = Math.floor((restante%3600000)/60000), s = Math.floor((restante%60000)/1000);
+                document.getElementById('reloj').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            }
+        }, 1000);
+    }
+</script>
 </body>
 </html>
