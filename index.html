@@ -32,7 +32,6 @@
 
     window.cambiarEstado = () => set(estadoRef, !window.estaDisponible);
 
-    // Registra tanto el cliente como la suma de horas totales
     window.registrarCliente = (nombre, horas) => {
         const clientesRef = ref(db, 'clientes');
         get(clientesRef).then((snapshot) => {
@@ -87,7 +86,7 @@
             <input type="text" id="personaje" placeholder="Ej: RucoyPro">
             
             <label>Elige tu Profesión:</label>
-            <select id="clase">
+            <select id="clase" onchange="calcularTotal()">
                 <option value="Melee">⚔️ Melee</option>
                 <option value="Distance">🏹 Distancia</option>
                 <option value="Magic">✨ Magia</option>
@@ -164,7 +163,6 @@
             } else { alert("Contraseña incorrecta"); }
         }
 
-        // Nueva lógica basada en horas totales
         function obtenerRango(horas) {
             if (horas >= 50) return { rango: "LEYENDA", color: "#ff4500", icono: "🔥" };
             if (horas >= 25) return { rango: "VIP", color: "#FFD700", icono: "👑" };
@@ -230,9 +228,10 @@
 
         function calcularTotal() {
             let p = parseInt(document.getElementById("servicio").value), h = parseInt(document.getElementById("horas").value) || 1;
+            let clase = document.getElementById("clase").value;
             let total = (p >= 1400) ? p : p * h;
             document.getElementById("precio-final").innerText = (total >= 1000) ? (total / 1000) + "KK gold" : total + "k gold";
-            let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} para ${document.getElementById("personaje").value}`;
+            let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} de tipo ${clase} para ${document.getElementById("personaje").value}`;
             document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
         }
 
