@@ -100,6 +100,10 @@
             
             <div id="panel-admin">
                 <button onclick="cambiarEstado()" style="width:100%; padding:10px; background: #ff0000; color: white; cursor:pointer;">CAMBIAR ESTADO</button>
+                <input type="text" id="admin-nombre" placeholder="Nombre cliente" style="margin-top:10px;">
+                <input type="number" id="admin-horas" placeholder="Horas">
+                <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer;">GENERAR LINK</button>
+                <div id="link-generado" style="color:#ffd700; font-size:11px; margin-top:10px; word-break:break-all;"></div>
                 <div id="lista-clientes" style="margin-top:15px; max-height: 150px; overflow-y: auto;"></div>
             </div>
         </div>
@@ -127,12 +131,12 @@
         function cargarAdmin() {
             onValue(ref(window.db, 'clientes'), (snap) => {
                 let div = document.getElementById('lista-clientes');
-                div.innerHTML = "<strong>Clientes Registrados:</strong>";
+                div.innerHTML = "<hr><strong>Clientes Registrados:</strong>";
                 snap.forEach(c => {
                     let d = c.val();
                     let color = d.compras >= 3 ? "#FFD700" : (d.compras >= 1 ? "#00f2ff" : "#fff");
                     let rango = d.compras >= 3 ? "👑 VIP" : (d.compras >= 1 ? "🌟 PREMIUM" : "Usuario");
-                    div.innerHTML += `<div class="lista-item" style="color:${color}">${d.nombre} (${rango})<br>Link: ${window.location.origin + window.location.pathname}?n=${encodeURIComponent(d.nombre)}</div>`;
+                    div.innerHTML += `<div class="lista-item" style="color:${color}">${d.nombre} (${rango})</div>`;
                 });
             });
         }
@@ -159,6 +163,12 @@
                     document.getElementById("reloj").innerText = `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
                 }
             }, 1000);
+        }
+
+        function generarLink() {
+            let n = document.getElementById("admin-nombre").value, h = parseInt(document.getElementById("admin-horas").value);
+            let f = new Date().getTime() + (h * 3600000);
+            document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}`;
         }
 
         function calcularTotal() {
