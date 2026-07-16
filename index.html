@@ -68,6 +68,81 @@
         if (confirm('¿Eliminar esta referencia?')) remove(ref(db, 'referencias/' + key));
     };
 
+    // ---- Envío público de referencias (sin login) → van a 'pendientes' para revisión ----
+    window.enviarReferenciaPublica = () => {
+        const tipo = document.getElementById('pub-ref-tipo').value;
+        const nombre = document.getElementById('pub-ref-nombre').value.trim();
+        const antes = document.getElementById('pub-ref-antes').value.trim();
+        const despues = document.getElementById('pub-ref-despues').value.trim();
+        const imagen = document.getElementById('pub-ref-imagen').value.trim();
+        const msj = document.getElementById('pub-ref-msj');
+        if (!nombre || !antes || !despues) { msj.style.color = '#ff6b6b'; msj.innerText = 'Completa nombre, antes y después.'; return; }
+        if (nombre.length > 60 || antes.length > 60 || despues.length > 60) { msj.style.color = '#ff6b6b'; msj.innerText = 'Los textos son muy largos, hazlos más cortos.'; return; }
+        push(ref(db, 'pendientes'), { tipo, nombre, antes, despues, imagen: imagen || '', fecha: Date.now() })
+            .then(() => {
+                msj.style.color = '#4caf50';
+                msj.innerText = '¡Gracias! Tu referencia quedó en revisión y se publicará pronto.';
+                document.getElementById('pub-ref-nombre').value = '';
+                document.getElementById('pub-ref-antes').value = '';
+                document.getElementById('pub-ref-despues').value = '';
+                document.getElementById('pub-ref-imagen').value = '';
+            })
+            .catch(() => { msj.style.color = '#ff6b6b'; msj.innerText = 'No se pudo enviar, intenta de nuevo.'; });
+    };
+
+    window.toggleFormularioPublico = () => {
+        const cont = document.getElementById('form-ref-publico');
+        const btn = document.getElementById('btn-toggle-form-publico');
+        const abierto = cont.style.display === 'block';
+        cont.style.display = abierto ? 'none' : 'block';
+        btn.innerText = abierto ? '✍️ DEJAR MI REFERENCIA' : '✖️ CERRAR FORMULARIO';
+    };
+
+    // ---- Moderación: aprobar o rechazar lo que el público envía ----
+    let pendientesCache = [];
+
+    window.aprobarPendiente = (key) => {
+        const item = pendientesCache.find(p => p.key === key);
+        if (!item) return;
+        const { tipo, nombre, antes, despues, imagen, fecha } = item;
+        push(ref(db, 'referencias'), { tipo, nombre, antes, despues, imagen: imagen || '', fecha }).then(() => {
+            remove(ref(db, 'pendientes/' + key));
+        });
+    };
+
+    window.rechazarPendiente = (key) => {
+        if (confirm('¿Rechazar y borrar esta referencia enviada?')) remove(ref(db, 'pendientes/' + key));
+    };
+
+    function renderPendientesAdmin() {
+        const cont = document.getElementById('contenido-lista-pendientes');
+        const contador = document.getElementById('contador-pendientes');
+        if (!cont) return;
+        if (contador) contador.innerText = pendientesCache.length;
+        cont.innerHTML = pendientesCache.length === 0
+            ? '<div style="color:#888; font-size:11px;">No hay referencias pendientes por revisar.</div>'
+            : '';
+        pendientesCache.slice().reverse().forEach(p => {
+            cont.innerHTML += `<div class="lista-item">${iconoTipo(p.tipo)} ${p.tipo} — <b>${p.nombre}</b>: ${p.antes} → ${p.despues}${p.imagen ? ` <a href="${p.imagen}" target="_blank" style="color:#00f2ff;">[imagen]</a>` : ''}
+                <div style="margin-top:5px;">
+                    <button onclick="aprobarPendiente('${p.key}')" style="background:#25D366; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px;">✅ Aprobar</button>
+                    <button onclick="rechazarPendiente('${p.key}')" style="background:#ff3333; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; margin-left:6px;">❌ Rechazar</button>
+                </div></div>`;
+        });
+    }
+    window.renderPendientesAdmin = renderPendientesAdmin;
+
+    onValue(ref(db, 'pendientes'), (snap) => {
+        pendientesCache = [];
+        snap.forEach(c => pendientesCache.push({ key: c.key, ...c.val() }));
+        const badge = document.getElementById('badge-pendientes');
+        if (badge) badge.style.display = pendientesCache.length > 0 ? 'inline-block' : 'none';
+        if (badge) badge.innerText = pendientesCache.length;
+        if (document.getElementById('panel-admin') && document.getElementById('panel-admin').style.display === 'block') {
+            renderPendientesAdmin();
+        }
+    });
+
     window.toggleReferencias = () => {
         const cont = document.getElementById('contenedor-ref-scroll');
         const btn = document.getElementById('btn-toggle-ref');
@@ -199,7 +274,7 @@
 
         <div id="vista-formulario">
             <div id="estado-servicio">Cargando...</div>
-            <h1 ondblclick="verificarAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
+            <h1 ondblclick="verificarAdmin()">🛡️ SAFEGAMING SERVICE 🛡️ <span id="badge-pendientes" style="display:none; background:#ff3333; color:white; font-size:11px; border-radius:10px; padding:1px 7px; vertical-align:middle;"></span></h1>
             <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
             <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
             
@@ -258,6 +333,13 @@
                 <div id="lista-clientes" style="margin-top:15px; max-height: 150px; overflow-y: auto;"></div>
 
                 <div class="form-admin-ref">
+                    <h3>📥 PENDIENTES POR APROBAR (<span id="contador-pendientes">0</span>)</h3>
+                    <div id="lista-pendientes-admin" style="max-height: 220px; overflow-y: auto;">
+                        <div id="contenido-lista-pendientes"></div>
+                    </div>
+                </div>
+
+                <div class="form-admin-ref">
                     <h3>📊 AGREGAR REFERENCIA (Skill / Nivel / Cuenta)</h3>
                     <select id="ref-tipo">
                         <option value="Skill">⚔️ Skill</option>
@@ -291,6 +373,27 @@
             </div>
             <div class="grid-referencias" id="grid-referencias"></div>
             <div id="sin-referencias">Aún no hay referencias publicadas en esta categoría.</div>
+        </div>
+
+        <button class="btn-toggle-ref" id="btn-toggle-form-publico" style="margin-top:10px;" onclick="toggleFormularioPublico()">✍️ DEJAR MI REFERENCIA</button>
+        <div id="form-ref-publico" style="display:none; margin-top:14px; text-align:left;">
+            <p style="font-size:11px; color:#aaa; margin:0 0 10px 0;">Cuéntanos tu experiencia. Se revisa antes de publicarse, así que no aparece de inmediato.</p>
+            <label style="margin-top:0;">Tipo:</label>
+            <select id="pub-ref-tipo">
+                <option value="Skill">⚔️ Skill</option>
+                <option value="Nivel">⭐ Nivel</option>
+                <option value="Cuenta">🎮 Cuenta</option>
+            </select>
+            <label>Tu nombre o el de tu personaje:</label>
+            <input type="text" id="pub-ref-nombre" placeholder="Ej: RucoyPro" maxlength="60">
+            <label>Antes:</label>
+            <input type="text" id="pub-ref-antes" placeholder="Ej: Skill 80 / Nivel 120" maxlength="60">
+            <label>Después:</label>
+            <input type="text" id="pub-ref-despues" placeholder="Ej: Skill 150 / Nivel 200" maxlength="60">
+            <label>Link de imagen (opcional):</label>
+            <input type="text" id="pub-ref-imagen" placeholder="Sube tu captura a imgbb.com y pega el link aquí">
+            <button onclick="enviarReferenciaPublica()" style="width:100%; padding:10px; background:#00f2ff; color:#030008; font-weight:bold; cursor:pointer; margin-top:6px;">📤 ENVIAR PARA REVISIÓN</button>
+            <div id="pub-ref-msj" style="font-size:11px; margin-top:8px; text-align:center;"></div>
         </div>
     </div>
 
@@ -341,6 +444,7 @@
                 document.getElementById('panel-admin').style.display = 'block';
                 cargarAdmin();
                 if (window.renderReferenciasAdmin) window.renderReferenciasAdmin();
+                if (window.renderPendientesAdmin) window.renderPendientesAdmin();
             } else { alert("Contraseña incorrecta"); }
         }
 
