@@ -103,13 +103,13 @@
                 </div>
             </div>
 
-            <!-- Tabla de Rangos -->
             <table class="tabla-rangos">
-                <tr><th>Rango</th><th>Horas Requeridas</th></tr>
-                <tr><td>👤 Usuario</td><td>0+</td></tr>
-                <tr><td style="color:#00f2ff;">💎 PREMIUM</td><td>10+</td></tr>
-                <tr><td style="color:#FFD700;">👑 VIP</td><td>25+</td></tr>
-                <tr><td style="color:#ff4500;">🔥 LEYENDA</td><td>50+</td></tr>
+                <tr><th>Rango</th><th>Horas</th></tr>
+                <tr><td>👤 Usuario</td><td>100+</td></tr>
+                <tr><td style="color:#00f2ff;">💎 PREMIUM</td><td>500+</td></tr>
+                <tr><td style="color:#FFD700;">👑 VIP</td><td>1000+</td></tr>
+                <tr><td style="color:#ff8c00;">🔥 LEYENDA I</td><td>1500+</td></tr>
+                <tr><td style="color:#ff4500;">⚡ LEYENDA II</td><td>2000+</td></tr>
             </table>
 
             <label>Servicio:</label>
@@ -175,10 +175,12 @@
         }
 
         function obtenerRango(horas) {
-            if (horas >= 50) return { rango: "LEYENDA", color: "#ff4500", icono: "🔥" };
-            if (horas >= 25) return { rango: "VIP", color: "#FFD700", icono: "👑" };
-            if (horas >= 10) return { rango: "PREMIUM", color: "#00f2ff", icono: "💎" };
-            return { rango: "Usuario", color: "#fff", icono: "👤" };
+            if (horas >= 2000) return { rango: "LEYENDA II", color: "#ff4500", icono: "⚡" };
+            if (horas >= 1500) return { rango: "LEYENDA I", color: "#ff8c00", icono: "🔥" };
+            if (horas >= 1000) return { rango: "VIP", color: "#FFD700", icono: "👑" };
+            if (horas >= 500) return { rango: "PREMIUM", color: "#00f2ff", icono: "💎" };
+            if (horas >= 100) return { rango: "Usuario", color: "#fff", icono: "👤" };
+            return { rango: "Novato", color: "#aaa", icono: "👶" };
         }
 
         function cargarAdmin() {
