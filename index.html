@@ -32,7 +32,7 @@
             let encontrado = false;
             snapshot.forEach((child) => {
                 if (child.val().nombre.toLowerCase() === nombre.toLowerCase()) {
-                    update(ref(db, 'clientes/' + child.key), { horas: (child.val().horas || 0) + parseInt(horasNuevas) });
+                    update(ref(db, 'clientes/' + child.key), { horas: (parseInt(child.val().horas) || 0) + parseInt(horasNuevas) });
                     encontrado = true;
                 }
             });
@@ -46,7 +46,6 @@
     body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
     .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; }
     #estado-servicio { text-align: center; margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 8px; border: 1px solid #00f2ff; }
-    #vista-seguimiento { display: none; text-align: center; }
     h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: default; }
     .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 13px; text-align: center; }
     .horario-box { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; }
@@ -69,7 +68,7 @@
             <div id="estado-servicio">Cargando...</div>
             <h1 ondblclick="verificarAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
             <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
-            <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
+            <div id="cronometro-display" style="text-align: center; color: #ffd700; font-size: 16px; margin: 10px 0;"></div>
             
             <label>Nombre del Personaje:</label>
             <input type="text" id="personaje" placeholder="Ej: RucoyPro">
@@ -123,12 +122,14 @@
 
     <script>
         function calcularRango(horas) {
-            if(horas >= 500) return {n: "LEYENDA OP PREMIUM VIP", c: "#ff00ff", i: "👑"};
-            if(horas >= 300) return {n: "TOP GLOBAL", c: "#ff4500", i: "🌍"};
-            if(horas >= 200) return {n: "PREMIUM ELITE", c: "#00f2ff", i: "💎"};
-            if(horas >= 100) return {n: "PREMIUM PRO", c: "#ffd700", i: "🌟"};
-            if(horas >= 50) return {n: "PLATA II", c: "#c0c0c0", i: "🥈"};
-            if(horas >= 20) return {n: "PLATA", c: "#aaa", i: "🥈"};
+            if(horas >= 1000) return {n: "LEYENDA OP PREMIUM VIP", c: "#ff00ff", i: "👑"};
+            if(horas >= 800) return {n: "LEYENDA PRO PREMIUM", c: "#ff00aa", i: "⭐"};
+            if(horas >= 600) return {n: "LEYENDA OP PREMIUM", c: "#ff0055", i: "🔥"};
+            if(horas >= 500) return {n: "TOP GLOBAL", c: "#ff4500", i: "🌍"};
+            if(horas >= 400) return {n: "PREMIUM ELITE", c: "#00f2ff", i: "💎"};
+            if(horas >= 200) return {n: "PREMIUM PRO", c: "#ffd700", i: "🌟"};
+            if(horas >= 100) return {n: "PLATA II", c: "#c0c0c0", i: "🥈"};
+            if(horas >= 50) return {n: "PLATA", c: "#aaa", i: "🥈"};
             return {n: "USUARIO", c: "#fff", i: "👤"};
         }
 
@@ -155,26 +156,11 @@
             });
         }
 
-        function reproducirYRedirigir() {
-            let nombre = document.getElementById("personaje").value;
-            let h = parseInt(document.getElementById("horas").value);
-            if(nombre) window.registrarCliente(nombre, h);
-            const audio = document.getElementById('sonido-level');
-            audio.play();
-            setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
-        }
-
         function generarLink() {
-            let n = document.getElementById("admin-nombre").value, h = parseInt(document.getElementById("admin-horas").value);
+            let n = document.getElementById("admin-nombre").value, h = parseInt(document.getElementById("admin-horas").value) || 0;
             let f = new Date().getTime() + (h * 3600000);
             window.get(window.ref(window.db, 'clientes')).then((snap) => {
-                let rangoData = {n: "Usuario", c: "#fff", i: "👤"};
-                snap.forEach(c => {
-                    if(c.val().nombre.toLowerCase() === n.toLowerCase()) {
-                        rangoData = calcularRango(parseInt(c.val().horas) || 0);
-                    }
-                });
-                document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}&r=${encodeURIComponent(rangoData.n)}&c=${encodeURIComponent(rangoData.c)}&i=${encodeURIComponent(rangoData.i)}`;
+                document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&f=${f}`;
             });
         }
 
@@ -187,7 +173,36 @@
             document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
         }
 
-        window.onload = () => { setInterval(() => {document.body.style.backgroundImage = "url('" + (Math.random() > 0.5 ? "https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png" : "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg") + "')";}, 30000); calcularTotal(); };
+        function reproducirYRedirigir() {
+            let nombre = document.getElementById("personaje").value;
+            let h = parseInt(document.getElementById("horas").value);
+            if(nombre) window.registrarCliente(nombre, h);
+            const audio = document.getElementById('sonido-level');
+            audio.play();
+            setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
+        }
+
+        window.onload = () => { 
+            setInterval(() => {document.body.style.backgroundImage = "url('" + (Math.random() > 0.5 ? "https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png" : "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg") + "')";}, 30000); 
+            calcularTotal(); 
+            
+            // Lógica del cronómetro
+            const params = new URLSearchParams(window.location.search);
+            const fin = params.get('f');
+            if (fin) {
+                setInterval(() => {
+                    let ahora = new Date().getTime();
+                    let dist = parseInt(fin) - ahora;
+                    if (dist > 0) {
+                        let h = Math.floor(dist / (1000 * 60 * 60));
+                        let m = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+                        document.getElementById("cronometro-display").innerText = `⏳ TIEMPO RESTANTE: ${h}h ${m}m`;
+                    } else {
+                        document.getElementById("cronometro-display").innerText = "SERVICIO FINALIZADO";
+                    }
+                }, 1000);
+            }
+        };
     </script>
 </body>
 </html>
