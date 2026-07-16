@@ -71,6 +71,7 @@
     <div class="caja" id="contenedor">
         <div id="vista-seguimiento">
             <h1 id="cliente-nombre">Seguimiento</h1>
+            <div id="rango-cliente" style="font-size: 18px; margin: 5px 0;"></div>
             <div id="reloj" style="font-size: 40px; color: #ffd700; margin: 20px 0; font-weight: bold;">00:00:00</div>
         </div>
 
@@ -142,13 +143,11 @@
             let barra = document.getElementById("barra-progreso");
             let texto = document.getElementById("nombre-rango");
             document.getElementById("contenedor-barra").style.display = nivel > 0 ? "block" : "none";
-
             let config = { rango: "Bronce", color: "#cd7f32", ancho: "20%" };
             if (nivel >= 250) { config = { rango: "Diamante", color: "#b9f2ff", ancho: "100%" }; }
             else if (nivel >= 200) { config = { rango: "Esmeralda", color: "#50c878", ancho: "80%" }; }
             else if (nivel >= 150) { config = { rango: "Oro", color: "#ffd700", ancho: "60%" }; }
             else if (nivel >= 100) { config = { rango: "Plata", color: "#c0c0c0", ancho: "40%" }; }
-
             texto.innerText = config.rango;
             texto.style.color = config.color;
             barra.style.width = config.ancho;
@@ -173,7 +172,8 @@
                     let d = c.val();
                     let color = d.compras >= 3 ? "#FFD700" : (d.compras >= 1 ? "#00f2ff" : "#fff");
                     let rango = d.compras >= 3 ? "👑 VIP" : (d.compras >= 1 ? "🌟 PREMIUM" : "Usuario");
-                    listaDiv.innerHTML += `<div class="lista-item" style="color:${color}; margin-top:5px;">• ${d.nombre} — <b>${rango}</b></div>`;
+                    let icono = d.compras >= 3 ? "🏆" : (d.compras >= 1 ? "💎" : "👤");
+                    listaDiv.innerHTML += `<div class="lista-item" style="color:${color}; margin-top:5px;">${icono} ${d.nombre} — <b>${rango}</b></div>`;
                 });
             });
         }
@@ -191,6 +191,10 @@
             document.getElementById("vista-formulario").style.display = "none";
             document.getElementById("vista-seguimiento").style.display = "block";
             document.getElementById("cliente-nombre").innerText = "Cliente: " + decodeURIComponent(params.get('n'));
+            // Mostrar rango y medalla al cliente
+            let r = params.get('r') || "Usuario", c = params.get('c') || "#fff", i = params.get('i') || "👤";
+            document.getElementById("rango-cliente").innerHTML = `<span style="color:${c}">${i} ${r}</span>`;
+            
             let fin = parseInt(params.get('f'));
             setInterval(() => {
                 let diff = fin - new Date().getTime();
@@ -205,7 +209,18 @@
         function generarLink() {
             let n = document.getElementById("admin-nombre").value, h = parseInt(document.getElementById("admin-horas").value);
             let f = new Date().getTime() + (h * 3600000);
-            document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}`;
+            // Buscamos el rango del cliente en la base de datos para pasarlo al link
+            window.get(window.ref(window.db, 'clientes')).then((snap) => {
+                let rango = "Usuario", color = "#fff", icono = "👤";
+                snap.forEach(c => {
+                    if(c.val().nombre.toLowerCase() === n.toLowerCase()) {
+                        let d = c.val();
+                        if(d.compras >= 3) { rango = "VIP"; color = "#FFD700"; icono = "🏆"; }
+                        else if(d.compras >= 1) { rango = "PREMIUM"; color = "#00f2ff"; icono = "💎"; }
+                    }
+                });
+                document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}&r=${rango}&c=${encodeURIComponent(color)}&i=${encodeURIComponent(icono)}`;
+            });
         }
 
         function calcularTotal() {
