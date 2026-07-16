@@ -14,6 +14,13 @@
     }));
 
     window.db = db;
+    window.ref = ref;
+    window.onValue = onValue;
+    window.set = set;
+    window.push = push;
+    window.update = update;
+    window.get = get;
+
     const estadoRef = ref(db, 'disponible');
     onValue(estadoRef, (s) => {
         window.estaDisponible = s.val();
@@ -25,7 +32,6 @@
 
     window.cambiarEstado = () => set(estadoRef, !window.estaDisponible);
 
-    // Lógica para registrar cliente y contar compras
     window.registrarCliente = (nombre) => {
         const clientesRef = ref(db, 'clientes');
         get(clientesRef).then((snapshot) => {
@@ -129,14 +135,17 @@
         }
 
         function cargarAdmin() {
-            onValue(ref(window.db, 'clientes'), (snap) => {
-                let div = document.getElementById('lista-clientes');
-                div.innerHTML = "<div style='margin-top:15px; border-top:1px solid #00f2ff; padding-top:10px;'><strong>📋 TABLA DE CLIENTES:</strong></div>";
+            let div = document.getElementById('lista-clientes');
+            div.innerHTML = "<div style='margin-top:15px; border-top:1px solid #00f2ff; padding-top:10px;'><strong>📋 TABLA DE CLIENTES:</strong></div><div id='contenido-lista'></div>";
+            const listaDiv = document.getElementById('contenido-lista');
+            
+            window.onValue(window.ref(window.db, 'clientes'), (snap) => {
+                listaDiv.innerHTML = "";
                 snap.forEach(c => {
                     let d = c.val();
                     let color = d.compras >= 3 ? "#FFD700" : (d.compras >= 1 ? "#00f2ff" : "#fff");
                     let rango = d.compras >= 3 ? "👑 VIP" : (d.compras >= 1 ? "🌟 PREMIUM" : "Usuario");
-                    div.innerHTML += `<div class="lista-item" style="color:${color}; margin-top:5px;">• ${d.nombre} — <b>${rango}</b></div>`;
+                    listaDiv.innerHTML += `<div class="lista-item" style="color:${color}; margin-top:5px;">• ${d.nombre} — <b>${rango}</b></div>`;
                 });
             });
         }
