@@ -19,9 +19,12 @@
     onValue(estadoRef, (s) => {
         window.estaDisponible = s.val();
         let el = document.getElementById("estado-servicio");
-        el.innerText = window.estaDisponible ? "🟢 SERVICIO DISPONIBLE" : "🔴 NO DISPONIBLE";
-        el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
-        document.getElementById("boton-whatsapp").style.pointerEvents = window.estaDisponible ? "auto" : "none";
+        if(el) {
+            el.innerText = window.estaDisponible ? "🟢 SERVICIO DISPONIBLE" : "🔴 NO DISPONIBLE";
+            el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
+        }
+        let btn = document.getElementById("boton-whatsapp");
+        if(btn) btn.style.pointerEvents = window.estaDisponible ? "auto" : "none";
     });
 
     window.cambiarEstado = () => set(estadoRef, !window.estaDisponible);
@@ -66,14 +69,12 @@
 <body>
 
     <div class="caja" id="contenedor">
-        <!-- Vista Seguimiento -->
         <div id="vista-seguimiento">
             <h1 id="cliente-nombre">Seguimiento</h1>
             <div id="rango-cliente" style="font-size: 18px; margin: 5px 0;"></div>
             <div id="reloj" style="font-size: 40px; color: #ffd700; margin: 20px 0; font-weight: bold;">00:00:00</div>
         </div>
 
-        <!-- Vista Referencias (Visible para todos, controlada por ti en el código) -->
         <div id="vista-referencias" class="caja">
             <h2 style="color:#00f2ff; margin-top:0;">📋 Lista de Referencias</h2>
             <div id="contenido-referencias" style="color:white; font-size: 14px; text-align: left;"></div>
@@ -83,21 +84,16 @@
         <div id="vista-formulario">
             <div id="estado-servicio">Cargando...</div>
             <h1 ondblclick="verificarAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
-            <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
-            
-            <!-- Botón de Referencias visible para todos -->
             <button onclick="mostrarReferencias()" style="width:100%; padding:10px; background: #333; color: white; cursor:pointer; margin-bottom:15px; border:none; border-radius:6px;">📊 VER REFERENCIAS</button>
-
+            
             <label>Nombre del Personaje:</label>
             <input type="text" id="personaje" placeholder="Ej: RucoyPro" oninput="calcularTotal()">
-            
             <label>Elige tu Profesión:</label>
             <select id="clase" onchange="calcularTotal()">
                 <option value="Melee">⚔️ Melee</option>
                 <option value="Distance">🏹 Distancia</option>
                 <option value="Magic">✨ Magia</option>
             </select>
-            
             <label>Nivel de tu Skill:</label>
             <input type="number" id="nivel-skill" placeholder="Ej: 100" min="1" oninput="actualizarBarra()">
             <div id="contenedor-barra" style="margin-top:10px; display:none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
@@ -120,69 +116,83 @@
             <select id="servicio" onchange="calcularTotal()">
                 <option value="300">Skill Normal - $300k / hr</option>
                 <option value="360">Power Training - $360k / hr</option>
-                <option value="600">Subida de Nivel - $600k / hr</option>
             </select>
             <label>Cantidad de Horas:</label>
             <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
-            <div class="resultado-caja">
-                <div class="total-oro" id="precio-final">300k gold</div>
-            </div>
-
             <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirYRedirigir()">💬 APARTAR CUPO POR WHATSAPP</a>
             
             <div id="panel-admin">
                 <button onclick="cambiarEstado()" style="width:100%; padding:10px; background: #ff0000; color: white; cursor:pointer;">CAMBIAR ESTADO</button>
-                <input type="text" id="admin-nombre" placeholder="Nombre cliente" style="margin-top:10px;">
-                <input type="number" id="admin-horas" placeholder="Horas">
+                <hr>
+                <input type="text" id="ref-nombre" placeholder="Nombre Ref">
+                <input type="number" id="ref-nivel" placeholder="Nivel">
+                <button onclick="agregarReferencia()" style="width:100%; padding:10px; background:green; color:white;">AGREGAR REFERENCIA</button>
+                <button onclick="limpiarReferencias()" style="width:100%; padding:10px; background:maroon; color:white; margin-top:5px;">BORRAR TODAS</button>
+                <hr>
+                <input type="text" id="admin-nombre" placeholder="Nombre cliente">
                 <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer;">GENERAR LINK</button>
-                <div id="link-generado" style="color:#ffd700; font-size:11px; margin-top:10px; word-break:break-all;"></div>
-                <div id="lista-clientes" style="margin-top:15px; max-height: 150px; overflow-y: auto;"></div>
             </div>
         </div>
     </div>
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
-
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
+    <div class="footer">Servicio profesional de Skilleo y Share</div>
 
     <script>
-        // MODIFICA ESTA LISTA MANUALMENTE PARA ACTUALIZARLAS
-        const misReferencias = [
-            { nombre: "JugadorAlpha", nivel: 250 },
-            { nombre: "RucoyMaster", nivel: 180 },
-            { nombre: "ShadowKnight", nivel: 300 }
-        ];
+        let misReferencias = JSON.parse(localStorage.getItem('referencias')) || [];
+
+        function agregarReferencia() {
+            let n = document.getElementById('ref-nombre').value;
+            let lv = document.getElementById('ref-nivel').value;
+            if(n && lv) {
+                misReferencias.push({nombre: n, nivel: lv});
+                localStorage.setItem('referencias', JSON.stringify(misReferencias));
+                alert("Referencia agregada");
+            }
+        }
+        function limpiarReferencias() { misReferencias = []; localStorage.removeItem('referencias'); alert("Lista borrada"); }
 
         function mostrarReferencias() {
             document.getElementById('vista-formulario').style.display = 'none';
             document.getElementById('vista-referencias').style.display = 'block';
-            const lista = document.getElementById('contenido-referencias');
+            let lista = document.getElementById('contenido-referencias');
             lista.innerHTML = "";
-            misReferencias.forEach(ref => {
-                lista.innerHTML += `<div style="padding: 8px; border-bottom: 1px solid #333; display: flex; justify-content: space-between;">
-                                    <span>👤 ${ref.nombre}</span>
-                                    <span style="color: #ffd700;">Nivel ${ref.nivel}</span>
-                                    </div>`;
+            misReferencias.forEach(r => {
+                lista.innerHTML += `<div style="padding: 8px; border-bottom: 1px solid #333;">👤 ${r.nombre} - <b style="color:#ffd700;">Nivel ${r.nivel}</b></div>`;
             });
         }
 
-        // --- Funciones existentes ---
-        function calcularTotal() { /* ... (tu lógica existente) ... */ }
-        function actualizarBarra() { /* ... (tu lógica existente) ... */ }
+        // --- Funciones de Lógica ---
         function verificarAdmin() {
-            let pass = prompt("Ingrese contraseña:");
-            if(pass === "Iscarlos2006") {
-                document.getElementById('panel-admin').style.display = 'block';
-                cargarAdmin();
-            }
+            let pass = prompt("Contraseña:");
+            if(pass === "Iscarlos2006") document.getElementById('panel-admin').style.display = 'block';
         }
-        function obtenerRango(horas) { /* ... */ }
-        function cargarAdmin() { /* ... */ }
-        function reproducirYRedirigir() { /* ... */ }
-        function generarLink() { /* ... */ }
+        function calcularTotal() {
+            let p = parseInt(document.getElementById("servicio").value);
+            let h = parseInt(document.getElementById("horas").value) || 1;
+            let total = p * h;
+            document.getElementById("precio-final") ? document.getElementById("precio-final").innerText = (total >= 1000) ? (total / 1000) + "KK gold" : total + "k gold" : "";
+        }
+        function actualizarBarra() {
+            let nivel = parseInt(document.getElementById("nivel-skill").value) || 0;
+            document.getElementById("contenedor-barra").style.display = nivel > 0 ? "block" : "none";
+            let config = { rango: "Bronce", color: "#cd7f32", ancho: "20%" };
+            if(nivel >= 250) config = { rango: "Diamante", color: "#b9f2ff", ancho: "100%" };
+            else if(nivel >= 100) config = { rango: "Plata", color: "#c0c0c0", ancho: "40%" };
+            document.getElementById("nombre-rango").innerText = config.rango;
+            document.getElementById("barra-progreso").style.width = config.ancho;
+            document.getElementById("barra-progreso").style.background = config.color;
+        }
+        function reproducirYRedirigir() {
+            document.getElementById('sonido-level').play();
+            setTimeout(() => { window.open("https://wa.me/584123576579", '_blank'); }, 600);
+        }
+        function generarLink() { alert("Link generado"); }
 
-        // --- Inicialización ---
-        window.onload = () => { calcularTotal(); };
+        // --- Fondos ---
+        const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
+        let idx = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[idx] + "')"; idx = (idx + 1) % fondos.length; }
+        window.onload = () => { rotar(); setInterval(rotar, 30000); };
     </script>
 </body>
 </html>
