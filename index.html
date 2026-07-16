@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Safegaming Service - Rucoy Online</title>
-<!-- Firebase SDK -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, set, push, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -85,7 +84,6 @@
             <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
             
             <label>Nombre del Personaje:</label>
-            <!-- CORRECCIÓN: Añadido oninput -->
             <input type="text" id="personaje" placeholder="Ej: RucoyPro" oninput="calcularTotal()">
             
             <label>Elige tu Profesión:</label>
@@ -147,7 +145,6 @@
     <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
 
     <script>
-        // Función calcularTotal corregida y unificada
         function calcularTotal() {
             let p = parseInt(document.getElementById("servicio").value);
             let h = parseInt(document.getElementById("horas").value) || 1;
@@ -157,7 +154,8 @@
             let total = (p >= 1400) ? p : p * h;
             document.getElementById("precio-final").innerText = (total >= 1000) ? (total / 1000) + "KK gold" : total + "k gold";
             
-            let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} de tipo ${clase} para ${nombre}`;
+            // Mensaje actualizado con nombre y horas
+            let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} de tipo ${clase} para ${nombre || "el personaje"}. Cantidad de horas: ${h}`;
             document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
         }
 
