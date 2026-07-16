@@ -58,8 +58,6 @@
     .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center; }
     #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
     .lista-item { padding: 8px; border-bottom: 1px solid #333; font-size: 11px; text-align: left; }
-    /* Estilo para la nueva tabla */
-    #tabla-rangos { background: rgba(0, 242, 255, 0.05); padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(0, 242, 255, 0.3); font-size: 11px; }
 </style>
 </head>
 <body>
@@ -73,18 +71,217 @@
 
         <div id="vista-formulario">
             <div id="estado-servicio">Cargando...</div>
+            <h1 ondblclick="verificarAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
+            <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
+            <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
             
-            <!-- TABLA DE RANGOS AGREGADA -->
-            <div id="tabla-rangos">
-                <h3 style="color:#00f2ff; margin:0 0 5px 0; text-align: center;">🏆 TABLA DE RANGOS</h3>
-                <div class="lista-item">🥈 <b>PLATA:</b> 20+ horas acumuladas</div>
-                <div class="lista-item">🥈 <b>PLATA II:</b> 50+ horas acumuladas</div>
-                <div class="lista-item">🌟 <b>PREMIUM PRO:</b> 100+ horas acumuladas</div>
-                <div class="lista-item">💎 <b>PREMIUM ELITE:</b> 200+ horas acumuladas</div>
-                <div class="lista-item">🌍 <b>TOP GLOBAL:</b> 300+ horas acumuladas</div>
-                <div class="lista-item">👑 <b>LEYENDA OP PREMIUM VIP:</b> 500+ horas acumuladas</div>
+            <label>Nombre del Personaje:</label>
+            <input type="text" id="personaje" placeholder="Ej: RucoyPro">
+            
+            <label>Elige tu Profesión:</label>
+            <select id="clase" onchange="calcularTotal()">
+                <option value="Melee">⚔️ Melee</option>
+                <option value="Distance">🏹 Distancia</option>
+                <option value="Magic">✨ Magia</option>
+            </select>
+            
+            <label>Nivel de tu Skill:</label>
+            <input type="number" id="nivel-skill" placeholder="Ej: 100" min="1" oninput="actualizarBarra()">
+            <div id="contenedor-barra" style="margin-top:10px; display:none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+                <div style="font-size: 11px; margin-bottom: 3px;">Rango Actual: <span id="nombre-rango">Bronce</span></div>
+                <div style="width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden;">
+                    <div id="barra-progreso" style="width: 0%; height: 100%; background: #cd7f32; transition: width 0.3s, background 0.3s;"></div>
+                </div>
             </div>
 
+            <label>Servicio:</label>
+            <select id="servicio" onchange="calcularTotal()">
+                <option value="300">Skill Normal - $300k / hr</option>
+                <option value="360">Power Training - $360k / hr</option>
+                <option value="600">Subida de Nivel - $600k / hr</option>
+                <option value="1400">Pack Maraton (5h) - 1.4KK</option>
+                <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
+            </select>
+            <label>Cantidad de Horas:</label>
+            <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
+            <div class="resultado-caja">
+                <div class="total-oro" id="precio-final">300k gold</div>
+            </div>
+
+            <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirYRedirigir()">💬 APARTAR CUPO POR WHATSAPP</a>
+            
+            <div id="panel-admin">
+                <button onclick="cambiarEstado()" style="width:100%; padding:10px; background: #ff0000; color: white; cursor:pointer;">CAMBIAR ESTADO</button>
+                <input type="text" id="admin-nombre" placeholder="Nombre cliente" style="margin-top:10px;">
+                <input type="number" id="admin-horas" placeholder="Horas">
+                <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer;">GENERAR LINK</button>
+                <div id="link-generado" style="color:#ffd700; font-size:11px; margin-top:10px; word-break:break-all;"></div>
+                <div id="lista-clientes" style="margin-top:15px; max-height: 150px; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
+
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
+
+    <script>
+        function calcularRango(horas) {
+            if(horas >= 500) return {n: "LEYENDA OP PREMIUM VIP", c: "#ff00ff", i: "👑"};
+            if(horas >= 300) return {n: "TOP GLOBAL", c: "#ff4500", i: "🌍"};
+            if(horas >= 200) return {n: "PREMIUM ELITE", c: "#00f2ff", i: "💎"};
+            if(horas >= 100) return {n: "PREMIUM PRO", c: "#ffd700", i: "🌟"};
+            if(horas >= 50) return {n: "PLATA II", c: "#c0c0c0", i: "🥈"};
+            if(horas >= 20) return {n: "PLATA", c: "#aaa", i: "🥈"};
+            return {n: "USUARIO", c: "#fff", i: "👤"};
+        }
+
+        function actualizarBarra() {
+            let nivel = parseInt(document.getElementById("nivel-skill").value) || 0;
+            let barra = document.getElementById("barra-progreso");
+            let texto = document.getElementById("nombre-rango");
+            document.getElementById("contenedor-barra").style.display = nivel > 0 ? "block" : "none";
+            let config = { rango: "Bronce", color: "#cd7f32", ancho: "20%" };
+            if (nivel >= 250) { config = { rango: "Diamante", color: "#b9f2ff", ancho: "100%" }; }
+            else if (nivel >= 200) { config = { rango: "Esmeralda", color: "#50c878", ancho: "80%" }; }
+            else if (nivel >= 150) { config = { rango: "Oro", color: "#ffd700", ancho: "60%" }; }
+            else if (nivel >= 100) { config = { rango: "Plata", color: "#c0c0c0", ancho: "40%" }; }
+            texto.innerText = config.rango;
+            texto.style.color = config.color;
+            barra.style.width = config.ancho;
+            barra.style.background = config.color;
+        }
+
+        function verificarAdmin() {
+            let pass = prompt("Ingrese contraseña de administrador:");
+            if(pass === "Iscarlos2006") {
+                document.getElementById('panel-admin').style.display = 'block';
+                cargarAdmin();
+            } else { alert("Contraseña incorrecta"); }
+        }
+
+        function cargarAdmin() {
+            let div = document.getElementById('lista-clientes');
+            div.innerHTML = "<div style='margin-top:15px; border-top:1px solid #00f2ff; padding-top:10px;'><strong>📋 TABLA DE CLIENTES:</strong></div><div id='contenido-lista'></div>";
+            const listaDiv = document.getElementById('contenido-lista');
+            window.onValue(window.ref(window.db, 'clientes'), (snap) => {
+                listaDiv.innerHTML = "";
+                snap.forEach(c => {
+                    let d = c.val();
+                    let r = calcularRango(d.horas || 0);
+                    listaDiv.innerHTML += `<div class="lista-item" style="color:${r.c}; margin-top:5px;">${r.i} ${d.nombre} — <b>${r.n}</b> (${d.horas}h)</div>`;
+                });
+            });
+        }
+
+        function reproducirYRedirigir() {
+            let nombre = document.getElementById("personaje").value;
+            let h = parseInt(document.getElementById("horas").value);
+            if(nombre) window.registrarCliente(nombre, h);
+            const audio = document.getElementById('sonido-level');
+            audio.play();
+            setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
+        }
+
+        function generarLink() {
+            let n = document.getElementById("admin-nombre").value, h = parseInt(document.getElementById("admin-horas").value);
+            let f = new Date().getTime() + (h * 3600000);
+            window.get(window.ref(window.db, 'clientes')).then((snap) => {
+                let rangoData = {n: "Usuario", c: "#fff", i: "👤"};
+                snap.forEach(c => {
+                    if(c.val().nombre.toLowerCase() === n.toLowerCase()) {
+                        rangoData = calcularRango(c.val().horas);
+                    }
+                });
+                document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}&r=${encodeURIComponent(rangoData.n)}&c=${encodeURIComponent(rangoData.c)}&i=${encodeURIComponent(rangoData.i)}`;
+            });
+        }
+
+        function calcularTotal() {
+            let p = parseInt(document.getElementById("servicio").value), h = parseInt(document.getElementById("horas").value) || 1;
+            let total = (p >= 1400) ? p : p * h;
+            document.getElementById("precio-final").innerText = (total >= 1000) ? (total / 1000) + "KK gold" : total + "k gold";
+            let claseTexto = document.getElementById("clase").options[document.getElementById("clase").selectedIndex].text;
+            let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} para mi personaje: ${document.getElementById("personaje").value} (${claseTexto})`;
+            document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
+        }
+
+        window.onload = () => { setInterval(() => {document.body.style.backgroundImage = "url('" + (Math.random() > 0.5 ? "https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png" : "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg") + "')";}, 30000); calcularTotal(); };
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safegaming Service - Rucoy Online</title>
+<!-- Firebase SDK -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set, push, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    
+    const db = getDatabase(initializeApp({
+        databaseURL: "https://shareskill-8d1fe-default-rtdb.firebaseio.com"
+    }));
+
+    window.db = db; window.ref = ref; window.onValue = onValue; window.set = set; window.push = push; window.update = update; window.get = get;
+
+    const estadoRef = ref(db, 'disponible');
+    onValue(estadoRef, (s) => {
+        window.estaDisponible = s.val();
+        let el = document.getElementById("estado-servicio");
+        el.innerText = window.estaDisponible ? "🟢 SERVICIO DISPONIBLE" : "🔴 NO DISPONIBLE";
+        el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
+        document.getElementById("boton-whatsapp").style.pointerEvents = window.estaDisponible ? "auto" : "none";
+    });
+
+    window.cambiarEstado = () => set(estadoRef, !window.estaDisponible);
+
+    window.registrarCliente = (nombre, horasNuevas) => {
+        const clientesRef = ref(db, 'clientes');
+        get(clientesRef).then((snapshot) => {
+            let encontrado = false;
+            snapshot.forEach((child) => {
+                if (child.val().nombre.toLowerCase() === nombre.toLowerCase()) {
+                    update(ref(db, 'clientes/' + child.key), { horas: (child.val().horas || 0) + parseInt(horasNuevas) });
+                    encontrado = true;
+                }
+            });
+            if (!encontrado) push(clientesRef, { nombre: nombre, horas: parseInt(horasNuevas) });
+        });
+    };
+</script>
+
+<style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
+    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; }
+    #estado-servicio { text-align: center; margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 8px; border: 1px solid #00f2ff; }
+    #vista-seguimiento { display: none; text-align: center; }
+    h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: default; }
+    .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 13px; text-align: center; }
+    .horario-box { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; }
+    label { display: block; margin: 10px 0 4px 0; font-size: 13px; color: #ccc; }
+    input, select { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid rgba(0, 242, 255, 0.5); background: rgba(7, 13, 26, 0.8); color: white; margin-bottom: 5px; cursor: pointer;}
+    .resultado-caja { background: rgba(0, 242, 255, 0.1); border: 1px dashed rgba(0, 242, 255, 0.5); padding: 12px; margin-top: 15px; border-radius: 6px; text-align: center; }
+    .total-oro { color: #ffd700; font-size: 20px; font-weight: bold; }
+    .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; cursor: pointer; }
+    .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center; }
+    #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
+    .lista-item { padding: 8px; border-bottom: 1px solid #333; font-size: 11px; text-align: left; }
+</style>
+</head>
+<body>
+
+    <div class="caja" id="contenedor">
+        <div id="vista-seguimiento">
+            <h1 id="cliente-nombre">Seguimiento</h1>
+            <div id="rango-cliente" style="font-size: 18px; margin: 5px 0;"></div>
+            <div id="reloj" style="font-size: 40px; color: #ffd700; margin: 20px 0; font-weight: bold;">00:00:00</div>
+        </div>
+
+        <div id="vista-formulario">
+            <div id="estado-servicio">Cargando...</div>
             <h1 ondblclick="verificarAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
             <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
             <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
