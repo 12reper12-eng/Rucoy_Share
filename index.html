@@ -105,7 +105,9 @@
 
             <table class="tabla-rangos">
                 <tr><th>Rango</th><th>Horas</th></tr>
-                <tr><td>👤 Usuario</td><td>100+</td></tr>
+                <tr><td style="color:#c0c0c0;">⚪ PLATA</td><td>20+</td></tr>
+                <tr><td style="color:#ffd700;">🟡 ORO</td><td>30+</td></tr>
+                <tr><td style="color:#00f2ff;">💎 DIAMANTE</td><td>50+</td></tr>
                 <tr><td style="color:#00f2ff;">💎 PREMIUM</td><td>500+</td></tr>
                 <tr><td style="color:#FFD700;">👑 VIP</td><td>1000+</td></tr>
                 <tr><td style="color:#ff8c00;">🔥 LEYENDA I</td><td>1500+</td></tr>
@@ -179,7 +181,9 @@
             if (horas >= 1500) return { rango: "LEYENDA I", color: "#ff8c00", icono: "🔥" };
             if (horas >= 1000) return { rango: "VIP", color: "#FFD700", icono: "👑" };
             if (horas >= 500) return { rango: "PREMIUM", color: "#00f2ff", icono: "💎" };
-            if (horas >= 100) return { rango: "Usuario", color: "#fff", icono: "👤" };
+            if (horas >= 50) return { rango: "DIAMANTE", color: "#00f2ff", icono: "💎" };
+            if (horas >= 30) return { rango: "ORO", color: "#ffd700", icono: "🟡" };
+            if (horas >= 20) return { rango: "PLATA", color: "#c0c0c0", icono: "⚪" };
             return { rango: "Novato", color: "#aaa", icono: "👶" };
         }
 
@@ -211,7 +215,7 @@
             document.getElementById("vista-formulario").style.display = "none";
             document.getElementById("vista-seguimiento").style.display = "block";
             document.getElementById("cliente-nombre").innerText = "Cliente: " + decodeURIComponent(params.get('n'));
-            let r = params.get('r') || "Usuario", c = params.get('c') || "#fff", i = params.get('i') || "👤";
+            let r = params.get('r') || "Novato", c = params.get('c') || "#aaa", i = params.get('i') || "👶";
             document.getElementById("rango-cliente").innerHTML = `<span style="color:${c}">${i} ${r}</span>`;
             
             let fin = parseInt(params.get('f'));
@@ -229,7 +233,7 @@
             let n = document.getElementById("admin-nombre").value, h = parseInt(document.getElementById("admin-horas").value);
             let f = new Date().getTime() + (h * 3600000);
             window.get(window.ref(window.db, 'clientes')).then((snap) => {
-                let rangoData = { rango: "Usuario", color: "#fff", icono: "👤" };
+                let rangoData = { rango: "Novato", color: "#aaa", icono: "👶" };
                 snap.forEach(c => {
                     if(c.val().nombre.toLowerCase() === n.toLowerCase()) {
                         rangoData = obtenerRango(c.val().totalHoras || 0);
