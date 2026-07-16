@@ -32,17 +32,19 @@
 
     window.cambiarEstado = () => set(estadoRef, !window.estaDisponible);
 
-    window.registrarCliente = (nombre) => {
+    // Registra tanto el cliente como la suma de horas totales
+    window.registrarCliente = (nombre, horas) => {
         const clientesRef = ref(db, 'clientes');
         get(clientesRef).then((snapshot) => {
             let encontrado = false;
             snapshot.forEach((child) => {
                 if (child.val().nombre.toLowerCase() === nombre.toLowerCase()) {
-                    update(ref(db, 'clientes/' + child.key), { compras: (child.val().compras || 0) + 1 });
+                    let totalHoras = (child.val().totalHoras || 0) + horas;
+                    update(ref(db, 'clientes/' + child.key), { totalHoras: totalHoras });
                     encontrado = true;
                 }
             });
-            if (!encontrado) push(clientesRef, { nombre: nombre, compras: 1 });
+            if (!encontrado) push(clientesRef, { nombre: nombre, totalHoras: horas });
         });
     };
 </script>
@@ -162,6 +164,14 @@
             } else { alert("Contraseña incorrecta"); }
         }
 
+        // Nueva lógica basada en horas totales
+        function obtenerRango(horas) {
+            if (horas >= 50) return { rango: "LEYENDA", color: "#ff4500", icono: "🔥" };
+            if (horas >= 25) return { rango: "VIP", color: "#FFD700", icono: "👑" };
+            if (horas >= 10) return { rango: "PREMIUM", color: "#00f2ff", icono: "💎" };
+            return { rango: "Usuario", color: "#fff", icono: "👤" };
+        }
+
         function cargarAdmin() {
             let div = document.getElementById('lista-clientes');
             div.innerHTML = "<div style='margin-top:15px; border-top:1px solid #00f2ff; padding-top:10px;'><strong>📋 TABLA DE CLIENTES:</strong></div><div id='contenido-lista'></div>";
@@ -170,17 +180,16 @@
                 listaDiv.innerHTML = "";
                 snap.forEach(c => {
                     let d = c.val();
-                    let color = d.compras >= 3 ? "#FFD700" : (d.compras >= 1 ? "#00f2ff" : "#fff");
-                    let rango = d.compras >= 3 ? "👑 VIP" : (d.compras >= 1 ? "🌟 PREMIUM" : "Usuario");
-                    let icono = d.compras >= 3 ? "🏆" : (d.compras >= 1 ? "💎" : "👤");
-                    listaDiv.innerHTML += `<div class="lista-item" style="color:${color}; margin-top:5px;">${icono} ${d.nombre} — <b>${rango}</b></div>`;
+                    let r = obtenerRango(d.totalHoras || 0);
+                    listaDiv.innerHTML += `<div class="lista-item" style="color:${r.color}; margin-top:5px;">${r.icono} ${d.nombre} (${d.totalHoras}h) — <b>${r.rango}</b></div>`;
                 });
             });
         }
 
         function reproducirYRedirigir() {
             let nombre = document.getElementById("personaje").value;
-            if(nombre) window.registrarCliente(nombre);
+            let horas = parseInt(document.getElementById("horas").value) || 1;
+            if(nombre) window.registrarCliente(nombre, horas);
             const audio = document.getElementById('sonido-level');
             audio.play();
             setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
@@ -191,7 +200,6 @@
             document.getElementById("vista-formulario").style.display = "none";
             document.getElementById("vista-seguimiento").style.display = "block";
             document.getElementById("cliente-nombre").innerText = "Cliente: " + decodeURIComponent(params.get('n'));
-            // Mostrar rango y medalla al cliente
             let r = params.get('r') || "Usuario", c = params.get('c') || "#fff", i = params.get('i') || "👤";
             document.getElementById("rango-cliente").innerHTML = `<span style="color:${c}">${i} ${r}</span>`;
             
@@ -209,17 +217,14 @@
         function generarLink() {
             let n = document.getElementById("admin-nombre").value, h = parseInt(document.getElementById("admin-horas").value);
             let f = new Date().getTime() + (h * 3600000);
-            // Buscamos el rango del cliente en la base de datos para pasarlo al link
             window.get(window.ref(window.db, 'clientes')).then((snap) => {
-                let rango = "Usuario", color = "#fff", icono = "👤";
+                let rangoData = { rango: "Usuario", color: "#fff", icono: "👤" };
                 snap.forEach(c => {
                     if(c.val().nombre.toLowerCase() === n.toLowerCase()) {
-                        let d = c.val();
-                        if(d.compras >= 3) { rango = "VIP"; color = "#FFD700"; icono = "🏆"; }
-                        else if(d.compras >= 1) { rango = "PREMIUM"; color = "#00f2ff"; icono = "💎"; }
+                        rangoData = obtenerRango(c.val().totalHoras || 0);
                     }
                 });
-                document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}&r=${rango}&c=${encodeURIComponent(color)}&i=${encodeURIComponent(icono)}`;
+                document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}&r=${rangoData.rango}&c=${encodeURIComponent(rangoData.color)}&i=${encodeURIComponent(rangoData.icono)}`;
             });
         }
 
