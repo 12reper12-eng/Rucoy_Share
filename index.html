@@ -12,19 +12,23 @@
         databaseURL: "https://shareskill-8d1fe-default-rtdb.firebaseio.com"
     }));
 
-    window.db = db; window.ref = ref; window.onValue = onValue; window.set = set; 
-    window.push = push; window.update = update; window.get = get;
+    window.db = db;
+    window.ref = ref;
+    window.onValue = onValue;
+    window.set = set;
+    window.push = push;
+    window.update = update;
+    window.get = get;
 
     const estadoRef = ref(db, 'disponible');
     onValue(estadoRef, (s) => {
         window.estaDisponible = s.val();
         let el = document.getElementById("estado-servicio");
-        if(el) {
+        if (el) {
             el.innerText = window.estaDisponible ? "🟢 SERVICIO DISPONIBLE" : "🔴 NO DISPONIBLE";
             el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
+            document.getElementById("boton-whatsapp").style.pointerEvents = window.estaDisponible ? "auto" : "none";
         }
-        let btn = document.getElementById("boton-whatsapp");
-        if(btn) btn.style.pointerEvents = window.estaDisponible ? "auto" : "none";
     });
 
     window.cambiarEstado = () => set(estadoRef, !window.estaDisponible);
@@ -50,7 +54,7 @@
     body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
     .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; }
     #estado-servicio { text-align: center; margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 8px; border: 1px solid #00f2ff; }
-    #vista-seguimiento, #vista-referencias { display: none; text-align: center; }
+    #vista-seguimiento { display: none; text-align: center; }
     h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: default; }
     .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 13px; text-align: center; }
     .horario-box { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; }
@@ -75,25 +79,22 @@
             <div id="reloj" style="font-size: 40px; color: #ffd700; margin: 20px 0; font-weight: bold;">00:00:00</div>
         </div>
 
-        <div id="vista-referencias" class="caja">
-            <h2 style="color:#00f2ff; margin-top:0;">📋 Lista de Referencias</h2>
-            <div id="contenido-referencias" style="color:white; font-size: 14px; text-align: left;"></div>
-            <button onclick="document.getElementById('vista-referencias').style.display='none'; document.getElementById('vista-formulario').style.display='block';" style="width:100%; margin-top:15px; padding:10px; cursor:pointer;">Cerrar</button>
-        </div>
-
         <div id="vista-formulario">
             <div id="estado-servicio">Cargando...</div>
             <h1 ondblclick="verificarAdmin()">🛡️ SAFEGAMING SERVICE 🛡️</h1>
-            <button onclick="mostrarReferencias()" style="width:100%; padding:10px; background: #333; color: white; cursor:pointer; margin-bottom:15px; border:none; border-radius:6px;">📊 VER REFERENCIAS</button>
+            <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
+            <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
             
             <label>Nombre del Personaje:</label>
             <input type="text" id="personaje" placeholder="Ej: RucoyPro" oninput="calcularTotal()">
+            
             <label>Elige tu Profesión:</label>
             <select id="clase" onchange="calcularTotal()">
                 <option value="Melee">⚔️ Melee</option>
                 <option value="Distance">🏹 Distancia</option>
                 <option value="Magic">✨ Magia</option>
             </select>
+            
             <label>Nivel de tu Skill:</label>
             <input type="number" id="nivel-skill" placeholder="Ej: 100" min="1" oninput="actualizarBarra()">
             <div id="contenedor-barra" style="margin-top:10px; display:none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
@@ -108,7 +109,9 @@
                 <tr><td style="color:#c0c0c0;">⚪ PLATA</td><td>20+</td></tr>
                 <tr><td style="color:#ffd700;">🟡 ORO</td><td>30+</td></tr>
                 <tr><td style="color:#00f2ff;">💎 DIAMANTE</td><td>50+</td></tr>
+                <tr><td style="color:#00f2ff;">💎 PREMIUM</td><td>500+</td></tr>
                 <tr><td style="color:#FFD700;">👑 VIP</td><td>1000+</td></tr>
+                <tr><td style="color:#ff8c00;">🔥 LEYENDA I</td><td>1500+</td></tr>
                 <tr><td style="color:#ff4500;">⚡ LEYENDA II</td><td>2000+</td></tr>
             </table>
 
@@ -116,27 +119,51 @@
             <select id="servicio" onchange="calcularTotal()">
                 <option value="300">Skill Normal - $300k / hr</option>
                 <option value="360">Power Training - $360k / hr</option>
+                <option value="600">Subida de Nivel - $600k / hr</option>
+                <option value="1400">Pack Maraton (5h) - 1.4KK</option>
+                <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
             </select>
             <label>Cantidad de Horas:</label>
             <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
+            <div class="resultado-caja">
+                <div class="total-oro" id="precio-final">300k gold</div>
+            </div>
+
             <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirYRedirigir()">💬 APARTAR CUPO POR WHATSAPP</a>
             
             <div id="panel-admin">
                 <button onclick="cambiarEstado()" style="width:100%; padding:10px; background: #ff0000; color: white; cursor:pointer;">CAMBIAR ESTADO</button>
-                <hr>
-                <input type="text" id="ref-nombre" placeholder="Nombre Ref">
-                <input type="number" id="ref-nivel" placeholder="Nivel">
-                <button onclick="agregarReferencia()" style="width:100%; padding:10px; background:green; color:white;">AGREGAR REFERENCIA</button>
-                <button onclick="limpiarReferencias()" style="width:100%; padding:10px; background:maroon; color:white; margin-top:5px;">BORRAR TODAS</button>
-                <hr>
-                <input type="text" id="admin-nombre" placeholder="Nombre cliente">
+                <input type="text" id="admin-nombre" placeholder="Nombre cliente" style="margin-top:10px;">
+                <input type="number" id="admin-horas" placeholder="Horas">
                 <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer;">GENERAR LINK</button>
+                <div id="link-generado" style="color:#ffd700; font-size:11px; margin-top:10px; word-break:break-all;"></div>
+                
+                <!-- SECCIÓN DE REFERENCIAS (ADMIN) -->
+                <div style="margin-top:15px; border-top:1px solid #00f2ff; padding-top:10px;">
+                    <input type="text" id="ref-nombre" placeholder="Nombre Ref">
+                    <input type="number" id="ref-nivel" placeholder="Nivel">
+                    <button onclick="agregarReferencia()" style="width:100%; padding:10px; background:green; color:white; cursor:pointer;">AGREGAR REFERENCIA</button>
+                    <button onclick="limpiarReferencias()" style="width:100%; padding:10px; background:maroon; color:white; cursor:pointer; margin-top:5px;">BORRAR REFERENCIAS</button>
+                </div>
+                
+                <div id="lista-clientes" style="margin-top:15px; max-height: 150px; overflow-y: auto;"></div>
             </div>
+            
+            <!-- VISTA REFERENCIAS (USUARIO) -->
+            <button onclick="document.getElementById('vista-referencias').style.display='block'; document.getElementById('vista-formulario').style.display='none';" style="width:100%; padding:10px; margin-top:10px; cursor:pointer;">📊 VER REFERENCIAS</button>
         </div>
     </div>
 
+    <!-- PANTALLA DE REFERENCIAS -->
+    <div class="caja" id="vista-referencias" style="display:none;">
+        <h2 style="color:#00f2ff;">REFERENCIAS</h2>
+        <div id="contenido-referencias" style="text-align:left;"></div>
+        <button onclick="document.getElementById('vista-referencias').style.display='none'; document.getElementById('vista-formulario').style.display='block';" style="width:100%; padding:10px; margin-top:10px;">Cerrar</button>
+    </div>
+
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
-    <div class="footer">Servicio profesional de Skilleo y Share</div>
+
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
 
     <script>
         let misReferencias = JSON.parse(localStorage.getItem('referencias')) || [];
@@ -147,52 +174,124 @@
             if(n && lv) {
                 misReferencias.push({nombre: n, nivel: lv});
                 localStorage.setItem('referencias', JSON.stringify(misReferencias));
-                alert("Referencia agregada");
+                actualizarListaReferencias();
             }
         }
-        function limpiarReferencias() { misReferencias = []; localStorage.removeItem('referencias'); alert("Lista borrada"); }
 
-        function mostrarReferencias() {
-            document.getElementById('vista-formulario').style.display = 'none';
-            document.getElementById('vista-referencias').style.display = 'block';
-            let lista = document.getElementById('contenido-referencias');
-            lista.innerHTML = "";
+        function limpiarReferencias() { misReferencias = []; localStorage.removeItem('referencias'); actualizarListaReferencias(); }
+
+        function actualizarListaReferencias() {
+            let div = document.getElementById('contenido-referencias');
+            div.innerHTML = "";
             misReferencias.forEach(r => {
-                lista.innerHTML += `<div style="padding: 8px; border-bottom: 1px solid #333;">👤 ${r.nombre} - <b style="color:#ffd700;">Nivel ${r.nivel}</b></div>`;
+                div.innerHTML += `<div class="lista-item">👤 ${r.nombre} — <b>Nivel ${r.nivel}</b></div>`;
             });
         }
+        
+        actualizarListaReferencias();
 
-        // --- Funciones de Lógica ---
-        function verificarAdmin() {
-            let pass = prompt("Contraseña:");
-            if(pass === "Iscarlos2006") document.getElementById('panel-admin').style.display = 'block';
-        }
+        // --- Funciones originales preservadas ---
         function calcularTotal() {
             let p = parseInt(document.getElementById("servicio").value);
             let h = parseInt(document.getElementById("horas").value) || 1;
-            let total = p * h;
-            document.getElementById("precio-final") ? document.getElementById("precio-final").innerText = (total >= 1000) ? (total / 1000) + "KK gold" : total + "k gold" : "";
+            let clase = document.getElementById("clase").value;
+            let nombre = document.getElementById("personaje").value;
+            let total = (p >= 1400) ? p : p * h;
+            document.getElementById("precio-final").innerText = (total >= 1000) ? (total / 1000) + "KK gold" : total + "k gold";
+            let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} de tipo ${clase} para ${nombre || "el personaje"}. Cantidad de horas: ${h}`;
+            document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
         }
+
         function actualizarBarra() {
             let nivel = parseInt(document.getElementById("nivel-skill").value) || 0;
+            let barra = document.getElementById("barra-progreso");
+            let texto = document.getElementById("nombre-rango");
             document.getElementById("contenedor-barra").style.display = nivel > 0 ? "block" : "none";
             let config = { rango: "Bronce", color: "#cd7f32", ancho: "20%" };
-            if(nivel >= 250) config = { rango: "Diamante", color: "#b9f2ff", ancho: "100%" };
-            else if(nivel >= 100) config = { rango: "Plata", color: "#c0c0c0", ancho: "40%" };
-            document.getElementById("nombre-rango").innerText = config.rango;
-            document.getElementById("barra-progreso").style.width = config.ancho;
-            document.getElementById("barra-progreso").style.background = config.color;
+            if (nivel >= 250) config = { rango: "Diamante", color: "#b9f2ff", ancho: "100%" };
+            else if (nivel >= 200) config = { rango: "Esmeralda", color: "#50c878", ancho: "80%" };
+            else if (nivel >= 150) config = { rango: "Oro", color: "#ffd700", ancho: "60%" };
+            else if (nivel >= 100) config = { rango: "Plata", color: "#c0c0c0", ancho: "40%" };
+            texto.innerText = config.rango; texto.style.color = config.color;
+            barra.style.width = config.ancho; barra.style.background = config.color;
         }
-        function reproducirYRedirigir() {
-            document.getElementById('sonido-level').play();
-            setTimeout(() => { window.open("https://wa.me/584123576579", '_blank'); }, 600);
-        }
-        function generarLink() { alert("Link generado"); }
 
-        // --- Fondos ---
+        function verificarAdmin() {
+            let pass = prompt("Ingrese contraseña de administrador:");
+            if(pass === "Iscarlos2006") {
+                document.getElementById('panel-admin').style.display = 'block';
+                cargarAdmin();
+            }
+        }
+
+        function obtenerRango(horas) {
+            if (horas >= 2000) return { rango: "LEYENDA II", color: "#ff4500", icono: "⚡" };
+            if (horas >= 1500) return { rango: "LEYENDA I", color: "#ff8c00", icono: "🔥" };
+            if (horas >= 1000) return { rango: "VIP", color: "#FFD700", icono: "👑" };
+            if (horas >= 500) return { rango: "PREMIUM", color: "#00f2ff", icono: "💎" };
+            if (horas >= 50) return { rango: "DIAMANTE", color: "#00f2ff", icono: "💎" };
+            if (horas >= 30) return { rango: "ORO", color: "#ffd700", icono: "🟡" };
+            if (horas >= 20) return { rango: "PLATA", color: "#c0c0c0", icono: "⚪" };
+            return { rango: "Novato", color: "#aaa", icono: "👶" };
+        }
+
+        function cargarAdmin() {
+            let div = document.getElementById('lista-clientes');
+            div.innerHTML = "<div style='margin-top:15px; border-top:1px solid #00f2ff; padding-top:10px;'><strong>📋 TABLA DE CLIENTES:</strong></div><div id='contenido-lista'></div>";
+            const listaDiv = document.getElementById('contenido-lista');
+            window.onValue(window.ref(window.db, 'clientes'), (snap) => {
+                listaDiv.innerHTML = "";
+                snap.forEach(c => {
+                    let d = c.val();
+                    let r = obtenerRango(d.totalHoras || 0);
+                    listaDiv.innerHTML += `<div class="lista-item" style="color:${r.color}; margin-top:5px;">${r.icono} ${d.nombre} (${d.totalHoras}h) — <b>${r.rango}</b></div>`;
+                });
+            });
+        }
+
+        function reproducirYRedirigir() {
+            let nombre = document.getElementById("personaje").value;
+            let horas = parseInt(document.getElementById("horas").value) || 1;
+            if(nombre) window.registrarCliente(nombre, horas);
+            const audio = document.getElementById('sonido-level');
+            audio.play();
+            setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        if(params.has('n')) {
+            document.getElementById("vista-formulario").style.display = "none";
+            document.getElementById("vista-seguimiento").style.display = "block";
+            document.getElementById("cliente-nombre").innerText = "Cliente: " + decodeURIComponent(params.get('n'));
+            let r = params.get('r') || "Novato", c = params.get('c') || "#aaa", i = params.get('i') || "👶";
+            document.getElementById("rango-cliente").innerHTML = `<span style="color:${c}">${i} ${r}</span>`;
+            let fin = parseInt(params.get('f'));
+            setInterval(() => {
+                let diff = fin - new Date().getTime();
+                if(diff <= 0) document.getElementById("reloj").innerText = "COMPLETADO ✅";
+                else {
+                    let h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+                    document.getElementById("reloj").innerText = `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                }
+            }, 1000);
+        }
+
+        function generarLink() {
+            let n = document.getElementById("admin-nombre").value;
+            let h = parseInt(document.getElementById("admin-horas").value);
+            let f = new Date().getTime() + (h * 3600000);
+            window.get(window.ref(window.db, 'clientes')).then((snap) => {
+                let rangoData = { rango: "Novato", color: "#aaa", icono: "👶" };
+                snap.forEach(c => {
+                    if(c.val().nombre.toLowerCase() === n.toLowerCase()) rangoData = obtenerRango(c.val().totalHoras || 0);
+                });
+                document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&f=${f}&r=${rangoData.rango}&c=${encodeURIComponent(rangoData.color)}&i=${encodeURIComponent(rangoData.icono)}`;
+            });
+        }
+
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
-        let idx = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[idx] + "')"; idx = (idx + 1) % fondos.length; }
-        window.onload = () => { rotar(); setInterval(rotar, 30000); };
+        let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
+        window.onload = () => { rotar(); setInterval(rotar, 30000); calcularTotal(); };
     </script>
 </body>
 </html>
