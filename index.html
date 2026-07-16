@@ -82,12 +82,23 @@
             
             <label>Nombre del Personaje:</label>
             <input type="text" id="personaje" placeholder="Ej: RucoyPro">
+            
             <label>Elige tu Profesión:</label>
             <select id="clase">
                 <option value="Melee">⚔️ Melee</option>
                 <option value="Distance">🏹 Distancia</option>
                 <option value="Magic">✨ Magia</option>
             </select>
+            
+            <label>Nivel de tu Skill:</label>
+            <input type="number" id="nivel-skill" placeholder="Ej: 100" min="1" oninput="actualizarBarra()">
+            <div id="contenedor-barra" style="margin-top:10px; display:none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+                <div style="font-size: 11px; margin-bottom: 3px;">Rango Actual: <span id="nombre-rango">Bronce</span></div>
+                <div style="width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden;">
+                    <div id="barra-progreso" style="width: 0%; height: 100%; background: #cd7f32; transition: width 0.3s, background 0.3s;"></div>
+                </div>
+            </div>
+
             <label>Servicio:</label>
             <select id="servicio" onchange="calcularTotal()">
                 <option value="300">Skill Normal - $300k / hr</option>
@@ -126,6 +137,24 @@
             document.removeEventListener('click', unlockAudio);
         }, { once: true });
 
+        function actualizarBarra() {
+            let nivel = parseInt(document.getElementById("nivel-skill").value) || 0;
+            let barra = document.getElementById("barra-progreso");
+            let texto = document.getElementById("nombre-rango");
+            document.getElementById("contenedor-barra").style.display = nivel > 0 ? "block" : "none";
+
+            let config = { rango: "Bronce", color: "#cd7f32", ancho: "20%" };
+            if (nivel >= 250) { config = { rango: "Diamante", color: "#b9f2ff", ancho: "100%" }; }
+            else if (nivel >= 200) { config = { rango: "Esmeralda", color: "#50c878", ancho: "80%" }; }
+            else if (nivel >= 150) { config = { rango: "Oro", color: "#ffd700", ancho: "60%" }; }
+            else if (nivel >= 100) { config = { rango: "Plata", color: "#c0c0c0", ancho: "40%" }; }
+
+            texto.innerText = config.rango;
+            texto.style.color = config.color;
+            barra.style.width = config.ancho;
+            barra.style.background = config.color;
+        }
+
         function verificarAdmin() {
             let pass = prompt("Ingrese contraseña de administrador:");
             if(pass === "Iscarlos2006") {
@@ -138,7 +167,6 @@
             let div = document.getElementById('lista-clientes');
             div.innerHTML = "<div style='margin-top:15px; border-top:1px solid #00f2ff; padding-top:10px;'><strong>📋 TABLA DE CLIENTES:</strong></div><div id='contenido-lista'></div>";
             const listaDiv = document.getElementById('contenido-lista');
-            
             window.onValue(window.ref(window.db, 'clientes'), (snap) => {
                 listaDiv.innerHTML = "";
                 snap.forEach(c => {
