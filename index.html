@@ -7,12 +7,13 @@
 <!-- Firebase SDK -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, onValue, set, push, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
     
     const db = getDatabase(initializeApp({
         databaseURL: "https://shareskill-8d1fe-default-rtdb.firebaseio.com"
     }));
 
+    window.db = db;
     const estadoRef = ref(db, 'disponible');
     onValue(estadoRef, (s) => {
         window.estaDisponible = s.val();
@@ -23,6 +24,21 @@
     });
 
     window.cambiarEstado = () => set(estadoRef, !window.estaDisponible);
+
+    // Lógica para registrar cliente y contar compras
+    window.registrarCliente = (nombre) => {
+        const clientesRef = ref(db, 'clientes');
+        get(clientesRef).then((snapshot) => {
+            let encontrado = false;
+            snapshot.forEach((child) => {
+                if (child.val().nombre.toLowerCase() === nombre.toLowerCase()) {
+                    update(ref(db, 'clientes/' + child.key), { compras: (child.val().compras || 0) + 1 });
+                    encontrado = true;
+                }
+            });
+            if (!encontrado) push(clientesRef, { nombre: nombre, compras: 1 });
+        });
+    };
 </script>
 
 <style>
@@ -41,6 +57,7 @@
     .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; cursor: pointer; }
     .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center; }
     #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
+    .lista-item { padding: 8px; border-bottom: 1px solid #333; font-size: 11px; text-align: left; }
 </style>
 </head>
 <body>
@@ -83,21 +100,16 @@
             
             <div id="panel-admin">
                 <button onclick="cambiarEstado()" style="width:100%; padding:10px; background: #ff0000; color: white; cursor:pointer;">CAMBIAR ESTADO</button>
-                <input type="text" id="admin-nombre" placeholder="Nombre cliente" style="margin-top:10px;">
-                <input type="number" id="admin-horas" placeholder="Horas">
-                <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer;">GENERAR LINK</button>
-                <div id="link-generado" style="color:#ffd700; font-size:11px; margin-top:10px; word-break:break-all;"></div>
+                <div id="lista-clientes" style="margin-top:15px; max-height: 150px; overflow-y: auto;"></div>
             </div>
         </div>
     </div>
 
-    <!-- Archivo local subido a tu repo -->
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
     <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
 
     <script>
-        // Lógica de desbloqueo al primer clic
         document.addEventListener('click', function unlockAudio() {
             const audio = document.getElementById('sonido-level');
             audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
@@ -108,12 +120,26 @@
             let pass = prompt("Ingrese contraseña de administrador:");
             if(pass === "Iscarlos2006") {
                 document.getElementById('panel-admin').style.display = 'block';
-            } else {
-                alert("Contraseña incorrecta");
-            }
+                cargarAdmin();
+            } else { alert("Contraseña incorrecta"); }
+        }
+
+        function cargarAdmin() {
+            onValue(ref(window.db, 'clientes'), (snap) => {
+                let div = document.getElementById('lista-clientes');
+                div.innerHTML = "<strong>Clientes Registrados:</strong>";
+                snap.forEach(c => {
+                    let d = c.val();
+                    let color = d.compras >= 3 ? "#FFD700" : (d.compras >= 1 ? "#00f2ff" : "#fff");
+                    let rango = d.compras >= 3 ? "👑 VIP" : (d.compras >= 1 ? "🌟 PREMIUM" : "Usuario");
+                    div.innerHTML += `<div class="lista-item" style="color:${color}">${d.nombre} (${rango})<br>Link: ${window.location.origin + window.location.pathname}?n=${encodeURIComponent(d.nombre)}</div>`;
+                });
+            });
         }
 
         function reproducirYRedirigir() {
+            let nombre = document.getElementById("personaje").value;
+            if(nombre) window.registrarCliente(nombre);
             const audio = document.getElementById('sonido-level');
             audio.play();
             setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
@@ -133,12 +159,6 @@
                     document.getElementById("reloj").innerText = `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
                 }
             }, 1000);
-        }
-
-        function generarLink() {
-            let n = document.getElementById("admin-nombre").value, h = parseInt(document.getElementById("admin-horas").value);
-            let f = new Date().getTime() + (h * 3600000);
-            document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}`;
         }
 
         function calcularTotal() {
