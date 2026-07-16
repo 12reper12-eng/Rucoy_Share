@@ -85,7 +85,7 @@
             <input type="text" id="personaje" placeholder="Ej: RucoyPro">
             
             <label>Elige tu Profesión:</label>
-            <select id="clase">
+            <select id="clase" onchange="calcularTotal()">
                 <option value="Melee">⚔️ Melee</option>
                 <option value="Distance">🏹 Distancia</option>
                 <option value="Magic">✨ Magia</option>
@@ -191,7 +191,6 @@
             document.getElementById("vista-formulario").style.display = "none";
             document.getElementById("vista-seguimiento").style.display = "block";
             document.getElementById("cliente-nombre").innerText = "Cliente: " + decodeURIComponent(params.get('n'));
-            // Mostrar rango y medalla al cliente
             let r = params.get('r') || "Usuario", c = params.get('c') || "#fff", i = params.get('i') || "👤";
             document.getElementById("rango-cliente").innerHTML = `<span style="color:${c}">${i} ${r}</span>`;
             
@@ -209,7 +208,6 @@
         function generarLink() {
             let n = document.getElementById("admin-nombre").value, h = parseInt(document.getElementById("admin-horas").value);
             let f = new Date().getTime() + (h * 3600000);
-            // Buscamos el rango del cliente en la base de datos para pasarlo al link
             window.get(window.ref(window.db, 'clientes')).then((snap) => {
                 let rango = "Usuario", color = "#fff", icono = "👤";
                 snap.forEach(c => {
@@ -227,7 +225,10 @@
             let p = parseInt(document.getElementById("servicio").value), h = parseInt(document.getElementById("horas").value) || 1;
             let total = (p >= 1400) ? p : p * h;
             document.getElementById("precio-final").innerText = (total >= 1000) ? (total / 1000) + "KK gold" : total + "k gold";
-            let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} para ${document.getElementById("personaje").value}`;
+            
+            let claseTexto = document.getElementById("clase").options[document.getElementById("clase").selectedIndex].text;
+            let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} para mi personaje: ${document.getElementById("personaje").value} (${claseTexto})`;
+            
             document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
         }
 
