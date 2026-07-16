@@ -85,7 +85,8 @@
             <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
             
             <label>Nombre del Personaje:</label>
-            <input type="text" id="personaje" placeholder="Ej: RucoyPro">
+            <!-- CORRECCIÓN: Añadido oninput -->
+            <input type="text" id="personaje" placeholder="Ej: RucoyPro" oninput="calcularTotal()">
             
             <label>Elige tu Profesión:</label>
             <select id="clase" onchange="calcularTotal()">
@@ -146,6 +147,20 @@
     <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579</div>
 
     <script>
+        // Función calcularTotal corregida y unificada
+        function calcularTotal() {
+            let p = parseInt(document.getElementById("servicio").value);
+            let h = parseInt(document.getElementById("horas").value) || 1;
+            let clase = document.getElementById("clase").value;
+            let nombre = document.getElementById("personaje").value;
+            
+            let total = (p >= 1400) ? p : p * h;
+            document.getElementById("precio-final").innerText = (total >= 1000) ? (total / 1000) + "KK gold" : total + "k gold";
+            
+            let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} de tipo ${clase} para ${nombre}`;
+            document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
+        }
+
         document.addEventListener('click', function unlockAudio() {
             const audio = document.getElementById('sonido-level');
             audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
@@ -241,15 +256,6 @@
                 });
                 document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}&r=${rangoData.rango}&c=${encodeURIComponent(rangoData.color)}&i=${encodeURIComponent(rangoData.icono)}`;
             });
-        }
-
-        function calcularTotal() {
-            let p = parseInt(document.getElementById("servicio").value), h = parseInt(document.getElementById("horas").value) || 1;
-            let clase = document.getElementById("clase").value;
-            let total = (p >= 1400) ? p : p * h;
-            document.getElementById("precio-final").innerText = (total >= 1000) ? (total / 1000) + "KK gold" : total + "k gold";
-            let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} de tipo ${clase} para ${document.getElementById("personaje").value}`;
-            document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
         }
 
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
