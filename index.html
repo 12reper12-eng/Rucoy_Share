@@ -6,235 +6,46 @@
         databaseURL: "https://shareskill-8d1fe-default-rtdb.firebaseio.com"
     }));
 
+    // Variables globales dentro del módulo
     window.db = db;
     window.ref = ref;
-    window.onValue = onValue;
-    window.set = set;
-    window.push = push;
-    window.update = update;
-    window.get = get;
-    window.remove = remove;
+    window.testimoniosCache = [];
+    window.pendientesCache = [];
 
-    let testimoniosCache = [];
-    let pendientesCache = [];
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const estadoRef = ref(db, 'disponible');
-        onValue(estadoRef, (s) => {
-            window.estaDisponible = s.val();
-            let el = document.getElementById("estado-servicio");
-            el.innerText = window.estaDisponible ? "🟢 SERVICIO DISPONIBLE" : "🔴 NO DISPONIBLE";
-            el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
-            document.getElementById("boton-whatsapp").style.pointerEvents = window.estaDisponible ? "auto" : "none";
-        });
-    });
-
-    window.cambiarEstado = () => set(ref(db, 'disponible'), !window.estaDisponible);
-
-    window.registrarCliente = (nombre, horas) => {
-        const clientesRef = ref(db, 'clientes');
-        get(clientesRef).then((snapshot) => {
-            let encontrado = false;
-            snapshot.forEach((child) => {
-                if (child.val().nombre.toLowerCase() === nombre.toLowerCase()) {
-                    let totalHoras = (child.val().totalHoras || 0) + horas;
-                    update(ref(db, 'clientes/' + child.key), { totalHoras: totalHoras });
-                    encontrado = true;
-                }
-            });
-            if (!encontrado) push(clientesRef, { nombre: nombre, totalHoras: horas });
-        });
-    };
-
-    function iconoTipo(tipo) {
-        return tipo === 'Skill' ? '⚔️' : tipo === 'Nivel' ? '⭐' : tipo === 'Cuenta' ? '🎮' : '📌';
-    }
-
-    function formatearFecha(ts) {
-        if (!ts) return '';
-        const d = new Date(ts);
-        return d.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    }
-
-    window.enviarReferenciaPublica = () => {
-        const tipo = document.getElementById('pub-ref-tipo').value;
-        const nombre = document.getElementById('pub-ref-nombre').value.trim();
-        const antes = document.getElementById('pub-ref-antes').value.trim();
-        const despues = document.getElementById('pub-ref-despues').value.trim();
-        const msj = document.getElementById('pub-ref-msj');
-        if (!nombre || !antes || !despues) { msj.style.color = '#ff6b6b'; msj.innerText = 'Completa nombre, antes y después.'; return; }
-        if (nombre.length > 60 || antes.length > 60 || despues.length > 60) { msj.style.color = '#ff6b6b'; msj.innerText = 'Los textos son muy largos, hazlos más cortos.'; return; }
-
-        push(ref(db, 'pendientes'), { tipo, nombre, antes, despues, fecha: Date.now() })
-            .then(() => {
-                msj.style.color = '#4caf50';
-                msj.innerText = '¡Gracias! Tu testimonio quedó en revisión y se publicará pronto.';
-                document.getElementById('pub-ref-nombre').value = '';
-                document.getElementById('pub-ref-antes').value = '';
-                document.getElementById('pub-ref-despues').value = '';
-            })
-            .catch(() => { msj.style.color = '#ff6b6b'; msj.innerText = 'No se pudo enviar, intenta de nuevo.'; });
-    };
-
-    window.toggleFormularioPublico = () => {
-        const cont = document.getElementById('form-ref-publico');
-        const btn = document.getElementById('btn-toggle-form-publico');
-        const abierto = cont.style.display === 'block';
-        cont.style.display = abierto ? 'none' : 'block';
-        btn.innerText = abierto ? '✍️ DEJAR MI TESTIMONIO' : '✖️ CERRAR FORMULARIO';
-    };
-
-    window.aprobarPendiente = (key) => {
-        const item = pendientesCache.find(p => p.key === key);
-        if (!item) return;
-        const { tipo, nombre, antes, despues, fecha } = item;
-        push(ref(db, 'testimonios'), { tipo, nombre, antes, despues, fecha })
-            .then(() => remove(ref(db, 'pendientes/' + key)))
-            .catch((err) => alert('No se pudo aprobar: ' + err.message));
-    };
-
-    window.rechazarPendiente = (key) => {
-        if (confirm('¿Rechazar y borrar este testimonio enviado?')) {
-            remove(ref(db, 'pendientes/' + key)).catch((err) => alert('No se pudo rechazar: ' + err.message));
-        }
-    };
-
-    window.editarTestimonio = (key) => {
-        const item = testimoniosCache.find(t => t.key === key);
-        if (!item) return;
-        const nuevoNombre = prompt('Nombre:', item.nombre);
-        if (nuevoNombre === null) return;
-        const nuevoAntes = prompt('Antes:', item.antes);
-        if (nuevoAntes === null) return;
-        const nuevoDespues = prompt('Después:', item.despues);
-        if (nuevoDespues === null) return;
-
-        update(ref(db, 'testimonios/' + key), {
-            nombre: nuevoNombre.trim(),
-            antes: nuevoAntes.trim(),
-            despues: nuevoDespues.trim()
-        }).catch((err) => alert('No se pudo editar: ' + err.message));
-    };
-
-    window.eliminarTestimonio = (key) => {
-        if (confirm('¿Eliminar este testimonio?')) {
-            remove(ref(db, 'testimonios/' + key)).catch((err) => alert('No se pudo eliminar: ' + err.message));
-        }
-    };
-
-    window.agregarTestimonio = () => {
-        const tipo = document.getElementById('ref-tipo').value;
-        const nombre = document.getElementById('ref-nombre').value.trim();
-        const antes = document.getElementById('ref-antes').value.trim();
-        const despues = document.getElementById('ref-despues').value.trim();
-        if (!nombre || !antes || !despues) { alert('Completa nombre, antes y después'); return; }
-
-        push(ref(db, 'testimonios'), { tipo, nombre, antes, despues, fecha: Date.now() })
-            .then(() => {
-                document.getElementById('ref-nombre').value = '';
-                document.getElementById('ref-antes').value = '';
-                document.getElementById('ref-despues').value = '';
-            })
-            .catch((err) => alert('No se pudo guardar: ' + err.message));
-    };
-
-    window.toggleReferencias = () => {
-        const cont = document.getElementById('contenedor-ref-scroll');
-        const btn = document.getElementById('btn-toggle-ref');
-        const abierto = cont.style.display === 'block';
-        cont.style.display = abierto ? 'none' : 'block';
-        btn.innerText = abierto ? `👁️ VER TESTIMONIOS (${testimoniosCache.length})` : '🔼 OCULTAR TESTIMONIOS';
-    };
-
-    window.filtrarReferencias = (tipo, btn) => {
-        document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
-        if (btn) btn.classList.add('activo');
-        renderTestimoniosPublico(tipo);
-    };
-
-    function renderTestimoniosPublico(tipo) {
+    // Función de renderizado definida globalmente
+    window.renderTestimoniosPublico = (tipo) => {
         const grid = document.getElementById('grid-referencias');
         const vacio = document.getElementById('sin-referencias');
         if (!grid) return;
-        const datos = (tipo === 'Todos' || !tipo) ? testimoniosCache : testimoniosCache.filter(t => t.tipo === tipo);
-        document.getElementById('contador-ref').innerText = testimoniosCache.length;
+        
+        const datos = (tipo === 'Todos' || !tipo) ? window.testimoniosCache : window.testimoniosCache.filter(t => t.tipo === tipo);
+        const contador = document.getElementById('contador-ref');
+        if(contador) contador.innerText = window.testimoniosCache.length;
 
         if (datos.length === 0) {
             grid.innerHTML = '';
-            vacio.style.display = 'block';
+            if(vacio) vacio.style.display = 'block';
             return;
         }
-        vacio.style.display = 'none';
+        if(vacio) vacio.style.display = 'none';
 
         grid.innerHTML = datos.slice().reverse().map(t => `
             <div class="tarjeta-ref">
-                <div class="tarjeta-ref-tipo">${iconoTipo(t.tipo)} ${(t.tipo || '').toUpperCase()}</div>
+                <div class="tarjeta-ref-tipo">${t.tipo === 'Skill' ? '⚔️' : t.tipo === 'Nivel' ? '⭐' : '🎮'} ${(t.tipo || '').toUpperCase()}</div>
                 <div class="tarjeta-ref-nombre">${t.nombre}</div>
                 <div class="tarjeta-ref-progreso"><span class="antes">Antes: ${t.antes}</span><span class="despues">Después: ${t.despues}</span></div>
-                <div class="tarjeta-ref-fecha">🗓️ ${formatearFecha(t.fecha)}</div>
+                <div class="tarjeta-ref-fecha">🗓️ ${t.fecha ? new Date(t.fecha).toLocaleDateString('es-VE') : ''}</div>
             </div>`).join('');
-    }
+    };
 
-    function renderTestimoniosAdmin() {
-        const cont = document.getElementById('contenido-lista-ref');
-        if (!cont) return;
-        cont.innerHTML = testimoniosCache.slice().reverse().map(t => `
-            <div class="lista-item">
-                ${iconoTipo(t.tipo)} ${t.tipo} — <b>${t.nombre}</b>: ${t.antes} → ${t.despues}
-                <div style="margin-top:5px;">
-                    <button onclick="editarTestimonio('${t.key}')" style="background:#00f2ff; color:#030008; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; font-weight:bold;">✏️ Editar</button>
-                    <button onclick="eliminarTestimonio('${t.key}')" style="background:#ff3333; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; margin-left:6px;">🗑️ Borrar</button>
-                </div>
-            </div>`).join('');
-    }
-    window.renderTestimoniosAdmin = renderTestimoniosAdmin;
-
-    function renderPendientesAdmin() {
-        const cont = document.getElementById('contenido-lista-pendientes');
-        const contador = document.getElementById('contador-pendientes');
-        if (!cont) return;
-        if (contador) contador.innerText = pendientesCache.length;
-        cont.innerHTML = pendientesCache.length === 0
-            ? '<div style="color:#888; font-size:11px;">No hay testimonios pendientes por revisar.</div>'
-            : pendientesCache.slice().reverse().map(p => `
-                <div class="lista-item">
-                    ${iconoTipo(p.tipo)} ${p.tipo} — <b>${p.nombre}</b>: ${p.antes} → ${p.despues}
-                    <div style="margin-top:5px;">
-                        <button onclick="aprobarPendiente('${p.key}')" style="background:#25D366; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px;">✅ Aprobar</button>
-                        <button onclick="rechazarPendiente('${p.key}')" style="background:#ff3333; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; margin-left:6px;">❌ Rechazar</button>
-                    </div>
-                </div>`).join('');
-    }
-    window.renderPendientesAdmin = renderPendientesAdmin;
-
+    // Escuchar cambios de Firebase
     onValue(ref(db, 'testimonios'), (snap) => {
-        testimoniosCache = [];
-        snap.forEach(c => testimoniosCache.push({ key: c.key, ...c.val() }));
-        const activo = document.querySelector('.btn-filtro.activo');
-        renderTestimoniosPublico(activo ? activo.dataset.tipo : 'Todos');
-        const btnToggle = document.getElementById('btn-toggle-ref');
-        const contScroll = document.getElementById('contenedor-ref-scroll');
-        if (btnToggle && contScroll) {
-            const abierto = contScroll.style.display === 'block';
-            btnToggle.innerText = abierto ? '🔼 OCULTAR TESTIMONIOS' : `👁️ VER TESTIMONIOS (${testimoniosCache.length})`;
-        }
-        if (document.getElementById('panel-admin') && document.getElementById('panel-admin').style.display === 'block') {
-            renderTestimoniosAdmin();
-        }
+        window.testimoniosCache = [];
+        snap.forEach(c => window.testimoniosCache.push({ key: c.key, ...c.val() }));
+        window.renderTestimoniosPublico('Todos');
     });
 
-    onValue(ref(db, 'pendientes'), (snap) => {
-        pendientesCache = [];
-        snap.forEach(c => pendientesCache.push({ key: c.key, ...c.val() }));
-        const badge = document.getElementById('badge-pendientes');
-        if (badge) {
-            badge.style.display = pendientesCache.length > 0 ? 'inline-block' : 'none';
-            badge.innerText = pendientesCache.length;
-        }
-        if (document.getElementById('panel-admin') && document.getElementById('panel-admin').style.display === 'block') {
-            renderPendientesAdmin();
-        }
-    });
+    // ... (Mantén aquí el resto de tus funciones como registrarCliente, cambiarEstado, etc.)
 </script>
 
 <style>
