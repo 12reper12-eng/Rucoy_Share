@@ -151,69 +151,40 @@
         btn.innerText = abierto ? `👁️ VER REFERENCIAS (${referenciasCache.length})` : '🔼 OCULTAR REFERENCIAS';
     };
 
-    window.filtrarReferencias = (tipo, btn) => {
-        document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
-        if (btn) btn.classList.add('activo');
-        renderReferencias(tipo);
-    };
+   function renderReferencias(tipo) {
+    const grid = document.getElementById('grid-referencias');
+    const vacio = document.getElementById('sin-referencias');
+    if (!grid) return;
 
-    function iconoTipo(tipo) {
-        return tipo === 'Skill' ? '⚔️' : tipo === 'Nivel' ? '⭐' : tipo === 'Cuenta' ? '🎮' : '📌';
+    let datos = (tipo === 'Todos' || !tipo) ? referenciasCache : referenciasCache.filter(r => r.tipo === tipo);
+    
+    // 1. Limpiamos totalmente antes de empezar para evitar duplicados
+    grid.innerHTML = ''; 
+    document.getElementById('contador-ref').innerText = referenciasCache.length;
+
+    if (datos.length === 0) { 
+        vacio.style.display = 'block'; 
+        return; 
     }
+    
+    vacio.style.display = 'none';
 
-    function formatearFecha(ts) {
-        if (!ts) return '';
-        const d = new Date(ts);
-        return d.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    }
-
-    function renderReferencias(tipo) {
-        const grid = document.getElementById('grid-referencias');
-        const vacio = document.getElementById('sin-referencias');
-        if (!grid) return;
-        let datos = (tipo === 'Todos' || !tipo) ? referenciasCache : referenciasCache.filter(r => r.tipo === tipo);
-        grid.innerHTML = '';
-        document.getElementById('contador-ref').innerText = referenciasCache.length;
-        if (datos.length === 0) { vacio.style.display = 'block'; return; }
-        vacio.style.display = 'none';
-        datos.slice().reverse().forEach(r => {
-            grid.innerHTML += `
-            <div class="tarjeta-ref">
-                ${r.imagen ? `<img src="${r.imagen}" alt="${r.nombre}" onerror="this.style.display='none'" onclick="window.open('${r.imagen}','_blank')">` : ''}
-                <div class="tarjeta-ref-tipo">${iconoTipo(r.tipo)} ${(r.tipo || '').toUpperCase()}</div>
-                <div class="tarjeta-ref-nombre">${r.nombre}</div>
-                <div class="tarjeta-ref-progreso"><span class="antes">Antes: ${r.antes}</span><span class="flecha">→</span><span class="despues">Después: ${r.despues}</span></div>
-                <div class="tarjeta-ref-fecha">🗓️ Registrado: ${formatearFecha(r.fecha)}</div>
-            </div>`;
-        });
-    }
-
-    function renderReferenciasAdmin() {
-        const cont = document.getElementById('contenido-lista-ref');
-        if (!cont) return;
-        cont.innerHTML = '';
-        referenciasCache.slice().reverse().forEach(r => {
-            cont.innerHTML += `<div class="lista-item">${iconoTipo(r.tipo)} ${r.tipo} — <b>${r.nombre}</b>: ${r.antes} → ${r.despues}
-                <button onclick="eliminarReferencia('${r.key}')" style="float:right; background:#ff3333; color:white; border:none; border-radius:4px; padding:2px 8px; cursor:pointer;">✕</button></div>`;
-        });
-    }
-    window.renderReferenciasAdmin = renderReferenciasAdmin;
-
-    onValue(ref(db, 'referencias'), (snap) => {
-        referenciasCache = [];
-        snap.forEach(c => referenciasCache.push({ key: c.key, ...c.val() }));
-        const activo = document.querySelector('.btn-filtro.activo');
-        renderReferencias(activo ? activo.dataset.tipo : 'Todos');
-        const btnToggle = document.getElementById('btn-toggle-ref');
-        const contScroll = document.getElementById('contenedor-ref-scroll');
-        if (btnToggle && contScroll) {
-            const abierto = contScroll.style.display === 'block';
-            btnToggle.innerText = abierto ? '🔼 OCULTAR REFERENCIAS' : `👁️ VER REFERENCIAS (${referenciasCache.length})`;
-        }
-        if (document.getElementById('panel-admin') && document.getElementById('panel-admin').style.display === 'block') {
-            renderReferenciasAdmin();
-        }
+    // 2. Usamos un acumulador de cadenas (es más rápido y eficiente que tocar el DOM muchas veces)
+    let htmlContent = '';
+    datos.slice().reverse().forEach(r => {
+        htmlContent += `
+        <div class="tarjeta-ref">
+            ${r.imagen ? `<img src="${r.imagen}" alt="${r.nombre}" onerror="this.style.display='none'" onclick="window.open('${r.imagen}','_blank')">` : ''}
+            <div class="tarjeta-ref-tipo">${iconoTipo(r.tipo)} ${(r.tipo || '').toUpperCase()}</div>
+            <div class="tarjeta-ref-nombre">${r.nombre}</div>
+            <div class="tarjeta-ref-progreso"><span class="antes">Antes: ${r.antes}</span><span class="flecha">→</span><span class="despues">Después: ${r.despues}</span></div>
+            <div class="tarjeta-ref-fecha">🗓️ Registrado: ${formatearFecha(r.fecha)}</div>
+        </div>`;
     });
+
+    // 3. Insertamos todo de una sola vez al final
+    grid.innerHTML = htmlContent;
+}
 </script>
 
 <style>
