@@ -246,10 +246,13 @@
     .filtros-ref { display: flex; gap: 6px; margin-bottom: 12px; justify-content: center; flex-wrap: wrap; }
     .btn-filtro { background: rgba(0,242,255,0.08); border: 1px solid rgba(0,242,255,0.4); color: #00f2ff; padding: 5px 11px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.2s; }
     .btn-filtro.activo { background: #00f2ff; color: #030008; font-weight: bold; box-shadow: 0 0 10px rgba(0,242,255,0.6); }
-    .grid-referencias { display: flex; gap: 10px; overflow-x: auto; overflow-y: hidden; padding-bottom: 8px; scroll-snap-type: x mandatory; }
-    .grid-referencias::-webkit-scrollbar { height: 5px; }
+
+    /* ---- FIX: grid en lugar de carrusel, para que se vean TODAS las referencias ---- */
+    .grid-referencias { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; max-height: 360px; overflow-y: auto; overflow-x: hidden; padding-bottom: 8px; }
+    .grid-referencias::-webkit-scrollbar { width: 5px; }
     .grid-referencias::-webkit-scrollbar-thumb { background: rgba(0,242,255,0.4); border-radius: 5px; }
-    .tarjeta-ref { flex: 0 0 150px; scroll-snap-align: start; background: rgba(0,242,255,0.06); border: 1px solid rgba(0,242,255,0.35); border-radius: 10px; padding: 10px; text-align: center; }
+    .tarjeta-ref { background: rgba(0,242,255,0.06); border: 1px solid rgba(0,242,255,0.35); border-radius: 10px; padding: 10px; text-align: center; }
+
     .tarjeta-ref img { width: 100%; height: 75px; object-fit: cover; border-radius: 6px; margin-bottom: 6px; border: 1px solid rgba(255,255,255,0.15); cursor: pointer; }
     .tarjeta-ref-tipo { font-size: 9px; color: #ffd700; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 3px; }
     .tarjeta-ref-nombre { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
