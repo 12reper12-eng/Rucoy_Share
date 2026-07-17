@@ -1,9 +1,3 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safegaming Service - Rucoy Online</title>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, set, push, update, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -21,16 +15,21 @@
     window.get = get;
     window.remove = remove;
 
-    const estadoRef = ref(db, 'disponible');
-    onValue(estadoRef, (s) => {
-        window.estaDisponible = s.val();
-        let el = document.getElementById("estado-servicio");
-        el.innerText = window.estaDisponible ? "🟢 SERVICIO DISPONIBLE" : "🔴 NO DISPONIBLE";
-        el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
-        document.getElementById("boton-whatsapp").style.pointerEvents = window.estaDisponible ? "auto" : "none";
+    let testimoniosCache = [];
+    let pendientesCache = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const estadoRef = ref(db, 'disponible');
+        onValue(estadoRef, (s) => {
+            window.estaDisponible = s.val();
+            let el = document.getElementById("estado-servicio");
+            el.innerText = window.estaDisponible ? "🟢 SERVICIO DISPONIBLE" : "🔴 NO DISPONIBLE";
+            el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
+            document.getElementById("boton-whatsapp").style.pointerEvents = window.estaDisponible ? "auto" : "none";
+        });
     });
 
-    window.cambiarEstado = () => set(estadoRef, !window.estaDisponible);
+    window.cambiarEstado = () => set(ref(db, 'disponible'), !window.estaDisponible);
 
     window.registrarCliente = (nombre, horas) => {
         const clientesRef = ref(db, 'clientes');
@@ -47,21 +46,6 @@
         });
     };
 
-    // =====================================================================
-    // ---- TESTIMONIOS (rediseñado) ----
-    // Tabla nueva en Firebase: "testimonios" (publicados, visibles al público)
-    //                          "pendientes"  (enviados por clientes, esperando revisión)
-    // Reglas del diseño:
-    //   - Solo texto, sin imágenes.
-    //   - Los clientes pueden ENVIAR pero no se publica directo (va a revisión).
-    //   - Solo el administrador aprueba/rechaza pendientes, y edita/borra publicados.
-    //   - SIEMPRE se usa push() para crear, NUNCA set() sobre la lista completa,
-    //     así nunca se sobrescribe un testimonio con otro.
-    // =====================================================================
-
-    let testimoniosCache = [];
-    let pendientesCache = [];
-
     function iconoTipo(tipo) {
         return tipo === 'Skill' ? '⚔️' : tipo === 'Nivel' ? '⭐' : tipo === 'Cuenta' ? '🎮' : '📌';
     }
@@ -72,7 +56,6 @@
         return d.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
-    // ---- Envío público (cliente, sin login) → va a 'pendientes' ----
     window.enviarReferenciaPublica = () => {
         const tipo = document.getElementById('pub-ref-tipo').value;
         const nombre = document.getElementById('pub-ref-nombre').value.trim();
@@ -101,7 +84,6 @@
         btn.innerText = abierto ? '✍️ DEJAR MI TESTIMONIO' : '✖️ CERRAR FORMULARIO';
     };
 
-    // ---- Aprobar: SIEMPRE push() a testimonios, nunca set() ----
     window.aprobarPendiente = (key) => {
         const item = pendientesCache.find(p => p.key === key);
         if (!item) return;
@@ -117,7 +99,6 @@
         }
     };
 
-    // ---- Editar / borrar publicados (solo admin) ----
     window.editarTestimonio = (key) => {
         const item = testimoniosCache.find(t => t.key === key);
         if (!item) return;
@@ -141,7 +122,6 @@
         }
     };
 
-    // ---- Manual del admin (agregar directo, sin pasar por revisión) ----
     window.agregarTestimonio = () => {
         const tipo = document.getElementById('ref-tipo').value;
         const nombre = document.getElementById('ref-nombre').value.trim();
@@ -158,7 +138,6 @@
             .catch((err) => alert('No se pudo guardar: ' + err.message));
     };
 
-    // ---- Mostrar/ocultar bloque público ----
     window.toggleReferencias = () => {
         const cont = document.getElementById('contenedor-ref-scroll');
         const btn = document.getElementById('btn-toggle-ref');
@@ -173,7 +152,6 @@
         renderTestimoniosPublico(tipo);
     };
 
-    // ---- Render público: TODOS los testimonios aprobados, sin excepción ----
     function renderTestimoniosPublico(tipo) {
         const grid = document.getElementById('grid-referencias');
         const vacio = document.getElementById('sin-referencias');
@@ -197,7 +175,6 @@
             </div>`).join('');
     }
 
-    // ---- Render admin: publicados (editar/borrar) ----
     function renderTestimoniosAdmin() {
         const cont = document.getElementById('contenido-lista-ref');
         if (!cont) return;
@@ -212,7 +189,6 @@
     }
     window.renderTestimoniosAdmin = renderTestimoniosAdmin;
 
-    // ---- Render admin: pendientes (aprobar/rechazar) ----
     function renderPendientesAdmin() {
         const cont = document.getElementById('contenido-lista-pendientes');
         const contador = document.getElementById('contador-pendientes');
@@ -231,33 +207,30 @@
     }
     window.renderPendientesAdmin = renderPendientesAdmin;
 
-    // ---- Único listener de publicados ----
     onValue(ref(db, 'testimonios'), (snap) => {
         testimoniosCache = [];
         snap.forEach(c => testimoniosCache.push({ key: c.key, ...c.val() }));
-
         const activo = document.querySelector('.btn-filtro.activo');
         renderTestimoniosPublico(activo ? activo.dataset.tipo : 'Todos');
-
         const btnToggle = document.getElementById('btn-toggle-ref');
         const contScroll = document.getElementById('contenedor-ref-scroll');
         if (btnToggle && contScroll) {
             const abierto = contScroll.style.display === 'block';
             btnToggle.innerText = abierto ? '🔼 OCULTAR TESTIMONIOS' : `👁️ VER TESTIMONIOS (${testimoniosCache.length})`;
         }
-
         if (document.getElementById('panel-admin') && document.getElementById('panel-admin').style.display === 'block') {
             renderTestimoniosAdmin();
         }
     });
 
-    // ---- Único listener de pendientes ----
     onValue(ref(db, 'pendientes'), (snap) => {
         pendientesCache = [];
         snap.forEach(c => pendientesCache.push({ key: c.key, ...c.val() }));
         const badge = document.getElementById('badge-pendientes');
-        if (badge) badge.style.display = pendientesCache.length > 0 ? 'inline-block' : 'none';
-        if (badge) badge.innerText = pendientesCache.length;
+        if (badge) {
+            badge.style.display = pendientesCache.length > 0 ? 'inline-block' : 'none';
+            badge.innerText = pendientesCache.length;
+        }
         if (document.getElementById('panel-admin') && document.getElementById('panel-admin').style.display === 'block') {
             renderPendientesAdmin();
         }
