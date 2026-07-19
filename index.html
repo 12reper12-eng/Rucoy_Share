@@ -525,7 +525,7 @@ if(params.has('n')) {
             }, 1000);
         }
 
-        function generarLink() {
+       function generarLink() {
             let n = document.getElementById("admin-nombre").value, h = parseInt(document.getElementById("admin-horas").value);
             let f = new Date().getTime() + (h * 3600000);
             window.get(window.ref(window.db, 'clientes')).then((snap) => {
@@ -538,10 +538,32 @@ if(params.has('n')) {
                 document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}&r=${rangoData.rango}&c=${encodeURIComponent(rangoData.color)}&i=${encodeURIComponent(rangoData.icono)}`;
             });
         }
+        
+        function verificarRangoReal(nombre) {
+            window.get(window.ref(window.db, 'clientes')).then((snap) => {
+                snap.forEach(c => {
+                    if(c.val().nombre.toLowerCase() === nombre.toLowerCase()) {
+                        let d = obtenerRango(c.val().totalHoras || 0);
+                        document.getElementById("rango-cliente").innerHTML = `<span style="color:${d.color}">${d.icono} ${d.rango}</span>`;
+                    }
+                });
+            });
+        }
 
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
         let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
-        window.onload = () => { rotar(); setInterval(rotar, 30000); calcularTotal(); };
+        
+        window.onload = () => { 
+            rotar(); 
+            setInterval(rotar, 30000); 
+            calcularTotal(); 
+            
+            // Si estamos en la vista de cliente (hay nombre), forzamos la actualización del rango real
+            const params = new URLSearchParams(window.location.search);
+            if(params.has('n')) {
+                verificarRangoReal(decodeURIComponent(params.get('n')));
+            }
+        };
     </script>
 </body>
 </html>
