@@ -47,6 +47,18 @@
         });
     };
 
+    // =====================================================================
+    // ---- TESTIMONIOS (rediseñado) ----
+    // Tabla nueva en Firebase: "testimonios" (publicados, visibles al público)
+    //                          "pendientes"  (enviados por clientes, esperando revisión)
+    // Reglas del diseño:
+    //   - Solo texto, sin imágenes.
+    //   - Los clientes pueden ENVIAR pero no se publica directo (va a revisión).
+    //   - Solo el administrador aprueba/rechaza pendientes, y edita/borra publicados.
+    //   - SIEMPRE se usa push() para crear, NUNCA set() sobre la lista completa,
+    //     así nunca se sobrescribe un testimonio con otro.
+    // =====================================================================
+
     let testimoniosCache = [];
     let pendientesCache = [];
 
@@ -60,6 +72,7 @@
         return d.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
+    // ---- Envío público (cliente, sin login) → va a 'pendientes' ----
     window.enviarReferenciaPublica = () => {
         const tipo = document.getElementById('pub-ref-tipo').value;
         const nombre = document.getElementById('pub-ref-nombre').value.trim();
@@ -88,6 +101,7 @@
         btn.innerText = abierto ? '✍️ DEJAR MI TESTIMONIO' : '✖️ CERRAR FORMULARIO';
     };
 
+    // ---- Aprobar: SIEMPRE push() a testimonios, nunca set() ----
     window.aprobarPendiente = (key) => {
         const item = pendientesCache.find(p => p.key === key);
         if (!item) return;
@@ -102,7 +116,8 @@
             remove(ref(db, 'pendientes/' + key)).catch((err) => alert('No se pudo rechazar: ' + err.message));
         }
     };
-    
+
+    // ---- Editar / borrar publicados (solo admin) ----
     window.editarTestimonio = (key) => {
         const item = testimoniosCache.find(t => t.key === key);
         if (!item) return;
@@ -125,7 +140,8 @@
             remove(ref(db, 'testimonios/' + key)).catch((err) => alert('No se pudo eliminar: ' + err.message));
         }
     };
-    
+
+    // ---- Manual del admin (agregar directo, sin pasar por revisión) ----
     window.agregarTestimonio = () => {
         const tipo = document.getElementById('ref-tipo').value;
         const nombre = document.getElementById('ref-nombre').value.trim();
@@ -142,6 +158,7 @@
             .catch((err) => alert('No se pudo guardar: ' + err.message));
     };
 
+    // ---- Mostrar/ocultar bloque público ----
     window.toggleReferencias = () => {
         const cont = document.getElementById('contenedor-ref-scroll');
         const btn = document.getElementById('btn-toggle-ref');
@@ -156,6 +173,7 @@
         renderTestimoniosPublico(tipo);
     };
 
+    // ---- Render público: TODOS los testimonios aprobados, sin excepción ----
     function renderTestimoniosPublico(tipo) {
         const grid = document.getElementById('grid-referencias');
         const vacio = document.getElementById('sin-referencias');
@@ -179,6 +197,7 @@
             </div>`).join('');
     }
 
+    // ---- Render admin: publicados (editar/borrar) ----
     function renderTestimoniosAdmin() {
         const cont = document.getElementById('contenido-lista-ref');
         if (!cont) return;
@@ -193,6 +212,7 @@
     }
     window.renderTestimoniosAdmin = renderTestimoniosAdmin;
 
+    // ---- Render admin: pendientes (aprobar/rechazar) ----
     function renderPendientesAdmin() {
         const cont = document.getElementById('contenido-lista-pendientes');
         const contador = document.getElementById('contador-pendientes');
@@ -211,6 +231,7 @@
     }
     window.renderPendientesAdmin = renderPendientesAdmin;
 
+    // ---- Único listener de publicados ----
     onValue(ref(db, 'testimonios'), (snap) => {
         testimoniosCache = [];
         snap.forEach(c => testimoniosCache.push({ key: c.key, ...c.val() }));
@@ -230,6 +251,7 @@
         }
     });
 
+    // ---- Único listener de pendientes ----
     onValue(ref(db, 'pendientes'), (snap) => {
         pendientesCache = [];
         snap.forEach(c => pendientesCache.push({ key: c.key, ...c.val() }));
@@ -262,6 +284,7 @@
     .tabla-rangos { width: 100%; font-size: 11px; margin-top: 15px; border-collapse: collapse; border: 1px solid #444; color: #ccc; }
     .tabla-rangos th, .tabla-rangos td { padding: 6px; border: 1px solid #444; text-align: center; }
 
+    /* ---- Sección de Testimonios (landing, compacta y colapsable) ---- */
     .caja-referencias { margin-top: 20px; max-width: 450px; padding: 16px 20px; }
     .caja-referencias h1 { font-size: 16px; letter-spacing: 0.5px; }
     .caja-referencias .subtitle { font-size: 11px; margin-bottom: 10px; }
@@ -272,6 +295,7 @@
     .btn-filtro { background: rgba(0,242,255,0.08); border: 1px solid rgba(0,242,255,0.4); color: #00f2ff; padding: 5px 11px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.2s; }
     .btn-filtro.activo { background: #00f2ff; color: #030008; font-weight: bold; box-shadow: 0 0 10px rgba(0,242,255,0.6); }
 
+    /* Grid: muestra TODAS las tarjetas, con scroll vertical si son muchas */
     .grid-referencias { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; max-height: 380px; overflow-y: auto; overflow-x: hidden; padding-bottom: 8px; }
     .grid-referencias::-webkit-scrollbar { width: 5px; }
     .grid-referencias::-webkit-scrollbar-thumb { background: rgba(0,242,255,0.4); border-radius: 5px; }
@@ -334,16 +358,16 @@
 
             <label>Servicio:</label>
             <select id="servicio" onchange="calcularTotal()">
-                <option value="400">Skill Normal - 400k / hr</option>
-                <option value="460">Power Training - 460k / hr</option>
-                <option value="800">Subida de Nivel - 800k / hr</option>
-                <option value="1900">Pack Maraton (5h) - 1.9KK</option>
-                <option value="2100">Pack Ptrain Pro (5h) - 2.1KK</option>
+                <option value="300">Skill Normal - 400k / hr</option>
+                <option value="360">Power Training - 460k / hr</option>
+                <option value="600">Subida de Nivel - 800k / hr</option>
+                <option value="1400">Pack Maraton (5h) - 1.9KK</option>
+                <option value="1700">Pack Ptrain Pro (5h) - 2.1KK</option>
             </select>
             <label>Cantidad de Horas:</label>
             <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
             <div class="resultado-caja">
-                <div class="total-oro" id="precio-final">400k gold</div>
+                <div class="total-oro" id="precio-final">300k gold</div>
             </div>
 
             <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirYRedirigir()">💬 APARTAR CUPO POR WHATSAPP</a>
@@ -441,7 +465,7 @@
             audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
             document.removeEventListener('click', unlockAudio);
         }, { once: true });
-        
+
         function actualizarBarra() {
             let nivel = parseInt(document.getElementById("nivel-skill").value) || 0;
             let barra = document.getElementById("barra-progreso");
@@ -502,17 +526,14 @@
             setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
         }
 
-       const params = new URLSearchParams(window.location.search);
-if(params.has('n')) {
-    document.getElementById("vista-formulario").style.display = "none";
-    document.querySelector(".caja-referencias").style.display = "none";
-    document.getElementById("vista-seguimiento").style.display = "block";
-    document.getElementById("cliente-nombre").innerText = "Cliente: " + decodeURIComponent(params.get('n'));
-    let r = params.get('r') || "Novato"; 
-    let c = params.get('c') || "#aaa"; 
-    let i = params.get('i') || "👶";
-    
-    document.getElementById("rango-cliente").innerHTML = `<span style="color:${c}">${i} ${r}</span>`;
+        const params = new URLSearchParams(window.location.search);
+        if(params.has('n')) {
+            document.getElementById("vista-formulario").style.display = "none";
+            document.querySelector(".caja-referencias").style.display = "none";
+            document.getElementById("vista-seguimiento").style.display = "block";
+            document.getElementById("cliente-nombre").innerText = "Cliente: " + decodeURIComponent(params.get('n'));
+            let r = params.get('r') || "Novato", c = params.get('c') || "#aaa", i = params.get('i') || "👶";
+            document.getElementById("rango-cliente").innerHTML = `<span style="color:${c}">${i} ${r}</span>`;
             
             let fin = parseInt(params.get('f'));
             setInterval(() => {
@@ -525,7 +546,7 @@ if(params.has('n')) {
             }, 1000);
         }
 
-       function generarLink() {
+        function generarLink() {
             let n = document.getElementById("admin-nombre").value, h = parseInt(document.getElementById("admin-horas").value);
             let f = new Date().getTime() + (h * 3600000);
             window.get(window.ref(window.db, 'clientes')).then((snap) => {
@@ -538,38 +559,10 @@ if(params.has('n')) {
                 document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}&r=${rangoData.rango}&c=${encodeURIComponent(rangoData.color)}&i=${encodeURIComponent(rangoData.icono)}`;
             });
         }
-        
-        function verificarRangoReal(nombre) {
-            window.get(window.ref(window.db, 'clientes')).then((snap) => {
-                snap.forEach(c => {
-                    if(c.val().nombre.toLowerCase() === nombre.toLowerCase()) {
-                        let d = obtenerRango(c.val().totalHoras || 0);
-                        document.getElementById("rango-cliente").innerHTML = `<span style="color:${d.color}">${d.icono} ${d.rango}</span>`;
-                    }
-                });
-            });
-        }
 
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
         let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
-        
-      window.onload = () => { 
-    rotar(); 
-    setInterval(rotar, 30000); 
-    calcularTotal(); 
-    
-    const params = new URLSearchParams(window.location.search);
-    if(params.has('n')) {
-        let nombreCliente = decodeURIComponent(params.get('n'));
-    
-        window.get(window.ref(window.db, 'clientes')).then((snap) => {
-            snap.forEach(c => {
-                if(c.val().nombre.toLowerCase() === nombreCliente.toLowerCase()) {
-                    let d = obtenerRango(c.val().totalHoras || 0);
-                    
-                    document.getElementById("rango-cliente").innerHTML = `<span style="color:${d.color}">${d.icono} ${d.rango}</span>`;
-            }
-        };
+        window.onload = () => { rotar(); setInterval(rotar, 30000); calcularTotal(); };
     </script>
 </body>
 </html>
