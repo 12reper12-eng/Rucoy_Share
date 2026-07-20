@@ -561,13 +561,12 @@ if(params.has('n')) {
     const params = new URLSearchParams(window.location.search);
     if(params.has('n')) {
         let nombreCliente = decodeURIComponent(params.get('n'));
-        
-       
+    
         window.get(window.ref(window.db, 'clientes')).then((snap) => {
             snap.forEach(c => {
                 if(c.val().nombre.toLowerCase() === nombreCliente.toLowerCase()) {
                     let d = obtenerRango(c.val().totalHoras || 0);
-                    // Esto sobrescribe el "Novato" del link con el rango real de la BD
+                    
                     document.getElementById("rango-cliente").innerHTML = `<span style="color:${d.color}">${d.icono} ${d.rango}</span>`;
             }
         };
