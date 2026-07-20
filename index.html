@@ -553,15 +553,22 @@ if(params.has('n')) {
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
         let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
         
-        window.onload = () => { 
-            rotar(); 
-            setInterval(rotar, 30000); 
-            calcularTotal(); 
-            
-            // Si estamos en la vista de cliente (hay nombre), forzamos la actualización del rango real
-            const params = new URLSearchParams(window.location.search);
-            if(params.has('n')) {
-                verificarRangoReal(decodeURIComponent(params.get('n')));
+      window.onload = () => { 
+    rotar(); 
+    setInterval(rotar, 30000); 
+    calcularTotal(); 
+    
+    const params = new URLSearchParams(window.location.search);
+    if(params.has('n')) {
+        let nombreCliente = decodeURIComponent(params.get('n'));
+        
+       
+        window.get(window.ref(window.db, 'clientes')).then((snap) => {
+            snap.forEach(c => {
+                if(c.val().nombre.toLowerCase() === nombreCliente.toLowerCase()) {
+                    let d = obtenerRango(c.val().totalHoras || 0);
+                    // Esto sobrescribe el "Novato" del link con el rango real de la BD
+                    document.getElementById("rango-cliente").innerHTML = `<span style="color:${d.color}">${d.icono} ${d.rango}</span>`;
             }
         };
     </script>
