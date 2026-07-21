@@ -51,12 +51,12 @@
     };
 
     // =====================================================================
-    // ---- TESTIMONIOS (CORREGIDO LISTADO COMPLETO) ----
+    // ---- TESTIMONIOS (SISTEMA DE RENDERIZADO FORZADO) ----
     // =====================================================================
 
     let testimoniosCache = [];
     let pendientesCache = [];
-    let limiteTestimonios = 3;
+    let limiteTestimonios = 5;
     let filtroActual = 'Todos';
 
     function iconoTipo(tipo) {
@@ -75,8 +75,7 @@
         const antes = document.getElementById('pub-ref-antes').value.trim();
         const despues = document.getElementById('pub-ref-despues').value.trim();
         const msj = document.getElementById('pub-ref-msj');
-        if (!nombre || !antes || !despues) { msj.style.color = '#ff6b6b'; msj.innerText = 'Completa nombre, antes y después.'; return; }
-        if (nombre.length > 60 || antes.length > 60 || despues.length > 60) { msj.style.color = '#ff6b6b'; msj.innerText = 'Los textos son muy largos.'; return; }
+        if (!nombre || !antes || !despues) { msj.style.color = '#ff6b6b'; msj.innerText = 'Completa todos los campos.'; return; }
 
         push(ref(db, 'pendientes'), { tipo, nombre, antes, despues, fecha: Date.now() })
             .then(() => {
@@ -160,42 +159,41 @@
         document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
         if (btn) btn.classList.add('activo');
         filtroActual = tipo;
-        limiteTestimonios = 3;
+        limiteTestimonios = 5;
         renderTestimoniosPublico();
     };
 
     window.cargarMasReferencias = () => {
-        limiteTestimonios += 3;
+        limiteTestimonios += 5;
         renderTestimoniosPublico();
     };
 
-    // ---- RENDER PÚBLICO REVISADO Y FIXEADO ----
+    // ---- RENDERIZADO GARANTIZADO DE TARJETAS ----
     function renderTestimoniosPublico() {
         const grid = document.getElementById('grid-referencias');
         const vacio = document.getElementById('sin-referencias');
         const btnVerMas = document.getElementById('btn-ver-mas-ref');
         if (!grid) return;
 
-        // Filtrar datos correctamente
         let datos = testimoniosCache;
         if (filtroActual !== 'Todos') {
             datos = testimoniosCache.filter(t => t.tipo === filtroActual);
         }
 
-        document.getElementById('contador-ref').innerText = testimoniosCache.length;
+        const elContador = document.getElementById('contador-ref');
+        if (elContador) elContador.innerText = testimoniosCache.length;
 
         if (datos.length === 0) {
             grid.innerHTML = '';
-            vacio.style.display = 'block';
+            if (vacio) vacio.style.display = 'block';
             if (btnVerMas) btnVerMas.style.display = 'none';
             return;
         }
-        vacio.style.display = 'none';
+        if (vacio) vacio.style.display = 'none';
 
-        // Ordenar del más reciente al más antiguo
-        const listaReversa = datos.slice().reverse();
-        const listaVisibles = listaReversa.slice(0, limiteTestimonios);
+        const listaVisibles = datos.slice().reverse().slice(0, limiteTestimonios);
 
+        // Generar HTML directo en el Grid
         grid.innerHTML = listaVisibles.map(t => `
             <div class="tarjeta-ref">
                 <div class="tarjeta-ref-tipo">${iconoTipo(t.tipo)} ${(t.tipo || '').toUpperCase()}</div>
@@ -208,7 +206,7 @@
             </div>`).join('');
 
         if (btnVerMas) {
-            btnVerMas.style.display = (listaReversa.length > limiteTestimonios) ? 'block' : 'none';
+            btnVerMas.style.display = (datos.length > limiteTestimonios) ? 'block' : 'none';
         }
     }
 
@@ -253,13 +251,6 @@
 
         renderTestimoniosPublico();
 
-        const btnToggle = document.getElementById('btn-toggle-ref');
-        const contScroll = document.getElementById('contenedor-ref-scroll');
-        if (btnToggle && contScroll) {
-            const abierto = contScroll.style.display === 'block';
-            btnToggle.innerText = abierto ? '🔼 OCULTAR TESTIMONIOS' : `👁️ VER TESTIMONIOS (${testimoniosCache.length})`;
-        }
-
         if (document.getElementById('panel-admin') && document.getElementById('panel-admin').style.display === 'block') {
             renderTestimoniosAdmin();
         }
@@ -298,29 +289,31 @@
     .tabla-rangos { width: 100%; font-size: 11px; margin-top: 15px; border-collapse: collapse; border: 1px solid #444; color: #ccc; }
     .tabla-rangos th, .tabla-rangos td { padding: 6px; border: 1px solid #444; text-align: center; }
 
-    /* ---- TESTIMONIOS STYLES ---- */
-    .caja-referencias { margin-top: 20px; max-width: 450px; padding: 16px 20px; }
+    /* ---- TESTIMONIOS (SIN LIMITACIÓN DE ALTURA) ---- */
+    .caja-referencias { margin-top: 20px; max-width: 450px; padding: 16px 20px; height: auto !important; max-height: none !important; overflow: visible !important; }
     .caja-referencias h1 { font-size: 16px; letter-spacing: 0.5px; }
     .caja-referencias .subtitle { font-size: 11px; margin-bottom: 10px; }
     .btn-toggle-ref { width: 100%; background: transparent; border: 1px solid rgba(0,242,255,0.5); color: #00f2ff; padding: 9px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .btn-toggle-ref:hover { background: rgba(0,242,255,0.1); }
-    #contenedor-ref-scroll { display: none; margin-top: 14px; }
+    
+    /* Mostrar por defecto o desacoplado */
+    #contenedor-ref-scroll { display: block !important; margin-top: 14px; height: auto !important; max-height: none !important; overflow: visible !important; }
     .filtros-ref { display: flex; gap: 6px; margin-bottom: 12px; justify-content: center; flex-wrap: wrap; }
     .btn-filtro { background: rgba(0,242,255,0.08); border: 1px solid rgba(0,242,255,0.4); color: #00f2ff; padding: 5px 11px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.2s; }
     .btn-filtro.activo { background: #00f2ff; color: #030008; font-weight: bold; box-shadow: 0 0 10px rgba(0,242,255,0.6); }
 
-    .grid-referencias { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-    .tarjeta-ref { background: rgba(0,242,255,0.06); border: 1px solid rgba(0,242,255,0.35); border-radius: 10px; padding: 12px 10px; text-align: center; width: 100%; }
+    /* Grid flex de tarjetas */
+    .grid-referencias { display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; height: auto !important; max-height: none !important; overflow: visible !important; }
+    .tarjeta-ref { background: rgba(0,242,255,0.08); border: 1px solid rgba(0,242,255,0.4); border-radius: 10px; padding: 12px 10px; text-align: center; width: 100%; display: block !important; }
     .tarjeta-ref-tipo { font-size: 9px; color: #ffd700; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 5px; }
-    .tarjeta-ref-nombre { font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tarjeta-ref-nombre { font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #fff; }
     .tarjeta-ref-progreso { font-size: 11px; color: #ccc; line-height: 1.6; }
     .tarjeta-ref-progreso .antes { color: #ff6b6b; display: block; }
     .tarjeta-ref-progreso .despues { color: #4caf50; font-weight: bold; display: block; }
     .tarjeta-ref-fecha { font-size: 9px; color: #777; margin-top: 8px; }
     #sin-referencias { display: none; text-align: center; color: #888; padding: 15px 5px; font-size: 12px; }
     
-    .btn-ver-mas { display: none; width: 100%; margin-top: 10px; background: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; color: #ffd700; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .btn-ver-mas:hover { background: rgba(255, 215, 0, 0.3); }
+    .btn-ver-mas { display: none; width: 100%; margin-top: 10px; background: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; color: #ffd700; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
 
     .form-admin-ref { border-top: 1px dashed #444; margin-top: 15px; padding-top: 12px; }
     .form-admin-ref h3 { font-size: 13px; color: #00f2ff; margin: 0 0 8px 0; text-align: left; }
@@ -403,18 +396,18 @@
                 </div>
 
                 <div class="form-admin-ref">
-                    <h3>📊 AGREGAR TESTIMONIO DIRECTO (Skill / Nivel / Cuenta)</h3>
+                    <h3>📊 AGREGAR TESTIMONIO DIRECTO</h3>
                     <select id="ref-tipo">
                         <option value="Skill">⚔️ Skill</option>
                         <option value="Nivel">⭐ Nivel</option>
                         <option value="Cuenta">🎮 Cuenta</option>
                     </select>
-                    <input type="text" id="ref-nombre" placeholder="Nombre del cliente / personaje">
-                    <input type="text" id="ref-antes" placeholder="Antes (ej: Skill 80 / Nivel 120)">
-                    <input type="text" id="ref-despues" placeholder="Después (ej: Skill 150 / Nivel 200)">
+                    <input type="text" id="ref-nombre" placeholder="Nombre del cliente">
+                    <input type="text" id="ref-antes" placeholder="Antes">
+                    <input type="text" id="ref-despues" placeholder="Después">
                     <button onclick="agregarTestimonio()" style="width:100%; padding:10px; background:#00f2ff; color:#030008; font-weight:bold; cursor:pointer;">➕ AGREGAR TESTIMONIO</button>
                     <div id="lista-referencias-admin" style="margin-top:15px; max-height: 220px; overflow-y: auto;">
-                        <div style="font-size:11px; color:#00f2ff; margin-bottom:5px;"><b>Testimonios publicados (editar/borrar):</b></div>
+                        <div style="font-size:11px; color:#00f2ff; margin-bottom:5px;"><b>Testimonios publicados:</b></div>
                         <div id="contenido-lista-ref"></div>
                     </div>
                 </div>
@@ -425,7 +418,8 @@
     <div class="caja caja-referencias">
         <h1>📊 TESTIMONIOS DE CLIENTES</h1>
         <div class="subtitle">SKILL • NIVEL • CUENTAS</div>
-        <button class="btn-toggle-ref" id="btn-toggle-ref" onclick="toggleReferencias()">👁️ VER TESTIMONIOS (<span id="contador-ref">0</span>)</button>
+        <button class="btn-toggle-ref" id="btn-toggle-ref" onclick="toggleReferencias()">👁️ TESTIMONIOS PUBLICADOS (<span id="contador-ref">0</span>)</button>
+        
         <div id="contenedor-ref-scroll">
             <div class="filtros-ref">
                 <button class="btn-filtro activo" data-tipo="Todos" onclick="filtrarReferencias('Todos', this)">Todos</button>
@@ -433,7 +427,9 @@
                 <button class="btn-filtro" data-tipo="Nivel" onclick="filtrarReferencias('Nivel', this)">⭐ Nivel</button>
                 <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</button>
             </div>
+            
             <div class="grid-referencias" id="grid-referencias"></div>
+            
             <button id="btn-ver-mas-ref" class="btn-ver-mas" onclick="cargarMasReferencias()">➕ VER MÁS TESTIMONIOS</button>
             <div id="sin-referencias">Aún no hay testimonios publicados en esta categoría.</div>
         </div>
@@ -460,7 +456,7 @@
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v5-fixed</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v6-overflow-fix</span></div>
 
     <script>
         function calcularTotal() {
