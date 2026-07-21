@@ -48,19 +48,12 @@
     };
 
     // =====================================================================
-    // ---- TESTIMONIOS (rediseñado) ----
-    // Tabla nueva en Firebase: "testimonios" (publicados, visibles al público)
-    //                          "pendientes"  (enviados por clientes, esperando revisión)
-    // Reglas del diseño:
-    //   - Solo texto, sin imágenes.
-    //   - Los clientes pueden ENVIAR pero no se publica directo (va a revisión).
-    //   - Solo el administrador aprueba/rechaza pendientes, y edita/borra publicados.
-    //   - SIEMPRE se usa push() para crear, NUNCA set() sobre la lista completa,
-    //     así nunca se sobrescribe un testimonio con otro.
+    // ---- TESTIMONIOS (rediseñado con Paginación "Ver más") ----
     // =====================================================================
 
     let testimoniosCache = [];
     let pendientesCache = [];
+    let limiteTestimonios = 3; // Mostrar 3 inicialmente
 
     function iconoTipo(tipo) {
         return tipo === 'Skill' ? '⚔️' : tipo === 'Nivel' ? '⭐' : tipo === 'Cuenta' ? '🎮' : '📌';
@@ -141,7 +134,7 @@
         }
     };
 
-    // ---- Manual del admin (agregar directo, sin pasar por revisión) ----
+    // ---- Manual del admin (agregar directo) ----
     window.agregarTestimonio = () => {
         const tipo = document.getElementById('ref-tipo').value;
         const nombre = document.getElementById('ref-nombre').value.trim();
@@ -170,49 +163,70 @@
     window.filtrarReferencias = (tipo, btn) => {
         document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
         if (btn) btn.classList.add('activo');
+        limiteTestimonios = 3; // Resetear límite al cambiar filtro
         renderTestimoniosPublico(tipo);
     };
 
-    // ---- Render público: TODOS los testimonios aprobados, sin excepción ----
+    window.cargarMasReferencias = () => {
+        limiteTestimonios += 3; // Sumar 3 más a la lista
+        const activo = document.querySelector('.btn-filtro.activo');
+        renderTestimoniosPublico(activo ? activo.dataset.tipo : 'Todos');
+    };
+
+    // ---- Render público con botón "Ver Más" ----
     function renderTestimoniosPublico(tipo) {
         const grid = document.getElementById('grid-referencias');
         const vacio = document.getElementById('sin-referencias');
+        const btnVerMas = document.getElementById('btn-ver-mas-ref');
         if (!grid) return;
+
         const datos = (tipo === 'Todos' || !tipo) ? testimoniosCache : testimoniosCache.filter(t => t.tipo === tipo);
         document.getElementById('contador-ref').innerText = testimoniosCache.length;
 
         if (datos.length === 0) {
             grid.innerHTML = '';
             vacio.style.display = 'block';
+            if (btnVerMas) btnVerMas.style.display = 'none';
             return;
         }
         vacio.style.display = 'none';
 
-        grid.innerHTML = datos.slice().reverse().map(t => `
+        // Invertimos para mostrar los más recientes primero
+        const listaReversa = datos.slice().reverse();
+        const listaVisibles = listaReversa.slice(0, limiteTestimonios);
+
+        grid.innerHTML = listaVisibles.map(t => `
             <div class="tarjeta-ref">
                 <div class="tarjeta-ref-tipo">${iconoTipo(t.tipo)} ${(t.tipo || '').toUpperCase()}</div>
                 <div class="tarjeta-ref-nombre">${t.nombre}</div>
                 <div class="tarjeta-ref-progreso"><span class="antes">Antes: ${t.antes}</span><span class="despues">Después: ${t.despues}</span></div>
                 <div class="tarjeta-ref-fecha">🗓️ ${formatearFecha(t.fecha)}</div>
             </div>`).join('');
+
+        // Mostrar u ocultar el botón "Ver más" según la cantidad disponible
+        if (btnVerMas) {
+            btnVerMas.style.display = (listaReversa.length > limiteTestimonios) ? 'block' : 'none';
+        }
     }
 
-    // ---- Render admin: publicados (editar/borrar) ----
+    // ---- Render admin: publicados ----
     function renderTestimoniosAdmin() {
         const cont = document.getElementById('contenido-lista-ref');
         if (!cont) return;
-        cont.innerHTML = testimoniosCache.slice().reverse().map(t => `
-            <div class="lista-item">
-                ${iconoTipo(t.tipo)} ${t.tipo} — <b>${t.nombre}</b>: ${t.antes} → ${t.despues}
-                <div style="margin-top:5px;">
-                    <button onclick="editarTestimonio('${t.key}')" style="background:#00f2ff; color:#030008; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; font-weight:bold;">✏️ Editar</button>
-                    <button onclick="eliminarTestimonio('${t.key}')" style="background:#ff3333; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; margin-left:6px;">🗑️ Borrar</button>
-                </div>
-            </div>`).join('');
+        cont.innerHTML = testimoniosCache.length === 0
+            ? '<div style="color:#888; font-size:11px;">No hay testimonios publicados.</div>'
+            : testimoniosCache.slice().reverse().map(t => `
+                <div class="lista-item">
+                    ${iconoTipo(t.tipo)} ${t.tipo} — <b>${t.nombre}</b>: ${t.antes} → ${t.despues}
+                    <div style="margin-top:5px;">
+                        <button onclick="editarTestimonio('${t.key}')" style="background:#00f2ff; color:#030008; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; font-weight:bold;">✏️ Editar</button>
+                        <button onclick="eliminarTestimonio('${t.key}')" style="background:#ff3333; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; margin-left:6px;">🗑️ Borrar</button>
+                    </div>
+                </div>`).join('');
     }
     window.renderTestimoniosAdmin = renderTestimoniosAdmin;
 
-    // ---- Render admin: pendientes (aprobar/rechazar) ----
+    // ---- Render admin: pendientes ----
     function renderPendientesAdmin() {
         const cont = document.getElementById('contenido-lista-pendientes');
         const contador = document.getElementById('contador-pendientes');
@@ -231,7 +245,7 @@
     }
     window.renderPendientesAdmin = renderPendientesAdmin;
 
-    // ---- Único listener de publicados ----
+    // ---- Listener de publicados ----
     onValue(ref(db, 'testimonios'), (snap) => {
         testimoniosCache = [];
         snap.forEach(c => testimoniosCache.push({ key: c.key, ...c.val() }));
@@ -251,7 +265,7 @@
         }
     });
 
-    // ---- Único listener de pendientes ----
+    // ---- Listener de pendientes ----
     onValue(ref(db, 'pendientes'), (snap) => {
         pendientesCache = [];
         snap.forEach(c => pendientesCache.push({ key: c.key, ...c.val() }));
@@ -284,7 +298,7 @@
     .tabla-rangos { width: 100%; font-size: 11px; margin-top: 15px; border-collapse: collapse; border: 1px solid #444; color: #ccc; }
     .tabla-rangos th, .tabla-rangos td { padding: 6px; border: 1px solid #444; text-align: center; }
 
-    /* ---- Sección de Testimonios (landing, compacta y colapsable) ---- */
+    /* ---- Sección de Testimonios ---- */
     .caja-referencias { margin-top: 20px; max-width: 450px; padding: 16px 20px; }
     .caja-referencias h1 { font-size: 16px; letter-spacing: 0.5px; }
     .caja-referencias .subtitle { font-size: 11px; margin-bottom: 10px; }
@@ -295,10 +309,7 @@
     .btn-filtro { background: rgba(0,242,255,0.08); border: 1px solid rgba(0,242,255,0.4); color: #00f2ff; padding: 5px 11px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.2s; }
     .btn-filtro.activo { background: #00f2ff; color: #030008; font-weight: bold; box-shadow: 0 0 10px rgba(0,242,255,0.6); }
 
-    /* Grid: muestra TODAS las tarjetas, con scroll vertical si son muchas */
-    .grid-referencias { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; max-height: 380px; overflow-y: auto; overflow-x: hidden; padding-bottom: 8px; }
-    .grid-referencias::-webkit-scrollbar { width: 5px; }
-    .grid-referencias::-webkit-scrollbar-thumb { background: rgba(0,242,255,0.4); border-radius: 5px; }
+    .grid-referencias { display: flex; flex-direction: column; gap: 10px; }
     .tarjeta-ref { background: rgba(0,242,255,0.06); border: 1px solid rgba(0,242,255,0.35); border-radius: 10px; padding: 12px 10px; text-align: center; }
     .tarjeta-ref-tipo { font-size: 9px; color: #ffd700; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 5px; }
     .tarjeta-ref-nombre { font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -307,6 +318,10 @@
     .tarjeta-ref-progreso .despues { color: #4caf50; font-weight: bold; display: block; }
     .tarjeta-ref-fecha { font-size: 9px; color: #777; margin-top: 8px; }
     #sin-referencias { display: none; text-align: center; color: #888; padding: 15px 5px; font-size: 12px; }
+    
+    .btn-ver-mas { display: none; width: 100%; margin-top: 10px; background: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; color: #ffd700; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-ver-mas:hover { background: rgba(255, 215, 0, 0.3); }
+
     .form-admin-ref { border-top: 1px dashed #444; margin-top: 15px; padding-top: 12px; }
     .form-admin-ref h3 { font-size: 13px; color: #00f2ff; margin: 0 0 8px 0; text-align: left; }
 </style>
@@ -358,11 +373,11 @@
 
             <label>Servicio:</label>
             <select id="servicio" onchange="calcularTotal()">
-                <option value="300">Skill Normal - 400k / hr</option>
-                <option value="360">Power Training - 460k / hr</option>
-                <option value="600">Subida de Nivel - 800k / hr</option>
-                <option value="1400">Pack Maraton (5h) - 1.9KK</option>
-                <option value="1700">Pack Ptrain Pro (5h) - 2.1KK</option>
+                <option value="300">Skill Normal - $300k / hr</option>
+                <option value="360">Power Training - $360k / hr</option>
+                <option value="600">Subida de Nivel - $600k / hr</option>
+                <option value="1400">Pack Maraton (5h) - 1.4KK</option>
+                <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
             </select>
             <label>Cantidad de Horas:</label>
             <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
@@ -419,6 +434,7 @@
                 <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</button>
             </div>
             <div class="grid-referencias" id="grid-referencias"></div>
+            <button id="btn-ver-mas-ref" class="btn-ver-mas" onclick="cargarMasReferencias()">➕ VER MÁS TESTIMONIOS</button>
             <div id="sin-referencias">Aún no hay testimonios publicados en esta categoría.</div>
         </div>
 
@@ -444,7 +460,7 @@
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-grid-v3</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-paginados-v4</span></div>
 
     <script>
         function calcularTotal() {
@@ -547,17 +563,27 @@
         }
 
         function generarLink() {
-            let n = document.getElementById("admin-nombre").value, h = parseInt(document.getElementById("admin-horas").value);
+            let n = document.getElementById("admin-nombre").value.trim();
+            let h = parseInt(document.getElementById("admin-horas").value);
+            
+            if (!n || isNaN(h)) {
+                alert("Por favor ingresa un nombre y cantidad de horas válidas.");
+                return;
+            }
+
             let f = new Date().getTime() + (h * 3600000);
+
             window.get(window.ref(window.db, 'clientes')).then((snap) => {
                 let rangoData = { rango: "Novato", color: "#aaa", icono: "👶" };
                 snap.forEach(c => {
-                    if(c.val().nombre.toLowerCase() === n.toLowerCase()) {
+                    if (c.val().nombre.toLowerCase() === n.toLowerCase()) {
                         rangoData = obtenerRango(c.val().totalHoras || 0);
                     }
                 });
-                document.getElementById("link-generado").innerText = window.location.href.split('?')[0] + `?n=${encodeURIComponent(n)}&h=${h}&f=${f}&r=${rangoData.rango}&c=${encodeURIComponent(rangoData.color)}&i=${encodeURIComponent(rangoData.icono)}`;
-            });
+                
+                let urlBase = window.location.href.split('?')[0];
+                document.getElementById("link-generado").innerText = `${urlBase}?n=${encodeURIComponent(n)}&h=${h}&f=${f}&r=${encodeURIComponent(rangoData.rango)}&c=${encodeURIComponent(rangoData.color)}&i=${encodeURIComponent(rangoData.icono)}`;
+            }).catch((err) => alert("Error al consultar cliente: " + err.message));
         }
 
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
