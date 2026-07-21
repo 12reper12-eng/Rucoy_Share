@@ -25,9 +25,12 @@
     onValue(estadoRef, (s) => {
         window.estaDisponible = s.val();
         let el = document.getElementById("estado-servicio");
-        el.innerText = window.estaDisponible ? "🟢 SERVICIO DISPONIBLE" : "🔴 NO DISPONIBLE";
-        el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
-        document.getElementById("boton-whatsapp").style.pointerEvents = window.estaDisponible ? "auto" : "none";
+        if(el) {
+            el.innerText = window.estaDisponible ? "🟢 SERVICIO DISPONIBLE" : "🔴 NO DISPONIBLE";
+            el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
+        }
+        const btnWa = document.getElementById("boton-whatsapp");
+        if(btnWa) btnWa.style.pointerEvents = window.estaDisponible ? "auto" : "none";
     });
 
     window.cambiarEstado = () => set(estadoRef, !window.estaDisponible);
@@ -48,12 +51,13 @@
     };
 
     // =====================================================================
-    // ---- TESTIMONIOS (rediseñado con Paginación "Ver más") ----
+    // ---- TESTIMONIOS (CORREGIDO LISTADO COMPLETO) ----
     // =====================================================================
 
     let testimoniosCache = [];
     let pendientesCache = [];
-    let limiteTestimonios = 3; // Mostrar 3 inicialmente
+    let limiteTestimonios = 3;
+    let filtroActual = 'Todos';
 
     function iconoTipo(tipo) {
         return tipo === 'Skill' ? '⚔️' : tipo === 'Nivel' ? '⭐' : tipo === 'Cuenta' ? '🎮' : '📌';
@@ -65,7 +69,6 @@
         return d.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
-    // ---- Envío público (cliente, sin login) → va a 'pendientes' ----
     window.enviarReferenciaPublica = () => {
         const tipo = document.getElementById('pub-ref-tipo').value;
         const nombre = document.getElementById('pub-ref-nombre').value.trim();
@@ -73,17 +76,17 @@
         const despues = document.getElementById('pub-ref-despues').value.trim();
         const msj = document.getElementById('pub-ref-msj');
         if (!nombre || !antes || !despues) { msj.style.color = '#ff6b6b'; msj.innerText = 'Completa nombre, antes y después.'; return; }
-        if (nombre.length > 60 || antes.length > 60 || despues.length > 60) { msj.style.color = '#ff6b6b'; msj.innerText = 'Los textos son muy largos, hazlos más cortos.'; return; }
+        if (nombre.length > 60 || antes.length > 60 || despues.length > 60) { msj.style.color = '#ff6b6b'; msj.innerText = 'Los textos son muy largos.'; return; }
 
         push(ref(db, 'pendientes'), { tipo, nombre, antes, despues, fecha: Date.now() })
             .then(() => {
                 msj.style.color = '#4caf50';
-                msj.innerText = '¡Gracias! Tu testimonio quedó en revisión y se publicará pronto.';
+                msj.innerText = '¡Gracias! Tu testimonio quedó en revisión.';
                 document.getElementById('pub-ref-nombre').value = '';
                 document.getElementById('pub-ref-antes').value = '';
                 document.getElementById('pub-ref-despues').value = '';
             })
-            .catch(() => { msj.style.color = '#ff6b6b'; msj.innerText = 'No se pudo enviar, intenta de nuevo.'; });
+            .catch(() => { msj.style.color = '#ff6b6b'; msj.innerText = 'Error al enviar.'; });
     };
 
     window.toggleFormularioPublico = () => {
@@ -94,53 +97,47 @@
         btn.innerText = abierto ? '✍️ DEJAR MI TESTIMONIO' : '✖️ CERRAR FORMULARIO';
     };
 
-    // ---- Aprobar: SIEMPRE push() a testimonios, nunca set() ----
     window.aprobarPendiente = (key) => {
         const item = pendientesCache.find(p => p.key === key);
         if (!item) return;
         const { tipo, nombre, antes, despues, fecha } = item;
         push(ref(db, 'testimonios'), { tipo, nombre, antes, despues, fecha })
             .then(() => remove(ref(db, 'pendientes/' + key)))
-            .catch((err) => alert('No se pudo aprobar: ' + err.message));
+            .catch((err) => alert('Error: ' + err.message));
     };
 
     window.rechazarPendiente = (key) => {
-        if (confirm('¿Rechazar y borrar este testimonio enviado?')) {
-            remove(ref(db, 'pendientes/' + key)).catch((err) => alert('No se pudo rechazar: ' + err.message));
+        if (confirm('¿Borrar testimonio pendiente?')) {
+            remove(ref(db, 'pendientes/' + key)).catch((err) => alert('Error: ' + err.message));
         }
     };
 
-    // ---- Editar / borrar publicados (solo admin) ----
     window.editarTestimonio = (key) => {
         const item = testimoniosCache.find(t => t.key === key);
         if (!item) return;
-        const nuevoNombre = prompt('Nombre:', item.nombre);
-        if (nuevoNombre === null) return;
-        const nuevoAntes = prompt('Antes:', item.antes);
-        if (nuevoAntes === null) return;
-        const nuevoDespues = prompt('Después:', item.despues);
-        if (nuevoDespues === null) return;
+        const nuevoNombre = prompt('Nombre:', item.nombre); if (nuevoNombre === null) return;
+        const nuevoAntes = prompt('Antes:', item.antes); if (nuevoAntes === null) return;
+        const nuevoDespues = prompt('Después:', item.despues); if (nuevoDespues === null) return;
 
         update(ref(db, 'testimonios/' + key), {
             nombre: nuevoNombre.trim(),
             antes: nuevoAntes.trim(),
             despues: nuevoDespues.trim()
-        }).catch((err) => alert('No se pudo editar: ' + err.message));
+        }).catch((err) => alert('Error: ' + err.message));
     };
 
     window.eliminarTestimonio = (key) => {
-        if (confirm('¿Eliminar este testimonio?')) {
-            remove(ref(db, 'testimonios/' + key)).catch((err) => alert('No se pudo eliminar: ' + err.message));
+        if (confirm('¿Eliminar testimonio?')) {
+            remove(ref(db, 'testimonios/' + key)).catch((err) => alert('Error: ' + err.message));
         }
     };
 
-    // ---- Manual del admin (agregar directo) ----
     window.agregarTestimonio = () => {
         const tipo = document.getElementById('ref-tipo').value;
         const nombre = document.getElementById('ref-nombre').value.trim();
         const antes = document.getElementById('ref-antes').value.trim();
         const despues = document.getElementById('ref-despues').value.trim();
-        if (!nombre || !antes || !despues) { alert('Completa nombre, antes y después'); return; }
+        if (!nombre || !antes || !despues) { alert('Completa todos los campos'); return; }
 
         push(ref(db, 'testimonios'), { tipo, nombre, antes, despues, fecha: Date.now() })
             .then(() => {
@@ -148,10 +145,9 @@
                 document.getElementById('ref-antes').value = '';
                 document.getElementById('ref-despues').value = '';
             })
-            .catch((err) => alert('No se pudo guardar: ' + err.message));
+            .catch((err) => alert('Error: ' + err.message));
     };
 
-    // ---- Mostrar/ocultar bloque público ----
     window.toggleReferencias = () => {
         const cont = document.getElementById('contenedor-ref-scroll');
         const btn = document.getElementById('btn-toggle-ref');
@@ -163,24 +159,29 @@
     window.filtrarReferencias = (tipo, btn) => {
         document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
         if (btn) btn.classList.add('activo');
-        limiteTestimonios = 3; // Resetear límite al cambiar filtro
-        renderTestimoniosPublico(tipo);
+        filtroActual = tipo;
+        limiteTestimonios = 3;
+        renderTestimoniosPublico();
     };
 
     window.cargarMasReferencias = () => {
-        limiteTestimonios += 3; // Sumar 3 más a la lista
-        const activo = document.querySelector('.btn-filtro.activo');
-        renderTestimoniosPublico(activo ? activo.dataset.tipo : 'Todos');
+        limiteTestimonios += 3;
+        renderTestimoniosPublico();
     };
 
-    // ---- Render público con botón "Ver Más" ----
-    function renderTestimoniosPublico(tipo) {
+    // ---- RENDER PÚBLICO REVISADO Y FIXEADO ----
+    function renderTestimoniosPublico() {
         const grid = document.getElementById('grid-referencias');
         const vacio = document.getElementById('sin-referencias');
         const btnVerMas = document.getElementById('btn-ver-mas-ref');
         if (!grid) return;
 
-        const datos = (tipo === 'Todos' || !tipo) ? testimoniosCache : testimoniosCache.filter(t => t.tipo === tipo);
+        // Filtrar datos correctamente
+        let datos = testimoniosCache;
+        if (filtroActual !== 'Todos') {
+            datos = testimoniosCache.filter(t => t.tipo === filtroActual);
+        }
+
         document.getElementById('contador-ref').innerText = testimoniosCache.length;
 
         if (datos.length === 0) {
@@ -191,7 +192,7 @@
         }
         vacio.style.display = 'none';
 
-        // Invertimos para mostrar los más recientes primero
+        // Ordenar del más reciente al más antiguo
         const listaReversa = datos.slice().reverse();
         const listaVisibles = listaReversa.slice(0, limiteTestimonios);
 
@@ -199,17 +200,18 @@
             <div class="tarjeta-ref">
                 <div class="tarjeta-ref-tipo">${iconoTipo(t.tipo)} ${(t.tipo || '').toUpperCase()}</div>
                 <div class="tarjeta-ref-nombre">${t.nombre}</div>
-                <div class="tarjeta-ref-progreso"><span class="antes">Antes: ${t.antes}</span><span class="despues">Después: ${t.despues}</span></div>
+                <div class="tarjeta-ref-progreso">
+                    <span class="antes">Antes: ${t.antes}</span>
+                    <span class="despues">Después: ${t.despues}</span>
+                </div>
                 <div class="tarjeta-ref-fecha">🗓️ ${formatearFecha(t.fecha)}</div>
             </div>`).join('');
 
-        // Mostrar u ocultar el botón "Ver más" según la cantidad disponible
         if (btnVerMas) {
             btnVerMas.style.display = (listaReversa.length > limiteTestimonios) ? 'block' : 'none';
         }
     }
 
-    // ---- Render admin: publicados ----
     function renderTestimoniosAdmin() {
         const cont = document.getElementById('contenido-lista-ref');
         if (!cont) return;
@@ -226,7 +228,6 @@
     }
     window.renderTestimoniosAdmin = renderTestimoniosAdmin;
 
-    // ---- Render admin: pendientes ----
     function renderPendientesAdmin() {
         const cont = document.getElementById('contenido-lista-pendientes');
         const contador = document.getElementById('contador-pendientes');
@@ -245,13 +246,12 @@
     }
     window.renderPendientesAdmin = renderPendientesAdmin;
 
-    // ---- Listener de publicados ----
+    // Escuchar Testimonios
     onValue(ref(db, 'testimonios'), (snap) => {
         testimoniosCache = [];
         snap.forEach(c => testimoniosCache.push({ key: c.key, ...c.val() }));
 
-        const activo = document.querySelector('.btn-filtro.activo');
-        renderTestimoniosPublico(activo ? activo.dataset.tipo : 'Todos');
+        renderTestimoniosPublico();
 
         const btnToggle = document.getElementById('btn-toggle-ref');
         const contScroll = document.getElementById('contenedor-ref-scroll');
@@ -265,7 +265,7 @@
         }
     });
 
-    // ---- Listener de pendientes ----
+    // Escuchar Pendientes
     onValue(ref(db, 'pendientes'), (snap) => {
         pendientesCache = [];
         snap.forEach(c => pendientesCache.push({ key: c.key, ...c.val() }));
@@ -298,7 +298,7 @@
     .tabla-rangos { width: 100%; font-size: 11px; margin-top: 15px; border-collapse: collapse; border: 1px solid #444; color: #ccc; }
     .tabla-rangos th, .tabla-rangos td { padding: 6px; border: 1px solid #444; text-align: center; }
 
-    /* ---- Sección de Testimonios ---- */
+    /* ---- TESTIMONIOS STYLES ---- */
     .caja-referencias { margin-top: 20px; max-width: 450px; padding: 16px 20px; }
     .caja-referencias h1 { font-size: 16px; letter-spacing: 0.5px; }
     .caja-referencias .subtitle { font-size: 11px; margin-bottom: 10px; }
@@ -309,8 +309,8 @@
     .btn-filtro { background: rgba(0,242,255,0.08); border: 1px solid rgba(0,242,255,0.4); color: #00f2ff; padding: 5px 11px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.2s; }
     .btn-filtro.activo { background: #00f2ff; color: #030008; font-weight: bold; box-shadow: 0 0 10px rgba(0,242,255,0.6); }
 
-    .grid-referencias { display: flex; flex-direction: column; gap: 10px; }
-    .tarjeta-ref { background: rgba(0,242,255,0.06); border: 1px solid rgba(0,242,255,0.35); border-radius: 10px; padding: 12px 10px; text-align: center; }
+    .grid-referencias { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+    .tarjeta-ref { background: rgba(0,242,255,0.06); border: 1px solid rgba(0,242,255,0.35); border-radius: 10px; padding: 12px 10px; text-align: center; width: 100%; }
     .tarjeta-ref-tipo { font-size: 9px; color: #ffd700; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 5px; }
     .tarjeta-ref-nombre { font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .tarjeta-ref-progreso { font-size: 11px; color: #ccc; line-height: 1.6; }
@@ -440,7 +440,7 @@
 
         <button class="btn-toggle-ref" id="btn-toggle-form-publico" style="margin-top:10px;" onclick="toggleFormularioPublico()">✍️ DEJAR MI TESTIMONIO</button>
         <div id="form-ref-publico" style="display:none; margin-top:14px; text-align:left;">
-            <p style="font-size:11px; color:#aaa; margin:0 0 10px 0;">Cuéntanos tu experiencia. Se revisa antes de publicarse, así que no aparece de inmediato.</p>
+            <p style="font-size:11px; color:#aaa; margin:0 0 10px 0;">Cuéntanos tu experiencia. Se revisa antes de publicarse.</p>
             <label style="margin-top:0;">Tipo:</label>
             <select id="pub-ref-tipo">
                 <option value="Skill">⚔️ Skill</option>
@@ -460,7 +460,7 @@
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-paginados-v4</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v5-fixed</span></div>
 
     <script>
         function calcularTotal() {
@@ -478,7 +478,7 @@
 
         document.addEventListener('click', function unlockAudio() {
             const audio = document.getElementById('sonido-level');
-            audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
+            if(audio) { audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {}); }
             document.removeEventListener('click', unlockAudio);
         }, { once: true });
 
@@ -538,7 +538,7 @@
             let horas = parseInt(document.getElementById("horas").value) || 1;
             if(nombre) window.registrarCliente(nombre, horas);
             const audio = document.getElementById('sonido-level');
-            audio.play();
+            if(audio) audio.play();
             setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
         }
 
