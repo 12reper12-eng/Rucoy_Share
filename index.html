@@ -76,7 +76,7 @@
         return [];
     }
 
-    function procesarImagenBase64(file, maxAncho = 2560, calidad = 0.95) {
+    function procesarImagenBase64(file, maxAncho = 2560) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -97,13 +97,11 @@
                     canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     
-                    // Evitar que el canvas emborrone la imagen al procesarla
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
-                    
                     ctx.drawImage(img, 0, 0, w, h);
 
-                    const base64Data = canvas.toDataURL('image/jpeg', calidad);
+                    const base64Data = canvas.toDataURL('image/png');
                     resolve(base64Data);
                 };
                 img.onerror = () => reject(new Error("Error al procesar la imagen"));
@@ -505,16 +503,13 @@
 
     #modal-editar-admin { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:999; width:90%; max-width:400px; background:#0a0314; border:2px solid #00f2ff; padding:20px; border-radius:12px; box-shadow: 0 0 25px rgba(0,242,255,0.5); }
 
-    /* ESTILO PARA MEJORAR CLARIDAD Y NITIDEZ EN EL VISOR DE FOTOS */
+    /* CORRECCIÓN DE NÍTIDEZ Y LECTURA DE TEXTO EN EL VISOR */
     #img-visor-grande {
-        max-width: 100%;
-        max-height: 80vh;
+        max-width: 95vw;
+        max-height: 88vh;
         border: 2px solid #00f2ff;
         border-radius: 8px;
-        box-shadow: 0 0 20px rgba(0,242,255,0.5);
-        image-rendering: -webkit-optimize-contrast;
-        image-rendering: crisp-edges;
-        image-rendering: pixelated;
+        box-shadow: 0 0 25px rgba(0,242,255,0.6);
         object-fit: contain;
         background: #000;
     }
@@ -567,11 +562,11 @@
 
             <label>Servicio:</label>
             <select id="servicio" onchange="calcularTotal()">
-                <option value="300">Skill Normal - $300k / hr</option>
-                <option value="360">Power Training - $360k / hr</option>
-                <option value="600">Subida de Nivel - $600k / hr</option>
-                <option value="1400">Pack Maraton (5h) - 1.4KK</option>
-                <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
+                <option value="400">Skill Normal - 400k / hr</option>
+                <option value="460">Power Training - 460k / hr</option>
+                <option value="800">Subida de Nivel - 800k / hr</option>
+                <option value="1900">Pack Maraton (5h) - 1.9KK</option>
+                <option value="2100">Pack Ptrain Pro (5h) - 2.1KK</option>
             </select>
             <label>Cantidad de Horas:</label>
             <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
@@ -752,7 +747,6 @@
             else if (nivel >= 150)  { config = { rango: "🟡 ORO", color: "#ffd700" }; }
             else if (nivel >= 100)  { config = { rango: "⚪ PLATA", color: "#c0c0c0" }; }
 
-            // Porcentaje dinámico de la barra según el nivel (máximo 100%)
             let porcentaje = Math.min(Math.round((nivel / 1000) * 100), 100);
             if (nivel > 0 && porcentaje < 5) porcentaje = 5;
 
