@@ -96,6 +96,11 @@
                     canvas.width = w;
                     canvas.height = h;
                     const ctx = canvas.getContext('2d');
+                    
+                    // Evitar que el canvas emborrone la imagen al procesarla
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    
                     ctx.drawImage(img, 0, 0, w, h);
 
                     const base64Data = canvas.toDataURL('image/jpeg', calidad);
@@ -499,6 +504,20 @@
     .form-admin-ref h3 { font-size: 13px; color: #00f2ff; margin: 0 0 8px 0; text-align: left; }
 
     #modal-editar-admin { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:999; width:90%; max-width:400px; background:#0a0314; border:2px solid #00f2ff; padding:20px; border-radius:12px; box-shadow: 0 0 25px rgba(0,242,255,0.5); }
+
+    /* ESTILO PARA MEJORAR CLARIDAD Y NITIDEZ EN EL VISOR DE FOTOS */
+    #img-visor-grande {
+        max-width: 100%;
+        max-height: 80vh;
+        border: 2px solid #00f2ff;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0,242,255,0.5);
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+        image-rendering: pixelated;
+        object-fit: contain;
+        background: #000;
+    }
 </style>
 </head>
 <body>
@@ -636,7 +655,7 @@
     <div id="modal-visor-foto" onclick="cerrarVisorFoto()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
         <div style="position:relative; max-width:90%; max-height:90%;">
             <span style="position:absolute; top:-30px; right:0; color:white; font-size:24px; font-weight:bold; cursor:pointer;">✖️ Cerrar</span>
-            <img id="img-visor-grande" src="" style="max-width:100%; max-height:80vh; border:2px solid #00f2ff; border-radius:8px; box-shadow:0 0 20px rgba(0,242,255,0.5);">
+            <img id="img-visor-grande" src="">
         </div>
     </div>
 
