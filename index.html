@@ -51,7 +51,7 @@
     };
 
     // =====================================================================
-    // ---- TESTIMONIOS (SISTEMA EN CADENA CON EVIDENCIA / URL IMAGEN) ----
+    // ---- TESTIMONIOS CON SUBIDA AUTOMÁTICA DE IMÁGENES / ARCHIVOS ----
     // =====================================================================
 
     let testimoniosCache = [];
@@ -69,7 +69,40 @@
         return d.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
-    // Guardar testimonio público en cadena con Evidencia
+    // Función para subir imagen automáticamente a Imgur (Gratis / Sin backend)
+    window.subirImagenAImgur = async (file, elementoEstado, elementoInputURL) => {
+        if (!file) return;
+        
+        elementoEstado.style.color = '#ffd700';
+        elementoEstado.innerText = '⏳ Subiendo imagen... Por favor espera.';
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const res = await fetch('https://api.imgur.com/3/image', {
+                method: 'POST',
+                headers: {
+                    Authorization: 'Client-ID 1c313a48e7f8e8f' // Client ID de demostración
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                elementoInputURL.value = data.data.link;
+                elementoEstado.style.color = '#4caf50';
+                elementoEstado.innerText = '✅ Imagen cargada correctamente.';
+            } else {
+                throw new Error('Error al subir');
+            }
+        } catch (error) {
+            elementoEstado.style.color = '#ff6b6b';
+            elementoEstado.innerText = '❌ Error al subir la imagen. Intenta con otra.';
+        }
+    };
+
+    // Guardar testimonio público
     window.enviarReferenciaPublica = () => {
         const tipo = document.getElementById('pub-ref-tipo').value;
         const nombre = document.getElementById('pub-ref-nombre').value.trim();
@@ -99,6 +132,7 @@
             document.getElementById('pub-ref-antes').value = '';
             document.getElementById('pub-ref-despues').value = '';
             document.getElementById('pub-ref-captura').value = '';
+            document.getElementById('estado-subida-publico').innerText = '';
         })
         .catch(() => { msj.style.color = '#ff6b6b'; msj.innerText = 'Error al enviar.'; });
     };
@@ -148,7 +182,6 @@
         }
     };
 
-    // Agregar testimonio directo desde el Admin
     window.agregarTestimonio = () => {
         const tipo = document.getElementById('ref-tipo').value;
         const nombre = document.getElementById('ref-nombre').value.trim();
@@ -275,11 +308,9 @@
     }
     window.renderPendientesAdmin = renderPendientesAdmin;
 
-    // Escuchar Testimonios en Firebase
     onValue(ref(db, 'testimonios'), (snap) => {
         testimoniosCache = [];
         const data = snap.val();
-
         if (data) {
             if (Array.isArray(data)) {
                 testimoniosCache = data.filter(item => item !== null).map((item, index) => ({ key: index.toString(), ...item }));
@@ -292,19 +323,15 @@
                 });
             }
         }
-
         renderTestimoniosPublico();
-
         if (document.getElementById('panel-admin') && document.getElementById('panel-admin').style.display === 'block') {
             renderTestimoniosAdmin();
         }
     });
 
-    // Escuchar Pendientes
     onValue(ref(db, 'pendientes'), (snap) => {
         pendientesCache = [];
         const data = snap.val();
-
         if (data) {
             if (Array.isArray(data)) {
                 pendientesCache = data.filter(item => item !== null).map((item, index) => ({ key: index.toString(), ...item }));
@@ -317,7 +344,6 @@
                 });
             }
         }
-
         const badge = document.getElementById('badge-pendientes');
         if (badge) badge.style.display = pendientesCache.length > 0 ? 'inline-block' : 'none';
         if (badge) badge.innerText = pendientesCache.length;
@@ -347,7 +373,12 @@
     .tabla-rangos { width: 100%; font-size: 11px; margin-top: 15px; border-collapse: collapse; border: 1px solid #444; color: #ccc; }
     .tabla-rangos th, .tabla-rangos td { padding: 6px; border: 1px solid #444; text-align: center; }
 
-    /* ---- TESTIMONIOS CON BOTÓN DE EVIDENCIA ---- */
+    /* ---- ÁREA DE DROP & CARGA DE ARCHIVO ---- */
+    .drop-zone { border: 2px dashed rgba(0, 242, 255, 0.5); background: rgba(0, 242, 255, 0.05); padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: 5px; transition: 0.3s; }
+    .drop-zone:hover, .drop-zone.dragover { background: rgba(0, 242, 255, 0.2); border-color: #00f2ff; }
+    .drop-zone-text { font-size: 11px; color: #00f2ff; font-weight: bold; }
+
+    /* ---- TESTIMONIOS ---- */
     .caja-referencias { margin-top: 20px; max-width: 450px; padding: 16px 20px; height: auto !important; max-height: none !important; overflow: visible !important; }
     .caja-referencias h1 { font-size: 16px; letter-spacing: 0.5px; }
     .caja-referencias .subtitle { font-size: 11px; margin-bottom: 10px; }
@@ -508,16 +539,23 @@
             <input type="text" id="pub-ref-antes" placeholder="Ej: Skill 80 / Nivel 120" maxlength="60">
             <label>Después:</label>
             <input type="text" id="pub-ref-despues" placeholder="Ej: Skill 150 / Nivel 200" maxlength="60">
-            <label>Evidencia / Captura (URL de imagen o WhatsApp):</label>
-            <input type="text" id="pub-ref-captura" placeholder="Ej: https://i.imgur.com/tu_imagen.png">
-            <button onclick="enviarReferenciaPublica()" style="width:100%; padding:10px; background:#00f2ff; color:#030008; font-weight:bold; cursor:pointer; margin-top:8px;">📤 ENVIAR PARA REVISIÓN</button>
+            
+            <label>Evidencia / Captura de pantalla:</label>
+            <div class="drop-zone" id="drop-zone-publico" onclick="document.getElementById('file-input-publico').click()">
+                <div class="drop-zone-text">📁 Toca para elegir foto (Móvil) o Arrastra aquí (PC)</div>
+            </div>
+            <input type="file" id="file-input-publico" accept="image/*" style="display:none;">
+            <input type="hidden" id="pub-ref-captura">
+            <div id="estado-subida-publico" style="font-size:11px; margin-top:5px; text-align:center;"></div>
+
+            <button onclick="enviarReferenciaPublica()" style="width:100%; padding:10px; background:#00f2ff; color:#030008; font-weight:bold; cursor:pointer; margin-top:10px;">📤 ENVIAR PARA REVISIÓN</button>
             <div id="pub-ref-msj" style="font-size:11px; margin-top:8px; text-align:center;"></div>
         </div>
     </div>
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v8-evidencia-url</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v9-upload-imgur</span></div>
 
     <script>
         function calcularTotal() {
@@ -642,6 +680,33 @@
                 document.getElementById("link-generado").innerText = `${urlBase}?n=${encodeURIComponent(n)}&h=${h}&f=${f}&r=${encodeURIComponent(rangoData.rango)}&c=${encodeURIComponent(rangoData.color)}&i=${encodeURIComponent(rangoData.icono)}`;
             }).catch((err) => alert("Error al consultar cliente: " + err.message));
         }
+
+        // LÓGICA DE DRAG & DROP Y SELECCIÓN DE ARCHIVOS
+        const dropZone = document.getElementById('drop-zone-publico');
+        const fileInput = document.getElementById('file-input-publico');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                window.subirImagenAImgur(e.target.files[0], document.getElementById('estado-subida-publico'), document.getElementById('pub-ref-captura'));
+            }
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                window.subirImagenAImgur(e.dataTransfer.files[0], document.getElementById('estado-subida-publico'), document.getElementById('pub-ref-captura'));
+            }
+        });
 
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
         let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
