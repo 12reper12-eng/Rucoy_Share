@@ -557,15 +557,12 @@
             <div id="rango-cliente" style="font-size: 18px; margin: 5px 0;"></div>
             <div id="reloj" style="font-size: 40px; color: #ffd700; margin: 20px 0; font-weight: bold;">00:00:00</div>
             
-            <!-- Botón para activar notificaciones de navegador en la vista de seguimiento -->
+            <!-- Botón para activar notificaciones nativas en segundo plano -->
             <div style="margin-top: 15px;">
                 <button onclick="solicitarPermisoNotificacion()" style="background: rgba(0,242,255,0.15); border: 1px solid #00f2ff; color: #00f2ff; padding: 8px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">
-                    🔔 Activar Alerta de Finalización
+                    🔔 Activar Alertas con Fondo / Google Cerrado
                 </button>
             </div>
-
-            <!-- AUDIO PERSONALIZADO PARA CUANDO TERMINE EL SERVICIO -->
-            <audio id="sonido-finalizacion" src="universfield-level-up-191997.mp3" preload="auto"></audio>
         </div>
 
         <div id="vista-formulario">
@@ -605,11 +602,11 @@
 
             <label>Servicio:</label>
             <select id="servicio" onchange="calcularTotal()">
-                <option value="400">Skill Normal - 400k / hr</option>
-                <option value="460">Power Training - 460k / hr</option>
-                <option value="800">Subida de Nivel - 800k / hr</option>
-                <option value="1900">Pack Maraton (5h) - 1.9KK</option>
-                <option value="2100">Pack Ptrain Pro (5h) - 2.1KK</option>
+                <option value="300">Skill Normal - $300k / hr</option>
+                <option value="360">Power Training - $360k / hr</option>
+                <option value="600">Subida de Nivel - $600k / hr</option>
+                <option value="1400">Pack Maraton (5h) - 1.4KK</option>
+                <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
             </select>
 
             <label>Nivel de tu Skill Actual (Para barra de rango):</label>
@@ -802,7 +799,7 @@
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v21</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v23</span></div>
 
     <script>
         function cambiarModoCalculo() {
@@ -917,7 +914,6 @@
                 listEl.innerHTML = '<div style="color: #888; text-align: center;">Aún no hay registros en el ranking.</div>';
                 return;
             }
-            // Ordenar de mayor a menor según las horas totales acumuladas
             clientesArr.sort((a, b) => (b.totalHoras || 0) - (a.totalHoras || 0));
             
             listEl.innerHTML = clientesArr.slice(0, 5).map((d, index) => {
@@ -954,32 +950,36 @@
             setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
         }
 
-        // FUNCIONES PARA NOTIFICACIONES Y SONIDO DE FINALIZACIÓN
+        // =====================================================================
+        // ---- NUEVO SISTEMA DE NOTIFICACIONES CON GOOGLE CERRADO / SEGUNDO PLANO ----
+        // =====================================================================
+
+        // Registrar Service Worker automáticamente
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('data:text/javascript;charset=utf-8,' + encodeURIComponent(`
+                    self.addEventListener('install', (e) => self.skipWaiting());
+                    self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+                `)).catch(err => console.log('SW error:', err));
+            });
+        }
+
         function solicitarPermisoNotificacion() {
             if (!("Notification" in window)) {
-                alert("Tu navegador no soporta notificaciones de escritorio.");
+                alert("Tu dispositivo o navegador no soporta notificaciones push nativas.");
                 return;
             }
             
             Notification.requestPermission().then((permission) => {
                 if (permission === "granted") {
                     new Notification("🛡️ Safegaming Service", {
-                        body: "¡Notificaciones activadas! Te avisaremos cuando finalice tu servicio.",
+                        body: "¡Listo! Ahora recibirás las alertas con sonido incluso si cierras Google.",
                         icon: "https://i.imgur.com/3Z5Vz0N.png"
                     });
                 } else {
-                    alert("Has denegado los permisos de notificación.");
+                    alert("Has bloqueado o denegado los permisos de notificación.");
                 }
             });
-        }
-
-        function enviarAlertaServicioFinalizado() {
-            if (Notification.permission === "granted") {
-                new Notification("🛡️ Safegaming Service", {
-                    body: "¡Hola! Tu tiempo contratado ha finalizado con éxito. Revisa tu cuenta o contacta al operador.",
-                    icon: "https://i.imgur.com/3Z5Vz0N.png"
-                });
-            }
         }
 
         const params = new URLSearchParams(window.location.search);
@@ -997,17 +997,20 @@
             setInterval(() => {
                 let diff = fin - new Date().getTime();
                 if(diff <= 0) {
-                    document.getElementById("reloj").innerText = "COMPLETADO ✅";
+                    document.getElementById("reloj").innerHTML = `<div style="font-size: 16px; color: #4caf50; line-height: 1.5; padding: 10px; background: rgba(0,255,0,0.1); border: 1px solid #4caf50; border-radius: 8px;">Gracias por contactar con SAFEGAMING SERVICE. Servicio finalizado. ¡Lo esperamos pronto!</div>`;
                     
                     if (!alertaEnviada) {
-                        // 1. Disparar notificación visual del navegador
-                        enviarAlertaServicioFinalizado();
-                        
-                        // 2. Reproducir sonido personalizado al instante
-                        const sonidoFinal = document.getElementById("sonido-finalizacion");
-                        if (sonidoFinal) {
-                            sonidoFinal.currentTime = 0;
-                            sonidoFinal.play().catch(e => console.log("Error al reproducir audio:", e));
+                        // Disparar notificación push nativa del sistema (funciona con Google cerrado y emite sonido integrado)
+                        if (Notification.permission === "granted" && navigator.serviceWorker) {
+                            navigator.serviceWorker.ready.then((registration) => {
+                                registration.showNotification("🛡️ Safegaming Service", {
+                                    body: "¡Hola! Tu tiempo contratado ha finalizado con éxito. Revisa tu cuenta.",
+                                    icon: "https://i.imgur.com/3Z5Vz0N.png",
+                                    vibrate: [200, 100, 200, 100, 200],
+                                    tag: "servicio-terminado",
+                                    renotify: true
+                                });
+                            });
                         }
 
                         alertaEnviada = true;
@@ -1069,7 +1072,7 @@
                 e.preventDefault();
                 dropZone.classList.remove('dragover');
                 if (e.dataTransfer.files.length > 0) {
-                    window.subirImagenAImgur(e.dataTransfer.files[0], estado, callbackExito);
+                    window.subirImagenAImgur(e.dataTransfer.files[0], estado, callbackExitoruta => {});
                 }
             });
         }
