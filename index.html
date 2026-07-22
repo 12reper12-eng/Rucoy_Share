@@ -605,11 +605,11 @@
 
             <label>Servicio:</label>
             <select id="servicio" onchange="calcularTotal()">
-                <option value="300">Skill Normal - $300k / hr</option>
-                <option value="360">Power Training - $360k / hr</option>
-                <option value="600">Subida de Nivel - $600k / hr</option>
-                <option value="1400">Pack Maraton (5h) - 1.4KK</option>
-                <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
+                <option value="400">Skill Normal - 400k / hr</option>
+                <option value="460">Power Training - 460k / hr</option>
+                <option value="800">Subida de Nivel - 800k / hr</option>
+                <option value="1900">Pack Maraton (5h) - 1.9KK</option>
+                <option value="2100">Pack Ptrain Pro (5h) - 2.1KK</option>
             </select>
 
             <label>Nivel de tu Skill Actual (Para barra de rango):</label>
@@ -632,6 +632,14 @@
                 <tr><td style="color:#ff8c00;">🔥 LEYENDA I</td><td>1500+</td></tr>
                 <tr><td style="color:#ff4500;">⚡ LEYENDA II</td><td>2000+</td></tr>
             </table>
+
+            <!-- SECCIÓN NUEVA: RANKING PÚBLICO DE CLIENTES -->
+            <div style="margin-top: 15px; background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 8px; padding: 10px;">
+                <div style="font-size: 12px; color: #ffd700; font-weight: bold; text-align: center; margin-bottom: 8px;">🏆 SALÓN DE LA FAMA (TOP CLIENTES)</div>
+                <div id="ranking-publico-lista" style="font-size: 11px; max-height: 130px; overflow-y: auto;">
+                    <div style="color: #888; text-align: center;">Cargando ranking...</div>
+                </div>
+            </div>
 
             <div class="resultado-caja">
                 <div class="total-oro" id="precio-final">300k gold</div>
@@ -794,7 +802,7 @@
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v20</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v21</span></div>
 
     <script>
         function cambiarModoCalculo() {
@@ -896,6 +904,31 @@
             if (visitas >= 3 || horas >= 100) return '<span style="background:rgba(0,242,255,0.2); border:1px solid #00f2ff; color:#00f2ff; padding:1px 5px; border-radius:4px; font-size:9px; margin-left:4px;">🎖️ Constante</span>';
             return '';
         }
+
+        // CARGAR RANKING EN VIVO PARA EL PÚBLICO
+        window.onValue(window.ref(window.db, 'clientes'), (snap) => {
+            const listEl = document.getElementById('ranking-publico-lista');
+            if (!listEl) return;
+            let clientesArr = [];
+            snap.forEach(c => {
+                clientesArr.push(c.val());
+            });
+            if (clientesArr.length === 0) {
+                listEl.innerHTML = '<div style="color: #888; text-align: center;">Aún no hay registros en el ranking.</div>';
+                return;
+            }
+            // Ordenar de mayor a menor según las horas totales acumuladas
+            clientesArr.sort((a, b) => (b.totalHoras || 0) - (a.totalHoras || 0));
+            
+            listEl.innerHTML = clientesArr.slice(0, 5).map((d, index) => {
+                let r = obtenerRango(d.totalHoras || 0);
+                let medalla = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `<b>#${index + 1}</b>`;
+                return `<div style="display: flex; justify-content: space-between; padding: 4px 6px; border-bottom: 1px solid rgba(255,255,255,0.05); color:${r.color};">
+                    <span>${medalla} ${d.nombre}</span>
+                    <span><b>${d.totalHoras}h</b> (${r.rango})</span>
+                </div>`;
+            }).join('');
+        });
 
         function cargarAdmin() {
             let div = document.getElementById('lista-clientes');
