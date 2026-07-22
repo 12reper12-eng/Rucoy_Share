@@ -51,7 +51,7 @@
     };
 
     // =====================================================================
-    // ---- TESTIMONIOS CON SUBIDA AUTOMÁTICA DE IMÁGENES / ARCHIVOS ----
+    // ---- SISTEMA DE TESTIMONIOS CON ACUMULACIÓN DE IMÁGENES ----
     // =====================================================================
 
     let testimoniosCache = [];
@@ -69,8 +69,15 @@
         return d.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
-    // Función para subir imagen automáticamente a Imgur (Gratis / Sin backend)
-    window.subirImagenAImgur = async (file, elementoEstado, elementoInputURL) => {
+    // Normaliza 'capturas' para que siempre sea una lista/array de URLs
+    function obtenerListaCapturas(item) {
+        if (!item) return [];
+        if (Array.isArray(item.capturas)) return item.capturas.filter(c => !!c);
+        if (item.captura) return [item.captura];
+        return [];
+    }
+
+    window.subirImagenAImgur = async (file, elementoEstado, callbackURL) => {
         if (!file) return;
         
         elementoEstado.style.color = '#ffd700';
@@ -82,33 +89,31 @@
         try {
             const res = await fetch('https://api.imgur.com/3/image', {
                 method: 'POST',
-                headers: {
-                    Authorization: 'Client-ID 1c313a48e7f8e8f' // Client ID de demostración
-                },
+                headers: { Authorization: 'Client-ID 1c313a48e7f8e8f' },
                 body: formData
             });
 
             const data = await res.json();
             if (data.success) {
-                elementoInputURL.value = data.data.link;
                 elementoEstado.style.color = '#4caf50';
-                elementoEstado.innerText = '✅ Imagen cargada correctamente.';
+                elementoEstado.innerText = '✅ Imagen subida y agregada al historial.';
+                callbackURL(data.data.link);
             } else {
                 throw new Error('Error al subir');
             }
         } catch (error) {
             elementoEstado.style.color = '#ff6b6b';
-            elementoEstado.innerText = '❌ Error al subir la imagen. Intenta con otra.';
+            elementoEstado.innerText = '❌ Error al subir la imagen. Intenta de nuevo.';
         }
     };
 
-    // Guardar testimonio público
+    // Formulario público
+    window.capturaPublicaTemporal = '';
     window.enviarReferenciaPublica = () => {
         const tipo = document.getElementById('pub-ref-tipo').value;
         const nombre = document.getElementById('pub-ref-nombre').value.trim();
         const antes = document.getElementById('pub-ref-antes').value.trim();
         const despues = document.getElementById('pub-ref-despues').value.trim();
-        const captura = document.getElementById('pub-ref-captura').value.trim();
         const msj = document.getElementById('pub-ref-msj');
         
         if (!nombre || !antes || !despues) { 
@@ -117,22 +122,17 @@
             return; 
         }
 
-        push(ref(db, 'pendientes'), { 
-            tipo, 
-            nombre, 
-            antes, 
-            despues, 
-            captura: captura || '', 
-            fecha: Date.now() 
-        })
+        const capturas = window.capturaPublicaTemporal ? [window.capturaPublicaTemporal] : [];
+
+        push(ref(db, 'pendientes'), { tipo, nombre, antes, despues, capturas, fecha: Date.now() })
         .then(() => {
             msj.style.color = '#4caf50';
             msj.innerText = '¡Gracias! Tu testimonio quedó en revisión.';
             document.getElementById('pub-ref-nombre').value = '';
             document.getElementById('pub-ref-antes').value = '';
             document.getElementById('pub-ref-despues').value = '';
-            document.getElementById('pub-ref-captura').value = '';
             document.getElementById('estado-subida-publico').innerText = '';
+            window.capturaPublicaTemporal = '';
         })
         .catch(() => { msj.style.color = '#ff6b6b'; msj.innerText = 'Error al enviar.'; });
     };
@@ -148,8 +148,10 @@
     window.aprobarPendiente = (key) => {
         const item = pendientesCache.find(p => p.key === key);
         if (!item) return;
-        const { tipo, nombre, antes, despues, captura, fecha } = item;
-        push(ref(db, 'testimonios'), { tipo, nombre, antes, despues, captura: captura || '', fecha })
+        const { tipo, nombre, antes, despues, fecha } = item;
+        const capturas = obtenerListaCapturas(item);
+
+        push(ref(db, 'testimonios'), { tipo, nombre, antes, despues, capturas, fecha })
             .then(() => remove(ref(db, 'pendientes/' + key)))
             .catch((err) => alert('Error: ' + err.message));
     };
@@ -160,50 +162,92 @@
         }
     };
 
-    window.editarTestimonio = (key) => {
+    // ---- EDICIÓN Y ACUMULACIÓN DESDE EL ADMIN ----
+    window.itemEditandoKey = null;
+    window.capturasEditando = [];
+
+    window.abrirEditarAdmin = (key) => {
         const item = testimoniosCache.find(t => t.key === key);
         if (!item) return;
-        const nuevoNombre = prompt('Nombre:', item.nombre); if (nuevoNombre === null) return;
-        const nuevoAntes = prompt('Antes:', item.antes); if (nuevoAntes === null) return;
-        const nuevoDespues = prompt('Después:', item.despues); if (nuevoDespues === null) return;
-        const nuevaCaptura = prompt('URL Evidencia / Captura:', item.captura || ''); if (nuevaCaptura === null) return;
+        
+        window.itemEditandoKey = key;
+        window.capturasEditando = obtenerListaCapturas(item);
 
-        update(ref(db, 'testimonios/' + key), {
-            nombre: nuevoNombre.trim(),
-            antes: nuevoAntes.trim(),
-            despues: nuevoDespues.trim(),
-            captura: nuevaCaptura.trim()
-        }).catch((err) => alert('Error: ' + err.message));
+        document.getElementById('edit-nombre').value = item.nombre;
+        document.getElementById('edit-antes').value = item.antes;
+        document.getElementById('edit-despues').value = item.despues;
+        
+        renderListaImagenesEditar();
+        document.getElementById('estado-subida-edit').innerText = '';
+        document.getElementById('modal-editar-admin').style.display = 'block';
+    };
+
+    function renderListaImagenesEditar() {
+        const cont = document.getElementById('galeria-edit-admin');
+        if (!cont) return;
+        
+        if (window.capturasEditando.length === 0) {
+            cont.innerHTML = '<span style="font-size:11px; color:#888;">No hay imágenes agregadas aún.</span>';
+            return;
+        }
+
+        cont.innerHTML = window.capturasEditando.map((url, i) => `
+            <div style="display:inline-flex; align-items:center; background:rgba(0,242,255,0.1); border:1px solid #00f2ff; border-radius:4px; padding:3px 8px; margin:3px; font-size:10px;">
+                <a href="${url}" target="_blank" style="color:#00f2ff; text-decoration:none;">📸 Foto ${i + 1}</a>
+                <button onclick="eliminarFotoEdicion(${i})" style="background:none; border:none; color:#ff3333; margin-left:6px; cursor:pointer; font-weight:bold;">✖</button>
+            </div>
+        `).join('');
+    }
+    window.renderListaImagenesEditar = renderListaImagenesEditar;
+
+    window.eliminarFotoEdicion = (index) => {
+        window.capturasEditando.splice(index, 1);
+        renderListaImagenesEditar();
+    };
+
+    window.cerrarEditarAdmin = () => {
+        document.getElementById('modal-editar-admin').style.display = 'none';
+    };
+
+    window.guardarEdicionAdmin = () => {
+        const key = window.itemEditandoKey;
+        const nombre = document.getElementById('edit-nombre').value.trim();
+        const antes = document.getElementById('edit-antes').value.trim();
+        const despues = document.getElementById('edit-despues').value.trim();
+
+        if (!nombre || !antes || !despues) { alert('Completa los campos principales.'); return; }
+
+        update(ref(db, 'testimonios/' + key), { nombre, antes, despues, capturas: window.capturasEditando })
+            .then(() => {
+                cerrarEditarAdmin();
+            })
+            .catch((err) => alert('Error: ' + err.message));
     };
 
     window.eliminarTestimonio = (key) => {
-        if (confirm('¿Eliminar testimonio?')) {
+        if (confirm('¿Eliminar testimonio completo?')) {
             remove(ref(db, 'testimonios/' + key)).catch((err) => alert('Error: ' + err.message));
         }
     };
 
-    window.agregarTestimonio = () => {
+    // Agregar nuevo testimonio directo con soporte de acumulación
+    window.capturasAdminNuevo = [];
+    window.agregarTestimonioAdmin = () => {
         const tipo = document.getElementById('ref-tipo').value;
         const nombre = document.getElementById('ref-nombre').value.trim();
         const antes = document.getElementById('ref-antes').value.trim();
         const despues = document.getElementById('ref-despues').value.trim();
-        const captura = document.getElementById('ref-captura').value.trim();
 
         if (!nombre || !antes || !despues) { alert('Completa los campos principales'); return; }
 
-        push(ref(db, 'testimonios'), { 
-            tipo, 
-            nombre, 
-            antes, 
-            despues, 
-            captura: captura || '', 
-            fecha: Date.now() 
-        })
+        push(ref(db, 'testimonios'), { tipo, nombre, antes, despues, capturas: window.capturasAdminNuevo, fecha: Date.now() })
         .then(() => {
             document.getElementById('ref-nombre').value = '';
             document.getElementById('ref-antes').value = '';
             document.getElementById('ref-despues').value = '';
-            document.getElementById('ref-captura').value = '';
+            document.getElementById('estado-subida-admin').innerText = '';
+            window.capturasAdminNuevo = [];
+            document.getElementById('contador-fotos-admin-nuevo').innerText = '';
         })
         .catch((err) => alert('Error: ' + err.message));
     };
@@ -254,7 +298,18 @@
         const listaOrdenada = datos.slice().reverse();
         const listaVisibles = listaOrdenada.slice(0, limiteTestimonios);
 
-        grid.innerHTML = listaVisibles.map(t => `
+        grid.innerHTML = listaVisibles.map(t => {
+            const fotos = obtenerListaCapturas(t);
+            const htmlFotos = fotos.length > 0 
+                ? `<div class="galeria-evidencias">
+                    <div style="font-size:10px; color:#ffd700; margin-top:6px;">📸 Evidencias acumuladas (${fotos.length}):</div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-top:4px;">
+                        ${fotos.map((url, idx) => `<a href="${url}" target="_blank" class="btn-evidencia">Ver Foto ${idx + 1}</a>`).join('')}
+                    </div>
+                   </div>`
+                : '';
+
+            return `
             <div class="tarjeta-ref">
                 <div class="tarjeta-ref-tipo">${iconoTipo(t.tipo)} ${(t.tipo || '').toUpperCase()}</div>
                 <div class="tarjeta-ref-nombre">${t.nombre}</div>
@@ -262,9 +317,10 @@
                     <span class="antes">Antes: ${t.antes}</span>
                     <span class="despues">Después: ${t.despues}</span>
                 </div>
-                ${t.captura ? `<a href="${t.captura}" target="_blank" class="btn-evidencia">📸 Ver Captura / Evidencia</a>` : ''}
+                ${htmlFotos}
                 <div class="tarjeta-ref-fecha">🗓️ ${formatearFecha(t.fecha)}</div>
-            </div>`).join('');
+            </div>`;
+        }).join('');
 
         if (btnVerMas) {
             btnVerMas.style.display = (datos.length > limiteTestimonios) ? 'block' : 'none';
@@ -277,15 +333,18 @@
         if (!cont) return;
         cont.innerHTML = testimoniosCache.length === 0
             ? '<div style="color:#888; font-size:11px;">No hay testimonios publicados.</div>'
-            : testimoniosCache.slice().reverse().map(t => `
+            : testimoniosCache.slice().reverse().map(t => {
+                const fotos = obtenerListaCapturas(t);
+                return `
                 <div class="lista-item">
                     ${iconoTipo(t.tipo)} ${t.tipo} — <b>${t.nombre}</b>: ${t.antes} → ${t.despues}
-                    ${t.captura ? `<br><a href="${t.captura}" target="_blank" style="color:#00f2ff; font-size:10px;">🔗 Ver imagen enviada</a>` : ''}
+                    <br><span style="color:#ffd700; font-size:10px;">📸 Total fotos acumuladas: ${fotos.length}</span>
                     <div style="margin-top:5px;">
-                        <button onclick="editarTestimonio('${t.key}')" style="background:#00f2ff; color:#030008; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; font-weight:bold;">✏️ Editar</button>
+                        <button onclick="abrirEditarAdmin('${t.key}')" style="background:#00f2ff; color:#030008; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; font-weight:bold;">✏️ Gestionar / Agregar fotos</button>
                         <button onclick="eliminarTestimonio('${t.key}')" style="background:#ff3333; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; margin-left:6px;">🗑️ Borrar</button>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
     }
     window.renderTestimoniosAdmin = renderTestimoniosAdmin;
 
@@ -296,15 +355,18 @@
         if (contador) contador.innerText = pendientesCache.length;
         cont.innerHTML = pendientesCache.length === 0
             ? '<div style="color:#888; font-size:11px;">No hay testimonios pendientes por revisar.</div>'
-            : pendientesCache.slice().reverse().map(p => `
+            : pendientesCache.slice().reverse().map(p => {
+                const fotos = obtenerListaCapturas(p);
+                return `
                 <div class="lista-item">
                     ${iconoTipo(p.tipo)} ${p.tipo} — <b>${p.nombre}</b>: ${p.antes} → ${p.despues}
-                    ${p.captura ? `<br><a href="${p.captura}" target="_blank" style="color:#ffd700; font-size:10px;">🔗 Revisar Evidencia</a>` : ''}
+                    ${fotos.length > 0 ? `<br><a href="${fotos[0]}" target="_blank" style="color:#ffd700; font-size:10px;">🔗 Revisar Evidencia</a>` : ''}
                     <div style="margin-top:5px;">
                         <button onclick="aprobarPendiente('${p.key}')" style="background:#25D366; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px;">✅ Aprobar</button>
                         <button onclick="rechazarPendiente('${p.key}')" style="background:#ff3333; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; margin-left:6px;">❌ Rechazar</button>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
     }
     window.renderPendientesAdmin = renderPendientesAdmin;
 
@@ -373,12 +435,12 @@
     .tabla-rangos { width: 100%; font-size: 11px; margin-top: 15px; border-collapse: collapse; border: 1px solid #444; color: #ccc; }
     .tabla-rangos th, .tabla-rangos td { padding: 6px; border: 1px solid #444; text-align: center; }
 
-    /* ---- ÁREA DE DROP & CARGA DE ARCHIVO ---- */
-    .drop-zone { border: 2px dashed rgba(0, 242, 255, 0.5); background: rgba(0, 242, 255, 0.05); padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: 5px; transition: 0.3s; }
+    /* DROP ZONE */
+    .drop-zone { border: 2px dashed rgba(0, 242, 255, 0.5); background: rgba(0, 242, 255, 0.05); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: 5px; transition: 0.3s; }
     .drop-zone:hover, .drop-zone.dragover { background: rgba(0, 242, 255, 0.2); border-color: #00f2ff; }
     .drop-zone-text { font-size: 11px; color: #00f2ff; font-weight: bold; }
 
-    /* ---- TESTIMONIOS ---- */
+    /* TESTIMONIOS */
     .caja-referencias { margin-top: 20px; max-width: 450px; padding: 16px 20px; height: auto !important; max-height: none !important; overflow: visible !important; }
     .caja-referencias h1 { font-size: 16px; letter-spacing: 0.5px; }
     .caja-referencias .subtitle { font-size: 11px; margin-bottom: 10px; }
@@ -397,7 +459,8 @@
     .tarjeta-ref-progreso { font-size: 11px; color: #ccc; line-height: 1.6; }
     .tarjeta-ref-progreso .antes { color: #ff6b6b; display: block; }
     .tarjeta-ref-progreso .despues { color: #4caf50; font-weight: bold; display: block; }
-    .btn-evidencia { display: inline-block; margin-top: 8px; background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; padding: 4px 10px; border-radius: 4px; font-size: 10px; text-decoration: none; font-weight: bold; transition: 0.2s; }
+    
+    .btn-evidencia { display: inline-block; background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; padding: 4px 8px; border-radius: 4px; font-size: 10px; text-decoration: none; font-weight: bold; transition: 0.2s; }
     .btn-evidencia:hover { background: #00f2ff; color: #030008; }
     .tarjeta-ref-fecha { font-size: 9px; color: #777; margin-top: 8px; }
     #sin-referencias { display: none; text-align: center; color: #888; padding: 15px 5px; font-size: 12px; }
@@ -406,6 +469,8 @@
 
     .form-admin-ref { border-top: 1px dashed #444; margin-top: 15px; padding-top: 12px; }
     .form-admin-ref h3 { font-size: 13px; color: #00f2ff; margin: 0 0 8px 0; text-align: left; }
+
+    #modal-editar-admin { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:999; width:90%; max-width:400px; background:#0a0314; border:2px solid #00f2ff; padding:20px; border-radius:12px; box-shadow: 0 0 25px rgba(0,242,255,0.5); }
 </style>
 </head>
 <body>
@@ -494,14 +559,48 @@
                     <input type="text" id="ref-nombre" placeholder="Nombre del cliente">
                     <input type="text" id="ref-antes" placeholder="Antes">
                     <input type="text" id="ref-despues" placeholder="Después">
-                    <input type="text" id="ref-captura" placeholder="URL Evidencia / Captura (Opcional)">
-                    <button onclick="agregarTestimonio()" style="width:100%; padding:10px; background:#00f2ff; color:#030008; font-weight:bold; cursor:pointer; margin-top:5px;">➕ AGREGAR TESTIMONIO</button>
+                    
+                    <label style="font-size:11px;">Subir e ir acumulando fotos:</label>
+                    <div class="drop-zone" id="drop-zone-admin" onclick="document.getElementById('file-input-admin').click()">
+                        <div class="drop-zone-text">📁 Toca o arrastra aquí para sumar una foto</div>
+                    </div>
+                    <input type="file" id="file-input-admin" accept="image/*" style="display:none;">
+                    <div id="contador-fotos-admin-nuevo" style="font-size:10px; color:#ffd700; margin-top:3px;"></div>
+                    <div id="estado-subida-admin" style="font-size:11px; margin-top:3px; text-align:center;"></div>
+
+                    <button onclick="agregarTestimonioAdmin()" style="width:100%; padding:10px; background:#00f2ff; color:#030008; font-weight:bold; cursor:pointer; margin-top:8px;">➕ PUBLICAR TESTIMONIO</button>
                     <div id="lista-referencias-admin" style="margin-top:15px; max-height: 220px; overflow-y: auto;">
                         <div style="font-size:11px; color:#00f2ff; margin-bottom:5px;"><b>Testimonios publicados:</b></div>
                         <div id="contenido-lista-ref"></div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE EDICIÓN ADMIN -->
+    <div id="modal-editar-admin">
+        <h3 style="margin-top:0; color:#00f2ff; text-align:center;">✏️ EDITAR Y ACUMULAR FOTOS</h3>
+        <label>Nombre:</label>
+        <input type="text" id="edit-nombre">
+        <label>Antes:</label>
+        <input type="text" id="edit-antes">
+        <label>Después:</label>
+        <input type="text" id="edit-despues">
+        
+        <label>Fotos guardadas actualmente:</label>
+        <div id="galeria-edit-admin" style="margin-bottom:10px; border:1px solid #333; padding:8px; border-radius:6px; background:rgba(0,0,0,0.4);"></div>
+
+        <label>➕ Sumar una nueva foto al cliente:</label>
+        <div class="drop-zone" id="drop-zone-edit" onclick="document.getElementById('file-input-edit').click()">
+            <div class="drop-zone-text">📁 Toca o arrastra para añadir foto extra</div>
+        </div>
+        <input type="file" id="file-input-edit" accept="image/*" style="display:none;">
+        <div id="estado-subida-edit" style="font-size:11px; margin-top:3px; text-align:center;"></div>
+
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button onclick="guardarEdicionAdmin()" style="flex:1; padding:10px; background:#25D366; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">💾 Guardar Cambios</button>
+            <button onclick="cerrarEditarAdmin()" style="flex:1; padding:10px; background:#ff3333; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">✖️ Cancelar</button>
         </div>
     </div>
 
@@ -545,7 +644,6 @@
                 <div class="drop-zone-text">📁 Toca para elegir foto (Móvil) o Arrastra aquí (PC)</div>
             </div>
             <input type="file" id="file-input-publico" accept="image/*" style="display:none;">
-            <input type="hidden" id="pub-ref-captura">
             <div id="estado-subida-publico" style="font-size:11px; margin-top:5px; text-align:center;"></div>
 
             <button onclick="enviarReferenciaPublica()" style="width:100%; padding:10px; background:#00f2ff; color:#030008; font-weight:bold; cursor:pointer; margin-top:10px;">📤 ENVIAR PARA REVISIÓN</button>
@@ -555,7 +653,7 @@
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v9-upload-imgur</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v11-acumulativo</span></div>
 
     <script>
         function calcularTotal() {
@@ -681,31 +779,50 @@
             }).catch((err) => alert("Error al consultar cliente: " + err.message));
         }
 
-        // LÓGICA DE DRAG & DROP Y SELECCIÓN DE ARCHIVOS
-        const dropZone = document.getElementById('drop-zone-publico');
-        const fileInput = document.getElementById('file-input-publico');
+        function vincularCargaDeImagen(idDrop, idFile, idEstado, callbackExito) {
+            const dropZone = document.getElementById(idDrop);
+            const fileInput = document.getElementById(idFile);
+            const estado = document.getElementById(idEstado);
 
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                window.subirImagenAImgur(e.target.files[0], document.getElementById('estado-subida-publico'), document.getElementById('pub-ref-captura'));
-            }
+            if (!dropZone || !fileInput) return;
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    window.subirImagenAImgur(e.target.files[0], estado, callbackExito);
+                }
+            });
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    window.subirImagenAImgur(e.dataTransfer.files[0], estado, callbackExito);
+                }
+            });
+        }
+
+        // Vincular acumuladores
+        vincularCargaDeImagen('drop-zone-publico', 'file-input-publico', 'estado-subida-publico', (url) => {
+            window.capturaPublicaTemporal = url;
         });
 
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
+        vincularCargaDeImagen('drop-zone-admin', 'file-input-admin', 'estado-subida-admin', (url) => {
+            window.capturasAdminNuevo.push(url);
+            document.getElementById('contador-fotos-admin-nuevo').innerText = `📷 Total fotos a subir: ${window.capturasAdminNuevo.length}`;
         });
 
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) {
-                window.subirImagenAImgur(e.dataTransfer.files[0], document.getElementById('estado-subida-publico'), document.getElementById('pub-ref-captura'));
-            }
+        vincularCargaDeImagen('drop-zone-edit', 'file-input-edit', 'estado-subida-edit', (url) => {
+            window.capturasEditando.push(url);
+            window.renderListaImagenesEditar();
         });
 
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
