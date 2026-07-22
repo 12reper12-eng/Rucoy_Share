@@ -51,16 +51,22 @@
     };
 
     // =====================================================================
-    // ---- SISTEMA DE TESTIMONIOS CON PROCESAMIENTO DIRECTO BASE64 ----
+    // ---- SISTEMA DE TESTIMONIOS CON BASE64 Y ESTRELLAS (OPCIÓN 3) ----
     // =====================================================================
 
     let testimoniosCache = [];
     let pendientesCache = [];
     let limiteTestimonios = 5;
     let filtroActual = 'Todos';
+    let primeraCargaPendientes = true;
 
     function iconoTipo(tipo) {
         return tipo === 'Skill' ? '⚔️' : tipo === 'Nivel' ? '⭐' : tipo === 'Cuenta' ? '🎮' : '📌';
+    }
+
+    function renderEstrellas(cant) {
+        const num = parseInt(cant) || 5;
+        return '★'.repeat(num) + '☆'.repeat(5 - num);
     }
 
     function formatearFecha(ts) {
@@ -130,6 +136,7 @@
     window.capturaPublicaTemporal = '';
     window.enviarReferenciaPublica = () => {
         const tipo = document.getElementById('pub-ref-tipo').value;
+        const estrellas = parseInt(document.getElementById('pub-ref-estrellas').value) || 5;
         const nombre = document.getElementById('pub-ref-nombre').value.trim();
         const antes = document.getElementById('pub-ref-antes').value.trim();
         const despues = document.getElementById('pub-ref-despues').value.trim();
@@ -143,7 +150,7 @@
 
         const capturas = window.capturaPublicaTemporal ? [window.capturaPublicaTemporal] : [];
 
-        push(ref(db, 'pendientes'), { tipo, nombre, antes, despues, capturas, fecha: Date.now() })
+        push(ref(db, 'pendientes'), { tipo, estrellas, nombre, antes, despues, capturas, fecha: Date.now() })
         .then(() => {
             msj.style.color = '#4caf50';
             msj.innerText = '¡Gracias! Tu testimonio quedó en revisión.';
@@ -167,10 +174,10 @@
     window.aprobarPendiente = (key) => {
         const item = pendientesCache.find(p => p.key === key);
         if (!item) return;
-        const { tipo, nombre, antes, despues, fecha } = item;
+        const { tipo, estrellas = 5, nombre, antes, despues, fecha } = item;
         const capturas = obtenerListaCapturas(item);
 
-        push(ref(db, 'testimonios'), { tipo, nombre, antes, despues, capturas, fecha })
+        push(ref(db, 'testimonios'), { tipo, estrellas, nombre, antes, despues, capturas, fecha })
             .then(() => remove(ref(db, 'pendientes/' + key)))
             .catch((err) => alert('Error: ' + err.message));
     };
@@ -192,6 +199,7 @@
         window.capturasEditando = obtenerListaCapturas(item);
 
         document.getElementById('edit-nombre').value = item.nombre;
+        document.getElementById('edit-estrellas').value = item.estrellas || 5;
         document.getElementById('edit-antes').value = item.antes;
         document.getElementById('edit-despues').value = item.despues;
         
@@ -230,12 +238,13 @@
     window.guardarEdicionAdmin = () => {
         const key = window.itemEditandoKey;
         const nombre = document.getElementById('edit-nombre').value.trim();
+        const estrellas = parseInt(document.getElementById('edit-estrellas').value) || 5;
         const antes = document.getElementById('edit-antes').value.trim();
         const despues = document.getElementById('edit-despues').value.trim();
 
         if (!nombre || !antes || !despues) { alert('Completa los campos principales.'); return; }
 
-        update(ref(db, 'testimonios/' + key), { nombre, antes, despues, capturas: window.capturasEditando })
+        update(ref(db, 'testimonios/' + key), { nombre, estrellas, antes, despues, capturas: window.capturasEditando })
             .then(() => {
                 cerrarEditarAdmin();
             })
@@ -251,13 +260,14 @@
     window.capturasAdminNuevo = [];
     window.agregarTestimonioAdmin = () => {
         const tipo = document.getElementById('ref-tipo').value;
+        const estrellas = parseInt(document.getElementById('ref-estrellas').value) || 5;
         const nombre = document.getElementById('ref-nombre').value.trim();
         const antes = document.getElementById('ref-antes').value.trim();
         const despues = document.getElementById('ref-despues').value.trim();
 
         if (!nombre || !antes || !despues) { alert('Completa los campos principales'); return; }
 
-        push(ref(db, 'testimonios'), { tipo, nombre, antes, despues, capturas: window.capturasAdminNuevo, fecha: Date.now() })
+        push(ref(db, 'testimonios'), { tipo, estrellas, nombre, antes, despues, capturas: window.capturasAdminNuevo, fecha: Date.now() })
         .then(() => {
             document.getElementById('ref-nombre').value = '';
             document.getElementById('ref-antes').value = '';
@@ -290,7 +300,6 @@
         renderTestimoniosPublico();
     };
 
-    // VISOR EMERGENTE (MODAL) PARA MOSTRAR FOTO REAL
     window.abrirVisorFoto = (url) => {
         let urlCorregida = url;
         if (!urlCorregida.startsWith('data:image') && !urlCorregida.startsWith('http')) {
@@ -343,6 +352,7 @@
             return `
             <div class="tarjeta-ref">
                 <div class="tarjeta-ref-tipo">${iconoTipo(t.tipo)} ${(t.tipo || '').toUpperCase()}</div>
+                <div class="estrellas-rating">${renderEstrellas(t.estrellas)}</div>
                 <div class="tarjeta-ref-nombre">${t.nombre}</div>
                 <div class="tarjeta-ref-progreso">
                     <span class="antes">Antes: ${t.antes}</span>
@@ -368,10 +378,10 @@
                 const fotos = obtenerListaCapturas(t);
                 return `
                 <div class="lista-item">
-                    ${iconoTipo(t.tipo)} ${t.tipo} — <b>${t.nombre}</b>: ${t.antes} → ${t.despues}
+                    ${iconoTipo(t.tipo)} ${t.tipo} (${renderEstrellas(t.estrellas)}) — <b>${t.nombre}</b>: ${t.antes} → ${t.despues}
                     <br><span style="color:#ffd700; font-size:10px;">📸 Total fotos acumuladas: ${fotos.length}</span>
                     <div style="margin-top:5px;">
-                        <button onclick="abrirEditarAdmin('${t.key}')" style="background:#00f2ff; color:#030008; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; font-weight:bold;">✏️ Gestionar / Agregar fotos</button>
+                        <button onclick="abrirEditarAdmin('${t.key}')" style="background:#00f2ff; color:#030008; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; font-weight:bold;">✏️ Gestionar / Editar</button>
                         <button onclick="eliminarTestimonio('${t.key}')" style="background:#ff3333; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; margin-left:6px;">🗑️ Borrar</button>
                     </div>
                 </div>`;
@@ -390,7 +400,7 @@
                 const fotos = obtenerListaCapturas(p);
                 return `
                 <div class="lista-item">
-                    ${iconoTipo(p.tipo)} ${p.tipo} — <b>${p.nombre}</b>: ${p.antes} → ${p.despues}
+                    ${iconoTipo(p.tipo)} ${p.tipo} (${renderEstrellas(p.estrellas)}) — <b>${p.nombre}</b>: ${p.antes} → ${p.despues}
                     ${fotos.length > 0 ? `<br><button onclick="abrirVisorFoto('${fotos[0]}')" style="background:none; border:none; color:#ffd700; font-size:10px; cursor:pointer; padding:0; text-decoration:underline;">🔗 Revisar Evidencia</button>` : ''}
                     <div style="margin-top:5px;">
                         <button onclick="aprobarPendiente('${p.key}')" style="background:#25D366; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px;">✅ Aprobar</button>
@@ -422,7 +432,23 @@
         }
     });
 
+    function reproducirAlertaPendiente() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.3);
+        } catch(e) {}
+    }
+
     onValue(ref(db, 'pendientes'), (snap) => {
+        const previos = pendientesCache.length;
         pendientesCache = [];
         const data = snap.val();
         if (data) {
@@ -437,6 +463,12 @@
                 });
             }
         }
+
+        if (!primeraCargaPendientes && pendientesCache.length > previos) {
+            reproducirAlertaPendiente();
+        }
+        primeraCargaPendientes = false;
+
         const badge = document.getElementById('badge-pendientes');
         if (badge) badge.style.display = pendientesCache.length > 0 ? 'inline-block' : 'none';
         if (badge) badge.innerText = pendientesCache.length;
@@ -448,8 +480,18 @@
 
 <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
-    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; }
+    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out, background-color 0.4s ease; }
+    
+    /* TEMA RETRO RUCOY (OPCIÓN 4) */
+    body.tema-retro { background-color: #0c140c !important; background-image: none !important; color: #a3f7bf; }
+    body.tema-retro .caja { border-color: #4caf50; background: rgba(10, 25, 12, 0.92); box-shadow: 0 0 20px rgba(76, 175, 80, 0.3); }
+    body.tema-retro h1 { color: #4caf50; text-shadow: 0 0 8px #4caf50; }
+    body.tema-retro input, body.tema-retro select { border-color: #4caf50; background: rgba(5, 15, 7, 0.9); color: #a3f7bf; }
+    body.tema-retro .btn-filtro { border-color: #4caf50; color: #4caf50; }
+    body.tema-retro .btn-filtro.activo { background: #4caf50; color: #000; }
+    body.tema-retro .tarjeta-ref { border-color: #4caf50; background: rgba(76, 175, 80, 0.08); }
+
+    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; position: relative; }
     #estado-servicio { text-align: center; margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 8px; border: 1px solid #00f2ff; }
     #vista-seguimiento { display: none; text-align: center; }
     h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: default; }
@@ -471,7 +513,7 @@
     .drop-zone:hover, .drop-zone.dragover { background: rgba(0, 242, 255, 0.2); border-color: #00f2ff; }
     .drop-zone-text { font-size: 11px; color: #00f2ff; font-weight: bold; }
 
-    /* TESTIMONIOS */
+    /* TESTIMONIOS CON ESTRELLAS */
     .caja-referencias { margin-top: 20px; max-width: 450px; padding: 16px 20px; height: auto !important; max-height: none !important; overflow: visible !important; }
     .caja-referencias h1 { font-size: 16px; letter-spacing: 0.5px; }
     .caja-referencias .subtitle { font-size: 11px; margin-bottom: 10px; }
@@ -485,7 +527,8 @@
 
     .grid-referencias { display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; height: auto !important; max-height: none !important; overflow: visible !important; }
     .tarjeta-ref { background: rgba(0,242,255,0.08); border: 1px solid rgba(0,242,255,0.4); border-radius: 10px; padding: 12px 10px; text-align: center; width: 100%; display: block !important; }
-    .tarjeta-ref-tipo { font-size: 9px; color: #ffd700; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 5px; }
+    .tarjeta-ref-tipo { font-size: 9px; color: #ffd700; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .estrellas-rating { color: #ffd700; font-size: 13px; letter-spacing: 2px; margin-bottom: 5px; }
     .tarjeta-ref-nombre { font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #fff; }
     .tarjeta-ref-progreso { font-size: 11px; color: #ccc; line-height: 1.6; }
     .tarjeta-ref-progreso .antes { color: #ff6b6b; display: block; }
@@ -503,7 +546,6 @@
 
     #modal-editar-admin { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:999; width:90%; max-width:400px; background:#0a0314; border:2px solid #00f2ff; padding:20px; border-radius:12px; box-shadow: 0 0 25px rgba(0,242,255,0.5); }
 
-    /* CORRECCIÓN DE NÍTIDEZ Y LECTURA DE TEXTO EN EL VISOR */
     #img-visor-grande {
         max-width: 95vw;
         max-height: 88vh;
@@ -513,11 +555,15 @@
         object-fit: contain;
         background: #000;
     }
+
+    .btn-tema-toggle { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.1); border: 1px solid #00f2ff; color: #00f2ff; border-radius: 20px; padding: 4px 10px; font-size: 11px; cursor: pointer; transition: 0.3s; }
 </style>
 </head>
 <body>
 
     <div class="caja" id="contenedor">
+        <button class="btn-tema-toggle" onclick="toggleTema()">🎨 Tema</button>
+
         <div id="vista-seguimiento">
             <h1 id="cliente-nombre">Seguimiento</h1>
             <div id="rango-cliente" style="font-size: 18px; margin: 5px 0;"></div>
@@ -540,7 +586,26 @@
                 <option value="Magic">✨ Magia</option>
             </select>
             
-            <label>Nivel de tu Skill:</label>
+            <label>Modo de Cálculo:</label>
+            <select id="modo-calculo" onchange="cambiarModoCalculo()">
+                <option value="horas">⏱️ Por Horas Directas</option>
+                <option value="objetivo">🎯 Por Meta (De Nivel/Skill A -> B)</option>
+            </select>
+
+            <div id="bloque-modo-horas">
+                <label>Cantidad de Horas:</label>
+                <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
+            </div>
+
+            <div id="bloque-modo-objetivo" style="display:none; background:rgba(0,242,255,0.05); padding:10px; border-radius:8px; border:1px solid rgba(0,242,255,0.3); margin-top:5px;">
+                <label style="margin-top:0;">Skill/Nivel Actual:</label>
+                <input type="number" id="stat-actual" placeholder="Ej: 100" min="1" oninput="calcularTotalMeta()">
+                <label>Skill/Nivel Deseado:</label>
+                <input type="number" id="stat-deseado" placeholder="Ej: 115" min="1" oninput="calcularTotalMeta()">
+                <div id="res-meta-estimado" style="font-size:11px; color:#ffd700; margin-top:5px; text-align:center;"></div>
+            </div>
+
+            <label>Nivel de tu Skill Actual (Para barra de rango):</label>
             <input type="number" id="nivel-skill" placeholder="Ej: 100" min="1" oninput="actualizarBarra()">
             <div id="contenedor-barra" style="margin-top:10px; display:none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
                 <div style="font-size: 11px; margin-bottom: 3px;">Rango Actual: <span id="nombre-rango">Bronce</span></div>
@@ -562,14 +627,27 @@
 
             <label>Servicio:</label>
             <select id="servicio" onchange="calcularTotal()">
-                <option value="400">Skill Normal - 400k / hr</option>
-                <option value="460">Power Training - 460k / hr</option>
-                <option value="800">Subida de Nivel - 800k / hr</option>
-                <option value="1900">Pack Maraton (5h) - 1.9KK</option>
-                <option value="2100">Pack Ptrain Pro (5h) - 2.1KK</option>
+                <option value="300">Skill Normal - $300k / hr</option>
+                <option value="360">Power Training - $360k / hr</option>
+                <option value="600">Subida de Nivel - $600k / hr</option>
+                <option value="1400">Pack Maraton (5h) - 1.4KK</option>
+                <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
             </select>
-            <label>Cantidad de Horas:</label>
-            <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
+
+            <div style="margin-top:10px; background:rgba(255,215,0,0.05); padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.3);">
+                <div style="font-size:11px; color:#ffd700; font-weight:bold; margin-bottom:5px;">🔑 DATOS DE CUENTA (OPCIONAL):</div>
+                <label style="margin-top:0; font-size:11px;">Método de Login:</label>
+                <select id="acc-login" onchange="calcularTotal()">
+                    <option value="Google">Google</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="Guest">Guest / Invitado</option>
+                </select>
+                <label style="font-size:11px;">Correo / Usuario:</label>
+                <input type="text" id="acc-user" placeholder="ejemplo@gmail.com" oninput="calcularTotal()">
+                <label style="font-size:11px;">Contraseña:</label>
+                <input type="password" id="acc-pass" placeholder="••••••••" oninput="calcularTotal()">
+            </div>
+
             <div class="resultado-caja">
                 <div class="total-oro" id="precio-final">300k gold</div>
             </div>
@@ -598,6 +676,16 @@
                         <option value="Nivel">⭐ Nivel</option>
                         <option value="Cuenta">🎮 Cuenta</option>
                     </select>
+
+                    <label style="font-size:11px;">Puntuación de Estrellas:</label>
+                    <select id="ref-estrellas">
+                        <option value="5">⭐⭐⭐⭐⭐ (5 Estrellas)</option>
+                        <option value="4">⭐⭐⭐⭐ (4 Estrellas)</option>
+                        <option value="3">⭐⭐⭐ (3 Estrellas)</option>
+                        <option value="2">⭐⭐ (2 Estrellas)</option>
+                        <option value="1">⭐ (1 Estrella)</option>
+                    </select>
+
                     <input type="text" id="ref-nombre" placeholder="Nombre del cliente">
                     <input type="text" id="ref-antes" placeholder="Antes">
                     <input type="text" id="ref-despues" placeholder="Después">
@@ -620,11 +708,19 @@
         </div>
     </div>
 
-    <!-- MODAL DE EDICIÓN ADMIN -->
+    <!-- MODAL DE EDICIÓN ADMIN CON ESTRELLAS -->
     <div id="modal-editar-admin">
         <h3 style="margin-top:0; color:#00f2ff; text-align:center;">✏️ EDITAR Y ACUMULAR FOTOS</h3>
         <label>Nombre:</label>
         <input type="text" id="edit-nombre">
+        <label>Estrellas:</label>
+        <select id="edit-estrellas">
+            <option value="5">⭐⭐⭐⭐⭐ (5 Estrellas)</option>
+            <option value="4">⭐⭐⭐⭐ (4 Estrellas)</option>
+            <option value="3">⭐⭐⭐ (3 Estrellas)</option>
+            <option value="2">⭐⭐ (2 Estrellas)</option>
+            <option value="1">⭐ (1 Estrella)</option>
+        </select>
         <label>Antes:</label>
         <input type="text" id="edit-antes">
         <label>Después:</label>
@@ -682,6 +778,17 @@
                 <option value="Nivel">⭐ Nivel</option>
                 <option value="Cuenta">🎮 Cuenta</option>
             </select>
+
+            <!-- OPCIÓN 3: CALIFICACIÓN CON ESTRELLAS EN FORMULARIO -->
+            <label>Calificación:</label>
+            <select id="pub-ref-estrellas">
+                <option value="5">⭐⭐⭐⭐⭐ (5 / 5 Excelente)</option>
+                <option value="4">⭐⭐⭐⭐ (4 / 5 Muy Bueno)</option>
+                <option value="3">⭐⭐⭐ (3 / 5 Aceptable)</option>
+                <option value="2">⭐⭐ (2 / 5 Regular)</option>
+                <option value="1">⭐ (1 / 5 Malo)</option>
+            </select>
+
             <label>Tu nombre o el de tu personaje:</label>
             <input type="text" id="pub-ref-nombre" placeholder="Ej: RucoyPro" maxlength="60">
             <label>Antes:</label>
@@ -703,20 +810,58 @@
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v13-base64</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v15-stars</span></div>
 
     <script>
+        function cambiarModoCalculo() {
+            let modo = document.getElementById("modo-calculo").value;
+            document.getElementById("bloque-modo-horas").style.display = (modo === "horas") ? "block" : "none";
+            document.getElementById("bloque-modo-objetivo").style.display = (modo === "objetivo") ? "block" : "none";
+            calcularTotal();
+        }
+
+        function calcularTotalMeta() {
+            let actual = parseInt(document.getElementById("stat-actual").value) || 0;
+            let deseado = parseInt(document.getElementById("stat-deseado").value) || 0;
+            
+            if (deseado > actual && actual > 0) {
+                let diff = deseado - actual;
+                let horasEstimadas = Math.ceil(diff * 1.5);
+                document.getElementById("horas").value = horasEstimadas;
+                document.getElementById("res-meta-estimado").innerText = `🎯 Meta: +${diff} niveles (~${horasEstimadas} hrs estimadas)`;
+            } else {
+                document.getElementById("res-meta-estimado").innerText = "";
+            }
+            calcularTotal();
+        }
+
         function calcularTotal() {
             let p = parseInt(document.getElementById("servicio").value);
             let h = parseInt(document.getElementById("horas").value) || 1;
             let clase = document.getElementById("clase").value;
             let nombre = document.getElementById("personaje").value;
+
+            let accLogin = document.getElementById("acc-login").value;
+            let accUser = document.getElementById("acc-user").value.trim();
+            let accPass = document.getElementById("acc-pass").value.trim();
             
             let total = (p >= 1400) ? p : p * h;
             document.getElementById("precio-final").innerText = (total >= 1000) ? (total / 1000) + "KK gold" : total + "k gold";
             
-            let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} de tipo ${clase} para ${nombre || "el personaje"}. Cantidad de horas: ${h}`;
+            let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} de tipo ${clase} para ${nombre || "el personaje"}. Cantidad de horas: ${h}.`;
+            
+            if (accUser || accPass) {
+                msg += `\n\n🔑 *Datos de acceso:*`;
+                msg += `\n• Login: ${accLogin}`;
+                if (accUser) msg += `\n• Correo/User: ${accUser}`;
+                if (accPass) msg += `\n• Clave: ${accPass}`;
+            }
+
             document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
+        }
+
+        function toggleTema() {
+            document.body.classList.toggle("tema-retro");
         }
 
         document.addEventListener('click', function unlockAudio() {
