@@ -42,12 +42,11 @@
             snapshot.forEach((child) => {
                 if (child.val().nombre.toLowerCase() === nombre.toLowerCase()) {
                     let totalHoras = (child.val().totalHoras || 0) + horas;
-                    let visitas = (child.val().visitas || 1) + 1;
-                    update(ref(db, 'clientes/' + child.key), { totalHoras: totalHoras, visitas: visitas });
+                    update(ref(db, 'clientes/' + child.key), { totalHoras: totalHoras });
                     encontrado = true;
                 }
             });
-            if (!encontrado) push(clientesRef, { nombre: nombre, totalHoras: horas, visitas: 1 });
+            if (!encontrado) push(clientesRef, { nombre: nombre, totalHoras: horas });
         });
     };
 
@@ -285,7 +284,7 @@
         const btn = document.getElementById('btn-toggle-ref');
         const abierto = cont.style.display !== 'none';
         cont.style.display = abierto ? 'none' : 'block';
-        btn.innerText = abierto ? `👁️ TESTIMONIOS PUBLICADOS (${testimoniosCache.length})` : '🔼 OCULTAR TESTIMONIOS';
+        btn.innerText = abierto ? `👁️ VER TESTIMONIOS (${testimoniosCache.length})` : '🔼 OCULTAR TESTIMONIOS';
     };
 
     window.filtrarReferencias = (tipo, btn) => {
@@ -556,13 +555,7 @@
             <h1 id="cliente-nombre">Seguimiento</h1>
             <div id="rango-cliente" style="font-size: 18px; margin: 5px 0;"></div>
             <div id="reloj" style="font-size: 40px; color: #ffd700; margin: 20px 0; font-weight: bold;">00:00:00</div>
-            
-            <!-- Botón para activar notificaciones nativas en segundo plano -->
-            <div style="margin-top: 15px;">
-                <button onclick="solicitarPermisoNotificacion()" style="background: rgba(0,242,255,0.15); border: 1px solid #00f2ff; color: #00f2ff; padding: 8px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">
-                    🔔 Activar Alertas con Fondo / Google Cerrado
-                </button>
-            </div>
+            <button id="btn-activar-notif" onclick="solicitarPermisoNotificaciones()" style="background:#00f2ff; color:#030008; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; margin-bottom:15px;">🔔 Activar Notificaciones</button>
         </div>
 
         <div id="vista-formulario">
@@ -602,11 +595,11 @@
 
             <label>Servicio:</label>
             <select id="servicio" onchange="calcularTotal()">
-                <option value="300">Skill Normal - $300k / hr</option>
-                <option value="360">Power Training - $360k / hr</option>
-                <option value="600">Subida de Nivel - $600k / hr</option>
-                <option value="1400">Pack Maraton (5h) - 1.4KK</option>
-                <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
+                <option value="400">Skill Normal - 400k / hr</option>
+                <option value="460">Power Training - 460k / hr</option>
+                <option value="800">Subida de Nivel - 800k / hr</option>
+                <option value="1900">Pack Maraton (5h) - 1.9KK</option>
+                <option value="2100">Pack Ptrain Pro (5h) - 2.1KK</option>
             </select>
 
             <label>Nivel de tu Skill Actual (Para barra de rango):</label>
@@ -629,14 +622,6 @@
                 <tr><td style="color:#ff8c00;">🔥 LEYENDA I</td><td>1500+</td></tr>
                 <tr><td style="color:#ff4500;">⚡ LEYENDA II</td><td>2000+</td></tr>
             </table>
-
-            <!-- SECCIÓN NUEVA: RANKING PÚBLICO DE CLIENTES -->
-            <div style="margin-top: 15px; background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 8px; padding: 10px;">
-                <div style="font-size: 12px; color: #ffd700; font-weight: bold; text-align: center; margin-bottom: 8px;">🏆 SALÓN DE LA FAMA (TOP CLIENTES)</div>
-                <div id="ranking-publico-lista" style="font-size: 11px; max-height: 130px; overflow-y: auto;">
-                    <div style="color: #888; text-align: center;">Cargando ranking...</div>
-                </div>
-            </div>
 
             <div class="resultado-caja">
                 <div class="total-oro" id="precio-final">300k gold</div>
@@ -750,7 +735,7 @@
                 <button class="btn-filtro activo" data-tipo="Todos" onclick="filtrarReferencias('Todos', this)">Todos</button>
                 <button class="btn-filtro" data-tipo="Skill" onclick="filtrarReferencias('Skill', this)">⚔️ Skill</button>
                 <button class="btn-filtro" data-tipo="Nivel" onclick="filtrarReferencias('Nivel', this)">⭐ Nivel</button>
-                <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</button>
+                <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</option>
             </div>
             
             <div class="grid-referencias" id="grid-referencias"></div>
@@ -799,7 +784,7 @@
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v23</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v17</span></div>
 
     <script>
         function cambiarModoCalculo() {
@@ -896,47 +881,16 @@
             return { rango: "Novato", color: "#aaa", icono: "👶" };
         }
 
-        function obtenerInsigniaFidelidad(visitas, horas) {
-            if (visitas >= 5 || horas >= 250) return '<span style="background:rgba(255,215,0,0.2); border:1px solid #ffd700; color:#ffd700; padding:1px 5px; border-radius:4px; font-size:9px; margin-left:4px;">🌟 Veterano Fiel</span>';
-            if (visitas >= 3 || horas >= 100) return '<span style="background:rgba(0,242,255,0.2); border:1px solid #00f2ff; color:#00f2ff; padding:1px 5px; border-radius:4px; font-size:9px; margin-left:4px;">🎖️ Constante</span>';
-            return '';
-        }
-
-        // CARGAR RANKING EN VIVO PARA EL PÚBLICO
-        window.onValue(window.ref(window.db, 'clientes'), (snap) => {
-            const listEl = document.getElementById('ranking-publico-lista');
-            if (!listEl) return;
-            let clientesArr = [];
-            snap.forEach(c => {
-                clientesArr.push(c.val());
-            });
-            if (clientesArr.length === 0) {
-                listEl.innerHTML = '<div style="color: #888; text-align: center;">Aún no hay registros en el ranking.</div>';
-                return;
-            }
-            clientesArr.sort((a, b) => (b.totalHoras || 0) - (a.totalHoras || 0));
-            
-            listEl.innerHTML = clientesArr.slice(0, 5).map((d, index) => {
-                let r = obtenerRango(d.totalHoras || 0);
-                let medalla = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `<b>#${index + 1}</b>`;
-                return `<div style="display: flex; justify-content: space-between; padding: 4px 6px; border-bottom: 1px solid rgba(255,255,255,0.05); color:${r.color};">
-                    <span>${medalla} ${d.nombre}</span>
-                    <span><b>${d.totalHoras}h</b> (${r.rango})</span>
-                </div>`;
-            }).join('');
-        });
-
         function cargarAdmin() {
             let div = document.getElementById('lista-clientes');
-            div.innerHTML = "<div style='margin-top:15px; border-top:1px solid #00f2ff; padding-top:10px;'><strong>📋 TABLA DE CLIENTES Y FIDELIDAD:</strong></div><div id='contenido-lista'></div>";
+            div.innerHTML = "<div style='margin-top:15px; border-top:1px solid #00f2ff; padding-top:10px;'><strong>📋 TABLA DE CLIENTES:</strong></div><div id='contenido-lista'></div>";
             const listaDiv = document.getElementById('contenido-lista');
             window.onValue(window.ref(window.db, 'clientes'), (snap) => {
                 listaDiv.innerHTML = "";
                 snap.forEach(c => {
                     let d = c.val();
                     let r = obtenerRango(d.totalHoras || 0);
-                    let badgeFidelidad = obtenerInsigniaFidelidad(d.visitas || 1, d.totalHoras || 0);
-                    listaDiv.innerHTML += `<div class="lista-item" style="color:${r.color}; margin-top:5px;">${r.icono} ${d.nombre} (${d.totalHoras}h) — <b>${r.rango}</b> ${badgeFidelidad}</div>`;
+                    listaDiv.innerHTML += `<div class="lista-item" style="color:${r.color}; margin-top:5px;">${r.icono} ${d.nombre} (${d.totalHoras}h) — <b>${r.rango}</b></div>`;
                 });
             });
         }
@@ -950,36 +904,20 @@
             setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
         }
 
-        // =====================================================================
-        // ---- NUEVO SISTEMA DE NOTIFICACIONES CON GOOGLE CERRADO / SEGUNDO PLANO ----
-        // =====================================================================
-
-        // Registrar Service Worker automáticamente
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('data:text/javascript;charset=utf-8,' + encodeURIComponent(`
-                    self.addEventListener('install', (e) => self.skipWaiting());
-                    self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
-                `)).catch(err => console.log('SW error:', err));
-            });
-        }
-
-        function solicitarPermisoNotificacion() {
-            if (!("Notification" in window)) {
-                alert("Tu dispositivo o navegador no soporta notificaciones push nativas.");
-                return;
+        function solicitarPermisoNotificaciones() {
+            if ("Notification" in window) {
+                Notification.requestPermission().then((permission) => {
+                    if (permission === "granted") {
+                        alert("¡Notificaciones activadas con éxito!");
+                        const btnNotif = document.getElementById("btn-activar-notif");
+                        if(btnNotif) btnNotif.style.display = "none";
+                    } else {
+                        alert("Has denegado o cerrado el permiso de notificaciones.");
+                    }
+                });
+            } else {
+                alert("Tu navegador no soporta notificaciones.");
             }
-            
-            Notification.requestPermission().then((permission) => {
-                if (permission === "granted") {
-                    new Notification("🛡️ Safegaming Service", {
-                        body: "¡Listo! Ahora recibirás las alertas con sonido incluso si cierras Google.",
-                        icon: "https://i.imgur.com/3Z5Vz0N.png"
-                    });
-                } else {
-                    alert("Has bloqueado o denegado los permisos de notificación.");
-                }
-            });
         }
 
         const params = new URLSearchParams(window.location.search);
@@ -991,29 +929,33 @@
             let r = params.get('r') || "Novato", c = params.get('c') || "#aaa", i = params.get('i') || "👶";
             document.getElementById("rango-cliente").innerHTML = `<span style="color:${c}">${i} ${r}</span>`;
             
+            if ("Notification" in window && Notification.permission === "granted") {
+                const btnNotif = document.getElementById("btn-activar-notif");
+                if(btnNotif) btnNotif.style.display = "none";
+            }
+
             let fin = parseInt(params.get('f'));
-            let alertaEnviada = false;
+            let notificacionEnviada = false;
 
             setInterval(() => {
                 let diff = fin - new Date().getTime();
                 if(diff <= 0) {
-                    document.getElementById("reloj").innerHTML = `<div style="font-size: 16px; color: #4caf50; line-height: 1.5; padding: 10px; background: rgba(0,255,0,0.1); border: 1px solid #4caf50; border-radius: 8px;">Gracias por contactar con SAFEGAMING SERVICE. Servicio finalizado. ¡Lo esperamos pronto!</div>`;
-                    
-                    if (!alertaEnviada) {
-                        // Disparar notificación push nativa del sistema (funciona con Google cerrado y emite sonido integrado)
-                        if (Notification.permission === "granted" && navigator.serviceWorker) {
-                            navigator.serviceWorker.ready.then((registration) => {
-                                registration.showNotification("🛡️ Safegaming Service", {
-                                    body: "¡Hola! Tu tiempo contratado ha finalizado con éxito. Revisa tu cuenta.",
-                                    icon: "https://i.imgur.com/3Z5Vz0N.png",
-                                    vibrate: [200, 100, 200, 100, 200],
-                                    tag: "servicio-terminado",
-                                    renotify: true
-                                });
-                            });
+                    document.getElementById("reloj").innerText = "COMPLETADO ✅";
+                    if (!notificacionEnviada) {
+                        notificacionEnviada = true;
+                        
+                        const audioAlerta = document.getElementById('sonido-level');
+                        if(audioAlerta) {
+                            audioAlerta.currentTime = 0;
+                            audioAlerta.play().catch(() => {});
                         }
 
-                        alertaEnviada = true;
+                        if ("Notification" in window && Notification.permission === "granted") {
+                            new Notification("SAFEGAMING SERVICE", {
+                                body: "Gracias por contactar a SAFEGAMING SERVICE servicio finalizado gracias por confiar en nosotros lo esperamos pronto",
+                                icon: ""
+                            });
+                        }
                     }
                 } else {
                     let h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
@@ -1072,7 +1014,7 @@
                 e.preventDefault();
                 dropZone.classList.remove('dragover');
                 if (e.dataTransfer.files.length > 0) {
-                    window.subirImagenAImgur(e.dataTransfer.files[0], estado, callbackExitoruta => {});
+                    window.subirImagenAImgur(e.dataTransfer.files[0], estado, callbackExito);
                 }
             });
         }
