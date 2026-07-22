@@ -51,7 +51,7 @@
     };
 
     // =====================================================================
-    // ---- SISTEMA DE TESTIMONIOS CON COMPRESIÓN Y ACUMULACIÓN DE IMÁGENES ----
+    // ---- SISTEMA DE TESTIMONIOS CON PROCESAMIENTO DIRECTO BASE64 ----
     // =====================================================================
 
     let testimoniosCache = [];
@@ -76,8 +76,8 @@
         return [];
     }
 
-    // FUNCIÓN DE COMPRESIÓN PREVIA
-    function comprimirImagen(file, maxAncho = 1080, calidad = 0.7) {
+    // CONVERSIÓN Y COMPRESIÓN DIRECTA A BASE64
+    function procesarImagenBase64(file, maxAncho = 1000, calidad = 0.7) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -99,19 +99,10 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
 
-                    canvas.toBlob((blob) => {
-                        if (blob) {
-                            const fileComprimido = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
-                                type: 'image/jpeg',
-                                lastModified: Date.now()
-                            });
-                            resolve(fileComprimido);
-                        } else {
-                            reject(new Error("Error al comprimir la imagen"));
-                        }
-                    }, 'image/jpeg', calidad);
+                    const base64Data = canvas.toDataURL('image/jpeg', calidad);
+                    resolve(base64Data);
                 };
-                img.onerror = () => reject(new Error("Error al cargar la imagen"));
+                img.onerror = () => reject(new Error("Error al procesar la imagen"));
             };
             reader.onerror = () => reject(new Error("Error al leer el archivo"));
         });
@@ -121,32 +112,16 @@
         if (!file) return;
         
         elementoEstado.style.color = '#ffd700';
-        elementoEstado.innerText = '⏳ Optimizando y subiendo imagen...';
+        elementoEstado.innerText = '⏳ Procesando imagen...';
 
         try {
-            // Se comprime la foto antes de subirla
-            const fotoComprimida = await comprimirImagen(file);
-
-            const formData = new FormData();
-            formData.append('image', fotoComprimida);
-
-            const res = await fetch('https://api.imgur.com/3/image', {
-                method: 'POST',
-                headers: { Authorization: 'Client-ID 1c313a48e7f8e8f' },
-                body: formData
-            });
-
-            const data = await res.json();
-            if (data.success) {
-                elementoEstado.style.color = '#4caf50';
-                elementoEstado.innerText = '✅ Imagen subida y agregada al historial.';
-                callbackURL(data.data.link);
-            } else {
-                throw new Error('Error al subir');
-            }
+            const imagenBase64 = await procesarImagenBase64(file);
+            elementoEstado.style.color = '#4caf50';
+            elementoEstado.innerText = '✅ Imagen agregada con éxito.';
+            callbackURL(imagenBase64);
         } catch (error) {
             elementoEstado.style.color = '#ff6b6b';
-            elementoEstado.innerText = '❌ Error al subir la imagen. Intenta de nuevo.';
+            elementoEstado.innerText = '❌ Error al procesar la imagen. Intenta de nuevo.';
         }
     };
 
@@ -693,7 +668,7 @@
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v12-compresion</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v13-base64</span></div>
 
     <script>
         function calcularTotal() {
