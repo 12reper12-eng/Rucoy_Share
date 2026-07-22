@@ -51,7 +51,7 @@
     };
 
     // =====================================================================
-    // ---- SISTEMA DE TESTIMONIOS CON BASE64 Y ESTRELLAS (OPCIÓN 3) ----
+    // ---- SISTEMA DE TESTIMONIOS CON ESTRELLAS Y BASE64 ----
     // =====================================================================
 
     let testimoniosCache = [];
@@ -480,16 +480,7 @@
 
 <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out, background-color 0.4s ease; }
-    
-    /* TEMA RETRO RUCOY (OPCIÓN 4) */
-    body.tema-retro { background-color: #0c140c !important; background-image: none !important; color: #a3f7bf; }
-    body.tema-retro .caja { border-color: #4caf50; background: rgba(10, 25, 12, 0.92); box-shadow: 0 0 20px rgba(76, 175, 80, 0.3); }
-    body.tema-retro h1 { color: #4caf50; text-shadow: 0 0 8px #4caf50; }
-    body.tema-retro input, body.tema-retro select { border-color: #4caf50; background: rgba(5, 15, 7, 0.9); color: #a3f7bf; }
-    body.tema-retro .btn-filtro { border-color: #4caf50; color: #4caf50; }
-    body.tema-retro .btn-filtro.activo { background: #4caf50; color: #000; }
-    body.tema-retro .tarjeta-ref { border-color: #4caf50; background: rgba(76, 175, 80, 0.08); }
+    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
 
     .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; position: relative; }
     #estado-servicio { text-align: center; margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 8px; border: 1px solid #00f2ff; }
@@ -555,15 +546,11 @@
         object-fit: contain;
         background: #000;
     }
-
-    .btn-tema-toggle { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.1); border: 1px solid #00f2ff; color: #00f2ff; border-radius: 20px; padding: 4px 10px; font-size: 11px; cursor: pointer; transition: 0.3s; }
 </style>
 </head>
 <body>
 
     <div class="caja" id="contenedor">
-        <button class="btn-tema-toggle" onclick="toggleTema()">🎨 Tema</button>
-
         <div id="vista-seguimiento">
             <h1 id="cliente-nombre">Seguimiento</h1>
             <div id="rango-cliente" style="font-size: 18px; margin: 5px 0;"></div>
@@ -605,6 +592,15 @@
                 <div id="res-meta-estimado" style="font-size:11px; color:#ffd700; margin-top:5px; text-align:center;"></div>
             </div>
 
+            <label>Servicio:</label>
+            <select id="servicio" onchange="calcularTotal()">
+                <option value="300">Skill Normal - $300k / hr</option>
+                <option value="360">Power Training - $360k / hr</option>
+                <option value="600">Subida de Nivel - $600k / hr</option>
+                <option value="1400">Pack Maraton (5h) - 1.4KK</option>
+                <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
+            </select>
+
             <label>Nivel de tu Skill Actual (Para barra de rango):</label>
             <input type="number" id="nivel-skill" placeholder="Ej: 100" min="1" oninput="actualizarBarra()">
             <div id="contenedor-barra" style="margin-top:10px; display:none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
@@ -614,6 +610,7 @@
                 </div>
             </div>
 
+            <!-- TABLA DE RANGOS REORDENADA -->
             <table class="tabla-rangos">
                 <tr><th>Rango</th><th>Horas</th></tr>
                 <tr><td style="color:#c0c0c0;">⚪ PLATA</td><td>20+</td></tr>
@@ -625,22 +622,11 @@
                 <tr><td style="color:#ff4500;">⚡ LEYENDA II</td><td>2000+</td></tr>
             </table>
 
-            <label>Servicio:</label>
-            <select id="servicio" onchange="calcularTotal()">
-                <option value="300">Skill Normal - $300k / hr</option>
-                <option value="360">Power Training - $360k / hr</option>
-                <option value="600">Subida de Nivel - $600k / hr</option>
-                <option value="1400">Pack Maraton (5h) - 1.4KK</option>
-                <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
-            </select>
-
-            <div style="margin-top:10px; background:rgba(255,215,0,0.05); padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.3);">
+            <div style="margin-top:15px; background:rgba(255,215,0,0.05); padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.3);">
                 <div style="font-size:11px; color:#ffd700; font-weight:bold; margin-bottom:5px;">🔑 DATOS DE CUENTA (OPCIONAL):</div>
                 <label style="margin-top:0; font-size:11px;">Método de Login:</label>
                 <select id="acc-login" onchange="calcularTotal()">
                     <option value="Google">Google</option>
-                    <option value="Facebook">Facebook</option>
-                    <option value="Guest">Guest / Invitado</option>
                 </select>
                 <label style="font-size:11px;">Correo / Usuario:</label>
                 <input type="text" id="acc-user" placeholder="ejemplo@gmail.com" oninput="calcularTotal()">
@@ -760,7 +746,7 @@
                 <button class="btn-filtro activo" data-tipo="Todos" onclick="filtrarReferencias('Todos', this)">Todos</button>
                 <button class="btn-filtro" data-tipo="Skill" onclick="filtrarReferencias('Skill', this)">⚔️ Skill</button>
                 <button class="btn-filtro" data-tipo="Nivel" onclick="filtrarReferencias('Nivel', this)">⭐ Nivel</button>
-                <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</button>
+                <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</option>
             </div>
             
             <div class="grid-referencias" id="grid-referencias"></div>
@@ -779,8 +765,7 @@
                 <option value="Cuenta">🎮 Cuenta</option>
             </select>
 
-            <!-- OPCIÓN 3: CALIFICACIÓN CON ESTRELLAS EN FORMULARIO -->
-            <label>Calificación:</label>
+            <label>Calificación de Estrellas:</label>
             <select id="pub-ref-estrellas">
                 <option value="5">⭐⭐⭐⭐⭐ (5 / 5 Excelente)</option>
                 <option value="4">⭐⭐⭐⭐ (4 / 5 Muy Bueno)</option>
@@ -810,7 +795,7 @@
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v15-stars</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v16</span></div>
 
     <script>
         function cambiarModoCalculo() {
@@ -858,10 +843,6 @@
             }
 
             document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
-        }
-
-        function toggleTema() {
-            document.body.classList.toggle("tema-retro");
         }
 
         document.addEventListener('click', function unlockAudio() {
