@@ -4,6 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Safegaming Service - Rucoy Online</title>
+
+<!-- SCRIPT DE ONESIGNAL (INICIALIZACIÓN WEB) -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "45f99623-47ba-4f12-bc37-d685f58aa42c",
+      safebrowsing_enabled: true,
+      allowLocalhostAsSecureOrigin: true
+    });
+  });
+</script>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, set, push, update, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -49,10 +63,6 @@
             if (!encontrado) push(clientesRef, { nombre: nombre, totalHoras: horas });
         });
     };
-
-    // =====================================================================
-    // ---- SISTEMA DE TESTIMONIOS CON ESTRELLAS Y BASE64 ----
-    // =====================================================================
 
     let testimoniosCache = [];
     let pendientesCache = [];
@@ -499,12 +509,10 @@
     .tabla-rangos { width: 100%; font-size: 11px; margin-top: 15px; border-collapse: collapse; border: 1px solid #444; color: #ccc; }
     .tabla-rangos th, .tabla-rangos td { padding: 6px; border: 1px solid #444; text-align: center; }
 
-    /* DROP ZONE */
     .drop-zone { border: 2px dashed rgba(0, 242, 255, 0.5); background: rgba(0, 242, 255, 0.05); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: 5px; transition: 0.3s; }
     .drop-zone:hover, .drop-zone.dragover { background: rgba(0, 242, 255, 0.2); border-color: #00f2ff; }
     .drop-zone-text { font-size: 11px; color: #00f2ff; font-weight: bold; }
 
-    /* TESTIMONIOS CON ESTRELLAS */
     .caja-referencias { margin-top: 20px; max-width: 450px; padding: 16px 20px; height: auto !important; max-height: none !important; overflow: visible !important; }
     .caja-referencias h1 { font-size: 16px; letter-spacing: 0.5px; }
     .caja-referencias .subtitle { font-size: 11px; margin-bottom: 10px; }
@@ -555,7 +563,6 @@
             <h1 id="cliente-nombre">Seguimiento</h1>
             <div id="rango-cliente" style="font-size: 18px; margin: 5px 0;"></div>
             <div id="reloj" style="font-size: 40px; color: #ffd700; margin: 20px 0; font-weight: bold;">00:00:00</div>
-            <button id="btn-activar-notif" onclick="solicitarPermisoNotificaciones()" style="background:#00f2ff; color:#030008; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; margin-bottom:15px;">🔔 Activar Notificaciones</button>
         </div>
 
         <div id="vista-formulario">
@@ -611,7 +618,6 @@
                 </div>
             </div>
 
-            <!-- TABLA DE RANGOS REORDENADA -->
             <table class="tabla-rangos">
                 <tr><th>Rango</th><th>Horas</th></tr>
                 <tr><td style="color:#c0c0c0;">⚪ PLATA</td><td>20+</td></tr>
@@ -683,7 +689,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE EDICIÓN ADMIN CON ESTRELLAS -->
     <div id="modal-editar-admin">
         <h3 style="margin-top:0; color:#00f2ff; text-align:center;">✏️ EDITAR Y ACUMULAR FOTOS</h3>
         <label>Nombre:</label>
@@ -717,7 +722,6 @@
         </div>
     </div>
 
-    <!-- VISOR EMERGENTE DE FOTOS -->
     <div id="modal-visor-foto" onclick="cerrarVisorFoto()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
         <div style="position:relative; max-width:90%; max-height:90%;">
             <span style="position:absolute; top:-30px; right:0; color:white; font-size:24px; font-weight:bold; cursor:pointer;">✖️ Cerrar</span>
@@ -735,7 +739,7 @@
                 <button class="btn-filtro activo" data-tipo="Todos" onclick="filtrarReferencias('Todos', this)">Todos</button>
                 <button class="btn-filtro" data-tipo="Skill" onclick="filtrarReferencias('Skill', this)">⚔️ Skill</button>
                 <button class="btn-filtro" data-tipo="Nivel" onclick="filtrarReferencias('Nivel', this)">⭐ Nivel</button>
-                <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</option>
+                <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</button>
             </div>
             
             <div class="grid-referencias" id="grid-referencias"></div>
@@ -782,9 +786,7 @@
         </div>
     </div>
 
-    <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
-
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v17</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v19-onesignal</span></div>
 
     <script>
         function cambiarModoCalculo() {
@@ -822,12 +824,6 @@
 
             document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
         }
-
-        document.addEventListener('click', function unlockAudio() {
-            const audio = document.getElementById('sonido-level');
-            if(audio) { audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {}); }
-            document.removeEventListener('click', unlockAudio);
-        }, { once: true });
 
         function actualizarBarra() {
             let nivel = parseInt(document.getElementById("nivel-skill").value) || 0;
@@ -899,25 +895,7 @@
             let nombre = document.getElementById("personaje").value;
             let horas = parseInt(document.getElementById("horas").value) || 1;
             if(nombre) window.registrarCliente(nombre, horas);
-            const audio = document.getElementById('sonido-level');
-            if(audio) audio.play();
             setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
-        }
-
-        function solicitarPermisoNotificaciones() {
-            if ("Notification" in window) {
-                Notification.requestPermission().then((permission) => {
-                    if (permission === "granted") {
-                        alert("¡Notificaciones activadas con éxito!");
-                        const btnNotif = document.getElementById("btn-activar-notif");
-                        if(btnNotif) btnNotif.style.display = "none";
-                    } else {
-                        alert("Has denegado o cerrado el permiso de notificaciones.");
-                    }
-                });
-            } else {
-                alert("Tu navegador no soporta notificaciones.");
-            }
         }
 
         const params = new URLSearchParams(window.location.search);
@@ -928,35 +906,13 @@
             document.getElementById("cliente-nombre").innerText = "Cliente: " + decodeURIComponent(params.get('n'));
             let r = params.get('r') || "Novato", c = params.get('c') || "#aaa", i = params.get('i') || "👶";
             document.getElementById("rango-cliente").innerHTML = `<span style="color:${c}">${i} ${r}</span>`;
-            
-            if ("Notification" in window && Notification.permission === "granted") {
-                const btnNotif = document.getElementById("btn-activar-notif");
-                if(btnNotif) btnNotif.style.display = "none";
-            }
 
             let fin = parseInt(params.get('f'));
-            let notificacionEnviada = false;
 
             setInterval(() => {
                 let diff = fin - new Date().getTime();
                 if(diff <= 0) {
                     document.getElementById("reloj").innerText = "COMPLETADO ✅";
-                    if (!notificacionEnviada) {
-                        notificacionEnviada = true;
-                        
-                        const audioAlerta = document.getElementById('sonido-level');
-                        if(audioAlerta) {
-                            audioAlerta.currentTime = 0;
-                            audioAlerta.play().catch(() => {});
-                        }
-
-                        if ("Notification" in window && Notification.permission === "granted") {
-                            new Notification("SAFEGAMING SERVICE", {
-                                body: "Gracias por contactar a SAFEGAMING SERVICE servicio finalizado gracias por confiar en nosotros lo esperamos pronto",
-                                icon: ""
-                            });
-                        }
-                    }
                 } else {
                     let h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
                     document.getElementById("reloj").innerText = `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
