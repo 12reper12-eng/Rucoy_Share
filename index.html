@@ -76,7 +76,6 @@
         return [];
     }
 
-    // CONVERSIÓN Y COMPRESIÓN DIRECTA A BASE64
     function procesarImagenBase64(file, maxAncho = 1000, calidad = 0.7) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -209,7 +208,7 @@
 
         cont.innerHTML = window.capturasEditando.map((url, i) => `
             <div style="display:inline-flex; align-items:center; background:rgba(0,242,255,0.1); border:1px solid #00f2ff; border-radius:4px; padding:3px 8px; margin:3px; font-size:10px;">
-                <a href="${url}" target="_blank" style="color:#00f2ff; text-decoration:none;">📸 Foto ${i + 1}</a>
+                <button onclick="abrirVisorFoto('${url}')" style="background:none; border:none; color:#00f2ff; cursor:pointer; padding:0;">📸 Foto ${i + 1}</button>
                 <button onclick="eliminarFotoEdicion(${i})" style="background:none; border:none; color:#ff3333; margin-left:6px; cursor:pointer; font-weight:bold;">✖</button>
             </div>
         `).join('');
@@ -288,6 +287,20 @@
         renderTestimoniosPublico();
     };
 
+    // VISOR EMERGENTE (MODAL) PARA MOSTRAR FOTO REAL
+    window.abrirVisorFoto = (url) => {
+        let urlCorregida = url;
+        if (!urlCorregida.startsWith('data:image') && !urlCorregida.startsWith('http')) {
+            urlCorregida = 'data:image/jpeg;base64,' + urlCorregida.replace(/^.*?base64,/, '');
+        }
+        document.getElementById('img-visor-grande').src = urlCorregida;
+        document.getElementById('modal-visor-foto').style.display = 'flex';
+    };
+
+    window.cerrarVisorFoto = () => {
+        document.getElementById('modal-visor-foto').style.display = 'none';
+    };
+
     function renderTestimoniosPublico() {
         const grid = document.getElementById('grid-referencias');
         const vacio = document.getElementById('sin-referencias');
@@ -319,7 +332,7 @@
                 ? `<div class="galeria-evidencias">
                     <div style="font-size:10px; color:#ffd700; margin-top:6px;">📸 Evidencias acumuladas (${fotos.length}):</div>
                     <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-top:4px;">
-                        ${fotos.map((url, idx) => `<a href="${url}" target="_blank" class="btn-evidencia">Ver Foto ${idx + 1}</a>`).join('')}
+                        ${fotos.map((url, idx) => `<button onclick="abrirVisorFoto('${url}')" class="btn-evidencia" style="cursor:pointer;">Ver Foto ${idx + 1}</button>`).join('')}
                     </div>
                    </div>`
                 : '';
@@ -375,7 +388,7 @@
                 return `
                 <div class="lista-item">
                     ${iconoTipo(p.tipo)} ${p.tipo} — <b>${p.nombre}</b>: ${p.antes} → ${p.despues}
-                    ${fotos.length > 0 ? `<br><a href="${fotos[0]}" target="_blank" style="color:#ffd700; font-size:10px;">🔗 Revisar Evidencia</a>` : ''}
+                    ${fotos.length > 0 ? `<br><button onclick="abrirVisorFoto('${fotos[0]}')" style="background:none; border:none; color:#ffd700; font-size:10px; cursor:pointer; padding:0; text-decoration:underline;">🔗 Revisar Evidencia</button>` : ''}
                     <div style="margin-top:5px;">
                         <button onclick="aprobarPendiente('${p.key}')" style="background:#25D366; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px;">✅ Aprobar</button>
                         <button onclick="rechazarPendiente('${p.key}')" style="background:#ff3333; color:white; border:none; border-radius:4px; padding:3px 10px; cursor:pointer; font-size:11px; margin-left:6px;">❌ Rechazar</button>
@@ -616,6 +629,14 @@
         <div style="display:flex; gap:10px; margin-top:15px;">
             <button onclick="guardarEdicionAdmin()" style="flex:1; padding:10px; background:#25D366; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">💾 Guardar Cambios</button>
             <button onclick="cerrarEditarAdmin()" style="flex:1; padding:10px; background:#ff3333; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">✖️ Cancelar</button>
+        </div>
+    </div>
+
+    <!-- VISOR EMERGENTE DE FOTOS -->
+    <div id="modal-visor-foto" onclick="cerrarVisorFoto()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
+        <div style="position:relative; max-width:90%; max-height:90%;">
+            <span style="position:absolute; top:-30px; right:0; color:white; font-size:24px; font-weight:bold; cursor:pointer;">✖️ Cerrar</span>
+            <img id="img-visor-grande" src="" style="max-width:100%; max-height:80vh; border:2px solid #00f2ff; border-radius:8px; box-shadow:0 0 20px rgba(0,242,255,0.5);">
         </div>
     </div>
 
