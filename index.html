@@ -592,7 +592,7 @@
 
             <div id="bloque-modo-horas">
                 <label>Cantidad de Horas:</label>
-                <input type="number" id="horas" value="1" min="1" oninput="calcularTotal(); actualizarSimuladorProgreso();">
+                <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
             </div>
 
             <div id="bloque-modo-objetivo" style="display:none; background:rgba(0,242,255,0.05); padding:10px; border-radius:8px; border:1px solid rgba(0,242,255,0.3); margin-top:5px;">
@@ -601,35 +601,6 @@
                 <label>Skill/Nivel Deseado:</label>
                 <input type="number" id="stat-deseado" placeholder="Ej: 115" min="1" oninput="calcularTotalMeta()">
                 <div id="res-meta-estimado" style="font-size:11px; color:#ffd700; margin-top:5px; text-align:center;"></div>
-            </div>
-
-            <!-- BLOQUE DE CÁLCULO AVANZADO CON POCIÓN Y ONLINE TRAINING -->
-            <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid rgba(0,242,255,0.3); margin-top:15px;">
-                <div style="font-size:12px; color:#00f2ff; font-weight:bold; margin-bottom:8px;">🧮 Optimizador con Poción y Online Training</div>
-                
-                <input type="checkbox" id="calc-check-potion" onchange="calcularMetaAvanzada()">
-                <label for="calc-check-potion" style="display:inline; font-size:12px; cursor:pointer;">Usar Super Skill XP Potion (Doble XP)</label><br>
-                
-                <input type="checkbox" id="calc-check-online" onchange="calcularMetaAvanzada()" style="margin-top:6px;">
-                <label for="calc-check-online" style="display:inline; font-size:12px; cursor:pointer;">Incluir Online Training Activo</label>
-
-                <div id="calc-resultado-final" style="margin-top:8px; font-size:11px; background:rgba(0,0,0,0.3); padding:8px; border-radius:5px; color:#ccc;">
-                    Selecciona opciones para ver estimación optimizada.
-                </div>
-            </div>
-
-            <!-- SIMULADOR DE PROGRESO DE BARRA DE XP VISUAL -->
-            <div style="background:rgba(0,242,255,0.03); padding:12px; border-radius:8px; border:1px solid rgba(0,242,255,0.3); margin-top:15px;">
-                <div style="font-size:12px; color:#00f2ff; font-weight:bold; margin-bottom:8px;">📈 Simulador de Progreso de XP Visual</div>
-                <div style="font-size:11px; color:#ccc; margin-bottom:6px;">Simula cómo avanzará tu barra general con las horas de servicio contratadas:</div>
-                <div style="display:flex; justify-content:space-between; font-size:11px; color:#ffd700; margin-bottom:4px;">
-                    <span>Progreso Actual: <b id="sim-progreso-actual">10%</b></span>
-                    <span>Proyectado: <b id="sim-progreso-nuevo" style="color:#00f2ff;">+5%</b></span>
-                </div>
-                <div style="width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden; position:relative;">
-                    <div id="barra-sim-base" style="width: 10%; height: 100%; background: #555; position: absolute; top:0; left:0; transition: width 0.3s;"></div>
-                    <div id="barra-sim-extra" style="width: 5%; height: 100%; background: #00f2ff; position: absolute; top:0; left:10%; transition: width 0.3s, left 0.3s;"></div>
-                </div>
             </div>
 
             <label>Servicio:</label>
@@ -642,7 +613,7 @@
             </select>
 
             <label>Nivel de tu Skill Actual (Para barra de rango):</label>
-            <input type="number" id="nivel-skill" placeholder="Ej: 100" min="1" oninput="actualizarBarra(); actualizarSimuladorProgreso();">
+            <input type="number" id="nivel-skill" placeholder="Ej: 100" min="1" oninput="actualizarBarra()">
             <div id="contenedor-barra" style="margin-top:10px; display:none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
                 <div style="font-size: 11px; margin-bottom: 3px;">Rango Actual: <span id="nombre-rango">Bronce</span></div>
                 <div style="width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden;">
@@ -846,8 +817,6 @@
                 document.getElementById("res-meta-estimado").innerText = "";
             }
             calcularTotal();
-            calcularMetaAvanzada();
-            actualizarSimuladorProgreso();
         }
 
         function calcularTotal() {
@@ -862,45 +831,6 @@
             let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} de tipo ${clase} para ${nombre || "el personaje"}. Cantidad de horas: ${h}.`;
 
             document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
-            calcularMetaAvanzada();
-            actualizarSimuladorProgreso();
-        }
-
-        function calcularMetaAvanzada() {
-            let horasBase = parseFloat(document.getElementById('horas').value) || 10;
-            let usaPotion = document.getElementById('calc-check-potion').checked;
-            let usaOnline = document.getElementById('calc-check-online').checked;
-
-            let factor = 1;
-            if (usaPotion) factor *= 2;      
-            if (usaOnline) factor *= 1.25;   
-
-            let horasFinales = horasBase / factor;
-            
-            let resultadoEl = document.getElementById('calc-resultado-final');
-            if (resultadoEl) {
-                resultadoEl.innerHTML = `
-                    ⏱️ Horas base: <b>${horasBase.toFixed(1)} hrs</b> | 🚀 Con mejoras: <b style="color:#00f2ff;">${horasFinales.toFixed(1)} hrs</b>
-                `;
-            }
-        }
-
-        function actualizarSimuladorProgreso() {
-            let nivelSkill = parseInt(document.getElementById("nivel-skill").value) || 50;
-            let horas = parseInt(document.getElementById("horas").value) || 1;
-            
-            let porcentajeBase = Math.min(Math.round((nivelSkill / 1000) * 100), 90);
-            if (porcentajeBase < 5) porcentajeBase = 5;
-
-            let gananciaEstimada = Math.min(Math.round(horas * 1.2), 100 - porcentajeBase);
-            
-            document.getElementById("sim-progreso-actual").innerText = porcentajeBase + "%";
-            document.getElementById("sim-progreso-nuevo").innerText = "+" + gananciaEstimada + "%";
-            
-            document.getElementById("barra-sim-base").style.width = porcentajeBase + "%";
-            let barraExtra = document.getElementById("barra-sim-extra");
-            barraExtra.style.left = porcentajeBase + "%";
-            barraExtra.style.width = gananciaEstimada + "%";
         }
 
         document.addEventListener('click', function unlockAudio() {
@@ -1127,7 +1057,7 @@
 
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
         let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
-        window.onload = () => { rotar(); setInterval(rotar, 30000); calcularTotal(); calcularMetaAvanzada(); actualizarSimuladorProgreso(); };
+        window.onload = () => { rotar(); setInterval(rotar, 30000); calcularTotal(); };
     </script>
 </body>
 </html>
