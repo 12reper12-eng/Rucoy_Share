@@ -42,11 +42,12 @@
             snapshot.forEach((child) => {
                 if (child.val().nombre.toLowerCase() === nombre.toLowerCase()) {
                     let totalHoras = (child.val().totalHoras || 0) + horas;
-                    update(ref(db, 'clientes/' + child.key), { totalHoras: totalHoras });
+                    let visitas = (child.val().visitas || 1) + 1;
+                    update(ref(db, 'clientes/' + child.key), { totalHoras: totalHoras, visitas: visitas });
                     encontrado = true;
                 }
             });
-            if (!encontrado) push(clientesRef, { nombre: nombre, totalHoras: horas });
+            if (!encontrado) push(clientesRef, { nombre: nombre, totalHoras: horas, visitas: 1 });
         });
     };
 
@@ -284,7 +285,7 @@
         const btn = document.getElementById('btn-toggle-ref');
         const abierto = cont.style.display !== 'none';
         cont.style.display = abierto ? 'none' : 'block';
-        btn.innerText = abierto ? `👁️ VER TESTIMONIOS (${testimoniosCache.length})` : '🔼 OCULTAR TESTIMONIOS';
+        btn.innerText = abierto ? `👁️ TESTIMONIOS PUBLICADOS (${testimoniosCache.length})` : '🔼 OCULTAR TESTIMONIOS';
     };
 
     window.filtrarReferencias = (tipo, btn) => {
@@ -555,6 +556,16 @@
             <h1 id="cliente-nombre">Seguimiento</h1>
             <div id="rango-cliente" style="font-size: 18px; margin: 5px 0;"></div>
             <div id="reloj" style="font-size: 40px; color: #ffd700; margin: 20px 0; font-weight: bold;">00:00:00</div>
+            
+            <!-- Botón para activar notificaciones de navegador en la vista de seguimiento -->
+            <div style="margin-top: 15px;">
+                <button onclick="solicitarPermisoNotificacion()" style="background: rgba(0,242,255,0.15); border: 1px solid #00f2ff; color: #00f2ff; padding: 8px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">
+                    🔔 Activar Alerta de Finalización
+                </button>
+            </div>
+
+            <!-- AUDIO PERSONALIZADO PARA CUANDO TERMINE EL SERVICIO -->
+            <audio id="sonido-finalizacion" src="universfield-level-up-191997.mp3" preload="auto"></audio>
         </div>
 
         <div id="vista-formulario">
@@ -581,7 +592,7 @@
 
             <div id="bloque-modo-horas">
                 <label>Cantidad de Horas:</label>
-                <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
+                <input type="number" id="horas" value="1" min="1" oninput="calcularTotal(); actualizarSimuladorProgreso();">
             </div>
 
             <div id="bloque-modo-objetivo" style="display:none; background:rgba(0,242,255,0.05); padding:10px; border-radius:8px; border:1px solid rgba(0,242,255,0.3); margin-top:5px;">
@@ -592,17 +603,46 @@
                 <div id="res-meta-estimado" style="font-size:11px; color:#ffd700; margin-top:5px; text-align:center;"></div>
             </div>
 
+            <!-- BLOQUE DE CÁLCULO AVANZADO CON POCIÓN Y ONLINE TRAINING -->
+            <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid rgba(0,242,255,0.3); margin-top:15px;">
+                <div style="font-size:12px; color:#00f2ff; font-weight:bold; margin-bottom:8px;">🧮 Optimizador con Poción y Online Training</div>
+                
+                <input type="checkbox" id="calc-check-potion" onchange="calcularMetaAvanzada()">
+                <label for="calc-check-potion" style="display:inline; font-size:12px; cursor:pointer;">Usar Super Skill XP Potion (Doble XP)</label><br>
+                
+                <input type="checkbox" id="calc-check-online" onchange="calcularMetaAvanzada()" style="margin-top:6px;">
+                <label for="calc-check-online" style="display:inline; font-size:12px; cursor:pointer;">Incluir Online Training Activo</label>
+
+                <div id="calc-resultado-final" style="margin-top:8px; font-size:11px; background:rgba(0,0,0,0.3); padding:8px; border-radius:5px; color:#ccc;">
+                    Selecciona opciones para ver estimación optimizada.
+                </div>
+            </div>
+
+            <!-- SIMULADOR DE PROGRESO DE BARRA DE XP VISUAL -->
+            <div style="background:rgba(0,242,255,0.03); padding:12px; border-radius:8px; border:1px solid rgba(0,242,255,0.3); margin-top:15px;">
+                <div style="font-size:12px; color:#00f2ff; font-weight:bold; margin-bottom:8px;">📈 Simulador de Progreso de XP Visual</div>
+                <div style="font-size:11px; color:#ccc; margin-bottom:6px;">Simula cómo avanzará tu barra general con las horas de servicio contratadas:</div>
+                <div style="display:flex; justify-content:space-between; font-size:11px; color:#ffd700; margin-bottom:4px;">
+                    <span>Progreso Actual: <b id="sim-progreso-actual">10%</b></span>
+                    <span>Proyectado: <b id="sim-progreso-nuevo" style="color:#00f2ff;">+5%</b></span>
+                </div>
+                <div style="width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden; position:relative;">
+                    <div id="barra-sim-base" style="width: 10%; height: 100%; background: #555; position: absolute; top:0; left:0; transition: width 0.3s;"></div>
+                    <div id="barra-sim-extra" style="width: 5%; height: 100%; background: #00f2ff; position: absolute; top:0; left:10%; transition: width 0.3s, left 0.3s;"></div>
+                </div>
+            </div>
+
             <label>Servicio:</label>
             <select id="servicio" onchange="calcularTotal()">
-                <option value="400">Skill Normal - 400k / hr</option>
-                <option value="460">Power Training - 460k / hr</option>
-                <option value="800">Subida de Nivel - 800k / hr</option>
-                <option value="1900">Pack Maraton (5h) - 1.9KK</option>
-                <option value="2100">Pack Ptrain Pro (5h) - 2.1KK</option>
+                <option value="300">Skill Normal - $300k / hr</option>
+                <option value="360">Power Training - $360k / hr</option>
+                <option value="600">Subida de Nivel - $600k / hr</option>
+                <option value="1400">Pack Maraton (5h) - 1.4KK</option>
+                <option value="1700">Pack Ptrain Pro (5h) - 1.7KK</option>
             </select>
 
             <label>Nivel de tu Skill Actual (Para barra de rango):</label>
-            <input type="number" id="nivel-skill" placeholder="Ej: 100" min="1" oninput="actualizarBarra()">
+            <input type="number" id="nivel-skill" placeholder="Ej: 100" min="1" oninput="actualizarBarra(); actualizarSimuladorProgreso();">
             <div id="contenedor-barra" style="margin-top:10px; display:none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
                 <div style="font-size: 11px; margin-bottom: 3px;">Rango Actual: <span id="nombre-rango">Bronce</span></div>
                 <div style="width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden;">
@@ -734,7 +774,7 @@
                 <button class="btn-filtro activo" data-tipo="Todos" onclick="filtrarReferencias('Todos', this)">Todos</button>
                 <button class="btn-filtro" data-tipo="Skill" onclick="filtrarReferencias('Skill', this)">⚔️ Skill</button>
                 <button class="btn-filtro" data-tipo="Nivel" onclick="filtrarReferencias('Nivel', this)">⭐ Nivel</button>
-                <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</option>
+                <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</button>
             </div>
             
             <div class="grid-referencias" id="grid-referencias"></div>
@@ -783,7 +823,7 @@
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v17</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v20</span></div>
 
     <script>
         function cambiarModoCalculo() {
@@ -806,6 +846,8 @@
                 document.getElementById("res-meta-estimado").innerText = "";
             }
             calcularTotal();
+            calcularMetaAvanzada();
+            actualizarSimuladorProgreso();
         }
 
         function calcularTotal() {
@@ -820,6 +862,45 @@
             let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} de tipo ${clase} para ${nombre || "el personaje"}. Cantidad de horas: ${h}.`;
 
             document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
+            calcularMetaAvanzada();
+            actualizarSimuladorProgreso();
+        }
+
+        function calcularMetaAvanzada() {
+            let horasBase = parseFloat(document.getElementById('horas').value) || 10;
+            let usaPotion = document.getElementById('calc-check-potion').checked;
+            let usaOnline = document.getElementById('calc-check-online').checked;
+
+            let factor = 1;
+            if (usaPotion) factor *= 2;      
+            if (usaOnline) factor *= 1.25;   
+
+            let horasFinales = horasBase / factor;
+            
+            let resultadoEl = document.getElementById('calc-resultado-final');
+            if (resultadoEl) {
+                resultadoEl.innerHTML = `
+                    ⏱️ Horas base: <b>${horasBase.toFixed(1)} hrs</b> | 🚀 Con mejoras: <b style="color:#00f2ff;">${horasFinales.toFixed(1)} hrs</b>
+                `;
+            }
+        }
+
+        function actualizarSimuladorProgreso() {
+            let nivelSkill = parseInt(document.getElementById("nivel-skill").value) || 50;
+            let horas = parseInt(document.getElementById("horas").value) || 1;
+            
+            let porcentajeBase = Math.min(Math.round((nivelSkill / 1000) * 100), 90);
+            if (porcentajeBase < 5) porcentajeBase = 5;
+
+            let gananciaEstimada = Math.min(Math.round(horas * 1.2), 100 - porcentajeBase);
+            
+            document.getElementById("sim-progreso-actual").innerText = porcentajeBase + "%";
+            document.getElementById("sim-progreso-nuevo").innerText = "+" + gananciaEstimada + "%";
+            
+            document.getElementById("barra-sim-base").style.width = porcentajeBase + "%";
+            let barraExtra = document.getElementById("barra-sim-extra");
+            barraExtra.style.left = porcentajeBase + "%";
+            barraExtra.style.width = gananciaEstimada + "%";
         }
 
         document.addEventListener('click', function unlockAudio() {
@@ -880,16 +961,23 @@
             return { rango: "Novato", color: "#aaa", icono: "👶" };
         }
 
+        function obtenerInsigniaFidelidad(visitas, horas) {
+            if (visitas >= 5 || horas >= 250) return '<span style="background:rgba(255,215,0,0.2); border:1px solid #ffd700; color:#ffd700; padding:1px 5px; border-radius:4px; font-size:9px; margin-left:4px;">🌟 Veterano Fiel</span>';
+            if (visitas >= 3 || horas >= 100) return '<span style="background:rgba(0,242,255,0.2); border:1px solid #00f2ff; color:#00f2ff; padding:1px 5px; border-radius:4px; font-size:9px; margin-left:4px;">🎖️ Constante</span>';
+            return '';
+        }
+
         function cargarAdmin() {
             let div = document.getElementById('lista-clientes');
-            div.innerHTML = "<div style='margin-top:15px; border-top:1px solid #00f2ff; padding-top:10px;'><strong>📋 TABLA DE CLIENTES:</strong></div><div id='contenido-lista'></div>";
+            div.innerHTML = "<div style='margin-top:15px; border-top:1px solid #00f2ff; padding-top:10px;'><strong>📋 TABLA DE CLIENTES Y FIDELIDAD:</strong></div><div id='contenido-lista'></div>";
             const listaDiv = document.getElementById('contenido-lista');
             window.onValue(window.ref(window.db, 'clientes'), (snap) => {
                 listaDiv.innerHTML = "";
                 snap.forEach(c => {
                     let d = c.val();
                     let r = obtenerRango(d.totalHoras || 0);
-                    listaDiv.innerHTML += `<div class="lista-item" style="color:${r.color}; margin-top:5px;">${r.icono} ${d.nombre} (${d.totalHoras}h) — <b>${r.rango}</b></div>`;
+                    let badgeFidelidad = obtenerInsigniaFidelidad(d.visitas || 1, d.totalHoras || 0);
+                    listaDiv.innerHTML += `<div class="lista-item" style="color:${r.color}; margin-top:5px;">${r.icono} ${d.nombre} (${d.totalHoras}h) — <b>${r.rango}</b> ${badgeFidelidad}</div>`;
                 });
             });
         }
@@ -903,6 +991,34 @@
             setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
         }
 
+        // FUNCIONES PARA NOTIFICACIONES Y SONIDO DE FINALIZACIÓN
+        function solicitarPermisoNotificacion() {
+            if (!("Notification" in window)) {
+                alert("Tu navegador no soporta notificaciones de escritorio.");
+                return;
+            }
+            
+            Notification.requestPermission().then((permission) => {
+                if (permission === "granted") {
+                    new Notification("🛡️ Safegaming Service", {
+                        body: "¡Notificaciones activadas! Te avisaremos cuando finalice tu servicio.",
+                        icon: "https://i.imgur.com/3Z5Vz0N.png"
+                    });
+                } else {
+                    alert("Has denegado los permisos de notificación.");
+                }
+            });
+        }
+
+        function enviarAlertaServicioFinalizado() {
+            if (Notification.permission === "granted") {
+                new Notification("🛡️ Safegaming Service", {
+                    body: "¡Hola! Tu tiempo contratado ha finalizado con éxito. Revisa tu cuenta o contacta al operador.",
+                    icon: "https://i.imgur.com/3Z5Vz0N.png"
+                });
+            }
+        }
+
         const params = new URLSearchParams(window.location.search);
         if(params.has('n')) {
             document.getElementById("vista-formulario").style.display = "none";
@@ -913,10 +1029,27 @@
             document.getElementById("rango-cliente").innerHTML = `<span style="color:${c}">${i} ${r}</span>`;
             
             let fin = parseInt(params.get('f'));
+            let alertaEnviada = false;
+
             setInterval(() => {
                 let diff = fin - new Date().getTime();
-                if(diff <= 0) document.getElementById("reloj").innerText = "COMPLETADO ✅";
-                else {
+                if(diff <= 0) {
+                    document.getElementById("reloj").innerText = "COMPLETADO ✅";
+                    
+                    if (!alertaEnviada) {
+                        // 1. Disparar notificación visual del navegador
+                        enviarAlertaServicioFinalizado();
+                        
+                        // 2. Reproducir sonido personalizado al instante
+                        const sonidoFinal = document.getElementById("sonido-finalizacion");
+                        if (sonidoFinal) {
+                            sonidoFinal.currentTime = 0;
+                            sonidoFinal.play().catch(e => console.log("Error al reproducir audio:", e));
+                        }
+
+                        alertaEnviada = true;
+                    }
+                } else {
                     let h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
                     document.getElementById("reloj").innerText = `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
                 }
@@ -994,7 +1127,7 @@
 
         const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
         let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
-        window.onload = () => { rotar(); setInterval(rotar, 30000); calcularTotal(); };
+        window.onload = () => { rotar(); setInterval(rotar, 30000); calcularTotal(); calcularMetaAvanzada(); actualizarSimuladorProgreso(); };
     </script>
 </body>
 </html>
