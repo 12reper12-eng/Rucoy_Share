@@ -734,15 +734,31 @@
             let nivel = parseInt(document.getElementById("nivel-skill").value) || 0;
             let barra = document.getElementById("barra-progreso");
             let texto = document.getElementById("nombre-rango");
+            
             document.getElementById("contenedor-barra").style.display = nivel > 0 ? "block" : "none";
-            let config = { rango: "Bronce", color: "#cd7f32", ancho: "20%" };
-            if (nivel >= 250) { config = { rango: "Diamante", color: "#b9f2ff", ancho: "100%" }; }
-            else if (nivel >= 200) { config = { rango: "Esmeralda", color: "#50c878", ancho: "80%" }; }
-            else if (nivel >= 150) { config = { rango: "Oro", color: "#ffd700", ancho: "60%" }; }
-            else if (nivel >= 100) { config = { rango: "Plata", color: "#c0c0c0", ancho: "40%" }; }
+
+            let config = { rango: "Bronce", color: "#cd7f32" };
+
+            if (nivel >= 1000)      { config = { rango: "👑 DIVINO", color: "#ff00ff" }; }
+            else if (nivel >= 900)  { config = { rango: "🔥 SUPREMO", color: "#ff3333" }; }
+            else if (nivel >= 800)  { config = { rango: "⚡ INMORTAL", color: "#ff8c00" }; }
+            else if (nivel >= 700)  { config = { rango: "🛡️ TITÁN", color: "#eab308" }; }
+            else if (nivel >= 600)  { config = { rango: "🔮 MAESTRO", color: "#a855f7" }; }
+            else if (nivel >= 500)  { config = { rango: "💎 LEYENDA", color: "#3b82f6" }; }
+            else if (nivel >= 400)  { config = { rango: "🔴 RUBÍ", color: "#e11d48" }; }
+            else if (nivel >= 300)  { config = { rango: "🔹 ZAFIRO", color: "#06b6d4" }; }
+            else if (nivel >= 250)  { config = { rango: "❄️ DIAMANTE", color: "#b9f2ff" }; }
+            else if (nivel >= 200)  { config = { rango: "🟢 ESMERALDA", color: "#50c878" }; }
+            else if (nivel >= 150)  { config = { rango: "🟡 ORO", color: "#ffd700" }; }
+            else if (nivel >= 100)  { config = { rango: "⚪ PLATA", color: "#c0c0c0" }; }
+
+            // Porcentaje dinámico de la barra según el nivel (máximo 100%)
+            let porcentaje = Math.min(Math.round((nivel / 1000) * 100), 100);
+            if (nivel > 0 && porcentaje < 5) porcentaje = 5;
+
             texto.innerText = config.rango;
             texto.style.color = config.color;
-            barra.style.width = config.ancho;
+            barra.style.width = porcentaje + "%";
             barra.style.background = config.color;
         }
 
