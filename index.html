@@ -51,7 +51,7 @@
     };
 
     // =====================================================================
-    // ---- SISTEMA DE TESTIMONIOS CON ACUMULACIÓN DE IMÁGENES ----
+    // ---- SISTEMA DE TESTIMONIOS CON COMPRESIÓN Y ACUMULACIÓN DE IMÁGENES ----
     // =====================================================================
 
     let testimoniosCache = [];
@@ -69,7 +69,6 @@
         return d.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
-    // Normaliza 'capturas' para que siempre sea una lista/array de URLs
     function obtenerListaCapturas(item) {
         if (!item) return [];
         if (Array.isArray(item.capturas)) return item.capturas.filter(c => !!c);
@@ -77,16 +76,60 @@
         return [];
     }
 
+    // FUNCIÓN DE COMPRESIÓN PREVIA
+    function comprimirImagen(file, maxAncho = 1080, calidad = 0.7) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width;
+                    let h = img.height;
+
+                    if (w > maxAncho) {
+                        h = Math.round((h * maxAncho) / w);
+                        w = maxAncho;
+                    }
+
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            const fileComprimido = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            resolve(fileComprimido);
+                        } else {
+                            reject(new Error("Error al comprimir la imagen"));
+                        }
+                    }, 'image/jpeg', calidad);
+                };
+                img.onerror = () => reject(new Error("Error al cargar la imagen"));
+            };
+            reader.onerror = () => reject(new Error("Error al leer el archivo"));
+        });
+    }
+
     window.subirImagenAImgur = async (file, elementoEstado, callbackURL) => {
         if (!file) return;
         
         elementoEstado.style.color = '#ffd700';
-        elementoEstado.innerText = '⏳ Subiendo imagen... Por favor espera.';
-
-        const formData = new FormData();
-        formData.append('image', file);
+        elementoEstado.innerText = '⏳ Optimizando y subiendo imagen...';
 
         try {
+            // Se comprime la foto antes de subirla
+            const fotoComprimida = await comprimirImagen(file);
+
+            const formData = new FormData();
+            formData.append('image', fotoComprimida);
+
             const res = await fetch('https://api.imgur.com/3/image', {
                 method: 'POST',
                 headers: { Authorization: 'Client-ID 1c313a48e7f8e8f' },
@@ -107,7 +150,6 @@
         }
     };
 
-    // Formulario público
     window.capturaPublicaTemporal = '';
     window.enviarReferenciaPublica = () => {
         const tipo = document.getElementById('pub-ref-tipo').value;
@@ -162,7 +204,6 @@
         }
     };
 
-    // ---- EDICIÓN Y ACUMULACIÓN DESDE EL ADMIN ----
     window.itemEditandoKey = null;
     window.capturasEditando = [];
 
@@ -230,7 +271,6 @@
         }
     };
 
-    // Agregar nuevo testimonio directo con soporte de acumulación
     window.capturasAdminNuevo = [];
     window.agregarTestimonioAdmin = () => {
         const tipo = document.getElementById('ref-tipo').value;
@@ -653,7 +693,7 @@
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v11-acumulativo</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v12-compresion</span></div>
 
     <script>
         function calcularTotal() {
@@ -810,7 +850,6 @@
             });
         }
 
-        // Vincular acumuladores
         vincularCargaDeImagen('drop-zone-publico', 'file-input-publico', 'estado-subida-publico', (url) => {
             window.capturaPublicaTemporal = url;
         });
