@@ -8,7 +8,6 @@
 <!-- CONFIGURACIÓN DE IMAGEN Y VISTA PREVIA PARA WHATSAPP -->
 <meta property="og:title" content="🛡️ SAFEGAMING SERVICE - RUCOY ONLINE">
 <meta property="og:description" content="Servicio Profesional de Skilleo, Nivel y Power Training.">
-<!-- Reemplaza esta URL por la dirección pública directa donde alojes la foto de tu logo (HTTPS) -->
 <meta property="og:image" content="https://i.imgur.com/TU_IMAGEN_AQUI.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
@@ -490,9 +489,32 @@
 
 <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
+    
+    /* CONFIGURACIÓN DEL VIDEO DE FONDO */
+    .video-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+        z-index: -2; /* Detrás de todo */
+    }
 
-    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; position: relative; }
+    /* Capa oscura opcional para que los textos resalten mejor sobre el video */
+    .video-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(3, 0, 8, 0.65); /* Ajusta la opacidad aquí si lo quieres más claro u oscuro */
+        z-index: -1;
+    }
+
+    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; background-color: #030008; }
+
+    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; position: relative; z-index: 1; }
     #estado-servicio { text-align: center; margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 8px; border: 1px solid #00f2ff; }
     #vista-seguimiento { display: none; text-align: center; }
     h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: default; }
@@ -503,7 +525,7 @@
     .resultado-caja { background: rgba(0, 242, 255, 0.1); border: 1px dashed rgba(0, 242, 255, 0.5); padding: 12px; margin-top: 15px; border-radius: 6px; text-align: center; }
     .total-oro { color: #ffd700; font-size: 20px; font-weight: bold; }
     .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; cursor: pointer; }
-    .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center; }
+    .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center; position: relative; z-index: 1; }
     #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
     .lista-item { padding: 8px; border-bottom: 1px solid #333; font-size: 11px; text-align: left; }
     .tabla-rangos { width: 100%; font-size: 11px; margin-top: 15px; border-collapse: collapse; border: 1px solid #444; color: #ccc; }
@@ -515,7 +537,7 @@
     .drop-zone-text { font-size: 11px; color: #00f2ff; font-weight: bold; }
 
     /* TESTIMONIOS CON ESTRELLAS */
-    .caja-referencias { margin-top: 20px; max-width: 450px; padding: 16px 20px; height: auto !important; max-height: none !important; overflow: visible !important; }
+    .caja-referencias { margin-top: 20px; max-width: 450px; padding: 16px 20px; height: auto !important; max-height: none !important; overflow: visible !important; position: relative; z-index: 1; }
     .caja-referencias h1 { font-size: 16px; letter-spacing: 0.5px; }
     .caja-referencias .subtitle { font-size: 11px; margin-bottom: 10px; }
     .btn-toggle-ref { width: 100%; background: transparent; border: 1px solid rgba(0,242,255,0.5); color: #00f2ff; padding: 9px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
@@ -559,6 +581,16 @@
 </style>
 </head>
 <body>
+
+    <!-- VIDEO DE FONDO EN MOVIMIENTO -->
+    <!-- Reemplaza "tu-video.mp4" con el nombre o ruta exacta de tu archivo de video descargado -->
+    <video autoplay loop muted playsinline class="video-background" id="bgVideo">
+        <source src="tu-video.mp4" type="video/mp4">
+        Tu navegador no soporta la reproducción de video.
+    </video>
+    
+    <!-- Capa oscura semitransparente para que las letras resalten -->
+    <div class="video-overlay"></div>
 
     <div class="caja" id="contenedor">
         <div id="vista-seguimiento">
@@ -744,7 +776,7 @@
                 <button class="btn-filtro activo" data-tipo="Todos" onclick="filtrarReferencias('Todos', this)">Todos</button>
                 <button class="btn-filtro" data-tipo="Skill" onclick="filtrarReferencias('Skill', this)">⚔️ Skill</button>
                 <button class="btn-filtro" data-tipo="Nivel" onclick="filtrarReferencias('Nivel', this)">⭐ Nivel</button>
-                <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</option>
+                <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</button>
             </div>
             
             <div class="grid-referencias" id="grid-referencias"></div>
@@ -830,7 +862,6 @@
             
             let servicioNombre = document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text;
 
-            // Formato de mensaje tipo orden/recibo profesional
             let msg = `🛡️ *SAFEGAMING SERVICE - SOLICITUD* 🛡️\n\n` +
                       `👤 *Personaje:* ${nombre || "No especificado"}\n` +
                       `⚔️ *Clase:* ${clase}\n` +
@@ -844,6 +875,14 @@
         document.addEventListener('click', function unlockAudio() {
             const audio = document.getElementById('sonido-level');
             if(audio) { audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {}); }
+            
+            // También habilitamos el audio del video de fondo con el primer clic del usuario
+            const bgVideo = document.getElementById('bgVideo');
+            if(bgVideo) {
+                bgVideo.muted = false; // Quita el silencio si deseas que tenga sonido
+                bgVideo.play().catch(() => {});
+            }
+
             document.removeEventListener('click', unlockAudio);
         }, { once: true });
 
@@ -928,10 +967,8 @@
             setTimeout(() => {
                 let esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
                 if (esMovil) {
-                    // Abre directamente la APP instalada en el teléfono
                     window.location.href = `whatsapp://send?phone=${telefono}&text=${textoCodificado}`;
                 } else {
-                    // En escritorio abre WhatsApp Web directo
                     window.open(`https://web.whatsapp.com/send?phone=${telefono}&text=${textoCodificado}`, '_blank');
                 }
             }, 300);
@@ -1026,9 +1063,9 @@
             window.renderListaImagenesEditar();
         });
 
-        const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
-        let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
-        window.onload = () => { rotar(); setInterval(rotar, 30000); calcularTotal(); };
+        window.onload = () => { 
+            calcularTotal(); 
+        };
     </script>
 </body>
 </html>
