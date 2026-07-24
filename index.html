@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Safegaming Service - Rucoy Online</title>
+
+<!-- CONFIGURACIÓN DE IMAGEN Y VISTA PREVIA PARA WHATSAPP -->
+<meta property="og:title" content="🛡️ SAFEGAMING SERVICE - RUCOY ONLINE">
+<meta property="og:description" content="Servicio Profesional de Skilleo, Nivel y Power Training.">
+<!-- Reemplaza esta URL por la dirección pública directa donde alojes la foto de tu logo (HTTPS) -->
+<meta property="og:image" content="https://i.imgur.com/TU_IMAGEN_AQUI.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, set, push, update, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -626,7 +636,7 @@
                 <div class="total-oro" id="precio-final">300k gold</div>
             </div>
 
-            <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirYRedirigir()">💬 APARTAR CUPO POR WHATSAPP</a>
+            <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirYRedirigir(); return false;">💬 APARTAR CUPO POR WHATSAPP</a>
             
             <div id="panel-admin">
                 <button onclick="cambiarEstado()" style="width:100%; padding:10px; background: #ff0000; color: white; cursor:pointer;">CAMBIAR ESTADO</button>
@@ -815,11 +825,20 @@
             let nombre = document.getElementById("personaje").value;
             
             let total = (p >= 1400) ? p : p * h;
-            document.getElementById("precio-final").innerText = (total >= 1000) ? (total / 1000) + "KK gold" : total + "k gold";
+            let precioTexto = (total >= 1000) ? (total / 1000) + "KK gold" : total + "k gold";
+            document.getElementById("precio-final").innerText = precioTexto;
             
-            let msg = `Hola Safegaming! Quiero agendar: ${document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text} de tipo ${clase} para ${nombre || "el personaje"}. Cantidad de horas: ${h}.`;
+            let servicioNombre = document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text;
 
-            document.getElementById("boton-whatsapp").href = "https://wa.me/584123576579?text=" + encodeURIComponent(msg);
+            // Formato de mensaje tipo orden/recibo profesional
+            let msg = `🛡️ *SAFEGAMING SERVICE - SOLICITUD* 🛡️\n\n` +
+                      `👤 *Personaje:* ${nombre || "No especificado"}\n` +
+                      `⚔️ *Clase:* ${clase}\n` +
+                      `📋 *Servicio:* ${servicioNombre}\n` +
+                      `⏱️ *Horas:* ${h} hrs\n` +
+                      `💰 *Monto Estimado:* ${precioTexto}`;
+
+            document.getElementById("boton-whatsapp").dataset.msg = msg;
         }
 
         document.addEventListener('click', function unlockAudio() {
@@ -898,9 +917,24 @@
             let nombre = document.getElementById("personaje").value;
             let horas = parseInt(document.getElementById("horas").value) || 1;
             if(nombre) window.registrarCliente(nombre, horas);
+            
             const audio = document.getElementById('sonido-level');
             if(audio) audio.play();
-            setTimeout(() => { window.open(document.getElementById('boton-whatsapp').href, '_blank'); }, 600);
+
+            let msg = document.getElementById("boton-whatsapp").dataset.msg || "";
+            let telefono = "584123576579";
+            let textoCodificado = encodeURIComponent(msg);
+
+            setTimeout(() => {
+                let esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                if (esMovil) {
+                    // Abre directamente la APP instalada en el teléfono
+                    window.location.href = `whatsapp://send?phone=${telefono}&text=${textoCodificado}`;
+                } else {
+                    // En escritorio abre WhatsApp Web directo
+                    window.open(`https://web.whatsapp.com/send?phone=${telefono}&text=${textoCodificado}`, '_blank');
+                }
+            }, 300);
         }
 
         const params = new URLSearchParams(window.location.search);
