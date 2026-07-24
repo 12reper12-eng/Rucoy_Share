@@ -36,7 +36,7 @@
         let el = document.getElementById("estado-servicio");
         if(el) {
             el.innerText = window.estaDisponible ? "🟢 SERVICIO DISPONIBLE" : "🔴 NO DISPONIBLE";
-            el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)";
+            el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.25)" : "rgba(255, 0, 0, 0.25)";
         }
         const btnWa = document.getElementById("boton-whatsapp");
         if(btnWa) btnWa.style.pointerEvents = window.estaDisponible ? "auto" : "none";
@@ -503,55 +503,61 @@
         pointer-events: none;
     }
 
-    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; position: relative; z-index: 1; margin-bottom: 20px; }
-    #estado-servicio { text-align: center; margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 8px; border: 1px solid #00f2ff; }
+    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(3, 1, 8, 0.95); backdrop-filter: blur(12px); box-shadow: 0 0 35px rgba(0,242,255,0.35); width: 100%; max-width: 450px; position: relative; z-index: 1; margin-bottom: 20px; }
+    #estado-servicio { text-align: center; margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 8px; border: 1px solid #00f2ff; background: rgba(0, 242, 255, 0.15); }
     #vista-seguimiento { display: none; text-align: center; }
     h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: default; }
     .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 13px; text-align: center; }
-    .horario-box { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; }
-    label { display: block; margin: 10px 0 4px 0; font-size: 13px; color: #ccc; }
-    input, select { padding: 10px; width: 100%; border-radius: 6px; border: 1px solid rgba(0, 242, 255, 0.5); background: rgba(7, 13, 26, 0.8); color: white; margin-bottom: 5px; cursor: pointer;}
-    .resultado-caja { background: rgba(0, 242, 255, 0.1); border: 1px dashed rgba(0, 242, 255, 0.5); padding: 12px; margin-top: 15px; border-radius: 6px; text-align: center; }
-    .total-oro { color: #ffd700; font-size: 20px; font-weight: bold; }
-    .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; cursor: pointer; }
-    .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.8); font-size: 12px; text-align: center; position: relative; z-index: 1; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); }
+    .horario-box { background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.5); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; font-weight: bold; }
+    
+    /* MEJORA DE VISIBILIDAD DE ETIQUETAS, INPUTS Y SELECTS */
+    label { display: block; margin: 12px 0 5px 0; font-size: 13px; color: #ffffff; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+    input, select { padding: 11px; width: 100%; border-radius: 6px; border: 1px solid #00f2ff; background: rgba(10, 20, 38, 0.95); color: #ffffff; margin-bottom: 5px; cursor: pointer; font-size: 14px; font-weight: 500; }
+    input::placeholder { color: #8fa3c7; opacity: 1; }
+    select option { background: #070d1a; color: #ffffff; }
+
+    .resultado-caja { background: rgba(0, 242, 255, 0.15); border: 1px dashed rgba(0, 242, 255, 0.8); padding: 14px; margin-top: 15px; border-radius: 6px; text-align: center; }
+    .total-oro { color: #ffd700; font-size: 22px; font-weight: bold; text-shadow: 0 0 8px rgba(255,215,0,0.4); }
+    .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; cursor: pointer; box-shadow: 0 0 12px rgba(37,211,102,0.4); }
+    .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.9); font-size: 12px; text-align: center; position: relative; z-index: 1; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); }
     #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
     .lista-item { padding: 8px; border-bottom: 1px solid #333; font-size: 11px; text-align: left; }
-    .tabla-rangos { width: 100%; font-size: 11px; margin-top: 15px; border-collapse: collapse; border: 1px solid #444; color: #ccc; }
-    .tabla-rangos th, .tabla-rangos td { padding: 6px; border: 1px solid #444; text-align: center; }
+    .tabla-rangos { width: 100%; font-size: 11px; margin-top: 15px; border-collapse: collapse; border: 1px solid rgba(0,242,255,0.4); color: #ffffff; background: rgba(0,0,0,0.5); }
+    .tabla-rangos th, .tabla-rangos td { padding: 7px; border: 1px solid rgba(0,242,255,0.3); text-align: center; }
+    .tabla-rangos th { color: #00f2ff; background: rgba(0,242,255,0.1); }
 
     /* DROP ZONE */
-    .drop-zone { border: 2px dashed rgba(0, 242, 255, 0.5); background: rgba(0, 242, 255, 0.05); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: 5px; transition: 0.3s; }
-    .drop-zone:hover, .drop-zone.dragover { background: rgba(0, 242, 255, 0.2); border-color: #00f2ff; }
+    .drop-zone { border: 2px dashed rgba(0, 242, 255, 0.7); background: rgba(0, 242, 255, 0.08); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: 5px; transition: 0.3s; }
+    .drop-zone:hover, .drop-zone.dragover { background: rgba(0, 242, 255, 0.25); border-color: #00f2ff; }
     .drop-zone-text { font-size: 11px; color: #00f2ff; font-weight: bold; }
 
     /* TESTIMONIOS CON ESTRELLAS */
     .caja-referencias { margin-top: 0px; max-width: 450px; padding: 16px 20px; height: auto !important; max-height: none !important; overflow: visible !important; position: relative; z-index: 1; }
     .caja-referencias h1 { font-size: 16px; letter-spacing: 0.5px; }
     .caja-referencias .subtitle { font-size: 11px; margin-bottom: 10px; }
-    .btn-toggle-ref { width: 100%; background: transparent; border: 1px solid rgba(0,242,255,0.5); color: #00f2ff; padding: 9px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .btn-toggle-ref:hover { background: rgba(0,242,255,0.1); }
+    .btn-toggle-ref { width: 100%; background: rgba(0,242,255,0.1); border: 1px solid rgba(0,242,255,0.7); color: #00f2ff; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-toggle-ref:hover { background: rgba(0,242,255,0.25); }
     
     #contenedor-ref-scroll { display: block; margin-top: 14px; height: auto; max-height: none; overflow: visible; }
     .filtros-ref { display: flex; gap: 6px; margin-bottom: 12px; justify-content: center; flex-wrap: wrap; }
-    .btn-filtro { background: rgba(0,242,255,0.08); border: 1px solid rgba(0,242,255,0.4); color: #00f2ff; padding: 5px 11px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.2s; }
+    .btn-filtro { background: rgba(0,242,255,0.12); border: 1px solid rgba(0,242,255,0.5); color: #00f2ff; padding: 6px 12px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.2s; font-weight: bold; }
     .btn-filtro.activo { background: #00f2ff; color: #030008; font-weight: bold; box-shadow: 0 0 10px rgba(0,242,255,0.6); }
 
     .grid-referencias { display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; height: auto !important; max-height: none !important; overflow: visible !important; }
-    .tarjeta-ref { background: rgba(0,242,255,0.08); border: 1px solid rgba(0,242,255,0.4); border-radius: 10px; padding: 12px 10px; text-align: center; width: 100%; display: block !important; }
-    .tarjeta-ref-tipo { font-size: 9px; color: #ffd700; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 3px; }
-    .estrellas-rating { color: #ffd700; font-size: 13px; letter-spacing: 2px; margin-bottom: 5px; }
-    .tarjeta-ref-nombre { font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #fff; }
-    .tarjeta-ref-progreso { font-size: 11px; color: #ccc; line-height: 1.6; }
-    .tarjeta-ref-progreso .antes { color: #ff6b6b; display: block; }
-    .tarjeta-ref-progreso .despues { color: #4caf50; font-weight: bold; display: block; }
+    .tarjeta-ref { background: rgba(0,242,255,0.12); border: 1px solid rgba(0,242,255,0.5); border-radius: 10px; padding: 12px 10px; text-align: center; width: 100%; display: block !important; }
+    .tarjeta-ref-tipo { font-size: 10px; color: #ffd700; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .estrellas-rating { color: #ffd700; font-size: 14px; letter-spacing: 2px; margin-bottom: 5px; }
+    .tarjeta-ref-nombre { font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #fff; }
+    .tarjeta-ref-progreso { font-size: 12px; color: #e2e8f0; line-height: 1.6; font-weight: 500; }
+    .tarjeta-ref-progreso .antes { color: #ff8585; display: block; font-weight: bold; }
+    .tarjeta-ref-progreso .despues { color: #6ee7b7; font-weight: bold; display: block; }
     
-    .btn-evidencia { display: inline-block; background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; padding: 4px 8px; border-radius: 4px; font-size: 10px; text-decoration: none; font-weight: bold; transition: 0.2s; }
+    .btn-evidencia { display: inline-block; background: rgba(0, 242, 255, 0.25); border: 1px solid #00f2ff; color: #00f2ff; padding: 5px 10px; border-radius: 4px; font-size: 10px; text-decoration: none; font-weight: bold; transition: 0.2s; }
     .btn-evidencia:hover { background: #00f2ff; color: #030008; }
-    .tarjeta-ref-fecha { font-size: 9px; color: #777; margin-top: 8px; }
-    #sin-referencias { display: none; text-align: center; color: #888; padding: 15px 5px; font-size: 12px; }
+    .tarjeta-ref-fecha { font-size: 10px; color: #aaa; margin-top: 8px; }
+    #sin-referencias { display: none; text-align: center; color: #aaa; padding: 15px 5px; font-size: 12px; }
     
-    .btn-ver-mas { display: none; width: 100%; margin-top: 10px; background: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; color: #ffd700; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+    .btn-ver-mas { display: none; width: 100%; margin-top: 10px; background: rgba(255, 215, 0, 0.2); border: 1px solid #ffd700; color: #ffd700; padding: 9px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
 
     .form-admin-ref { border-top: 1px dashed #444; margin-top: 15px; padding-top: 12px; }
     .form-admin-ref h3 { font-size: 13px; color: #00f2ff; margin: 0 0 8px 0; text-align: left; }
@@ -614,12 +620,12 @@
                 <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
             </div>
 
-            <div id="bloque-modo-objetivo" style="display:none; background:rgba(0,242,255,0.05); padding:10px; border-radius:8px; border:1px solid rgba(0,242,255,0.3); margin-top:5px;">
+            <div id="bloque-modo-objetivo" style="display:none; background:rgba(0,242,255,0.08); padding:10px; border-radius:8px; border:1px solid rgba(0,242,255,0.4); margin-top:5px;">
                 <label style="margin-top:0;">Skill/Nivel Actual:</label>
                 <input type="number" id="stat-actual" placeholder="Ej: 100" min="1" oninput="calcularTotalMeta()">
                 <label>Skill/Nivel Deseado:</label>
                 <input type="number" id="stat-deseado" placeholder="Ej: 115" min="1" oninput="calcularTotalMeta()">
-                <div id="res-meta-estimado" style="font-size:11px; color:#ffd700; margin-top:5px; text-align:center;"></div>
+                <div id="res-meta-estimado" style="font-size:12px; color:#ffd700; margin-top:5px; text-align:center; font-weight:bold;"></div>
             </div>
 
             <label>Servicio:</label>
@@ -633,9 +639,9 @@
 
             <label>Nivel de tu Skill Actual (Para barra de rango):</label>
             <input type="number" id="nivel-skill" placeholder="Ej: 100" min="1" oninput="actualizarBarra()">
-            <div id="contenedor-barra" style="margin-top:10px; display:none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
-                <div style="font-size: 11px; margin-bottom: 3px;">Rango Actual: <span id="nombre-rango">Bronce</span></div>
-                <div style="width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden;">
+            <div id="contenedor-barra" style="margin-top:10px; display:none; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px; border: 1px solid rgba(0,242,255,0.3);">
+                <div style="font-size: 12px; margin-bottom: 5px; font-weight: bold; color: #fff;">Rango Actual: <span id="nombre-rango">Bronce</span></div>
+                <div style="width: 100%; height: 12px; background: #222; border-radius: 6px; overflow: hidden; border: 1px solid #444;">
                     <div id="barra-progreso" style="width: 0%; height: 100%; background: #cd7f32; transition: width 0.3s, background 0.3s;"></div>
                 </div>
             </div>
@@ -643,13 +649,13 @@
             <!-- TABLA DE RANGOS REORDENADA -->
             <table class="tabla-rangos">
                 <tr><th>Rango</th><th>Horas</th></tr>
-                <tr><td style="color:#c0c0c0;">⚪ PLATA</td><td>20+</td></tr>
-                <tr><td style="color:#ffd700;">🟡 ORO</td><td>30+</td></tr>
-                <tr><td style="color:#00f2ff;">💎 DIAMANTE</td><td>50+</td></tr>
-                <tr><td style="color:#00f2ff;">💎 PREMIUM</td><td>500+</td></tr>
-                <tr><td style="color:#FFD700;">👑 VIP</td><td>1000+</td></tr>
-                <tr><td style="color:#ff8c00;">🔥 LEYENDA I</td><td>1500+</td></tr>
-                <tr><td style="color:#ff4500;">⚡ LEYENDA II</td><td>2000+</td></tr>
+                <tr><td style="color:#c0c0c0; font-weight:bold;">⚪ PLATA</td><td>20+</td></tr>
+                <tr><td style="color:#ffd700; font-weight:bold;">🟡 ORO</td><td>30+</td></tr>
+                <tr><td style="color:#00f2ff; font-weight:bold;">💎 DIAMANTE</td><td>50+</td></tr>
+                <tr><td style="color:#00f2ff; font-weight:bold;">💎 PREMIUM</td><td>500+</td></tr>
+                <tr><td style="color:#FFD700; font-weight:bold;">👑 VIP</td><td>1000+</td></tr>
+                <tr><td style="color:#ff8c00; font-weight:bold;">🔥 LEYENDA I</td><td>1500+</td></tr>
+                <tr><td style="color:#ff4500; font-weight:bold;">⚡ LEYENDA II</td><td>2000+</td></tr>
             </table>
 
             <div class="resultado-caja">
@@ -659,10 +665,10 @@
             <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirYRedirigir(); return false;">💬 APARTAR CUPO POR WHATSAPP</a>
             
             <div id="panel-admin">
-                <button onclick="cambiarEstado()" style="width:100%; padding:10px; background: #ff0000; color: white; cursor:pointer;">CAMBIAR ESTADO</button>
+                <button onclick="cambiarEstado()" style="width:100%; padding:10px; background: #ff0000; color: white; cursor:pointer; font-weight:bold;">CAMBIAR ESTADO</button>
                 <input type="text" id="admin-nombre" placeholder="Nombre cliente" style="margin-top:10px;">
                 <input type="number" id="admin-horas" placeholder="Horas">
-                <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer;">GENERAR LINK</button>
+                <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer; font-weight:bold;">GENERAR LINK</button>
                 <div id="link-generado" style="color:#ffd700; font-size:11px; margin-top:10px; word-break:break-all;"></div>
                 <div id="lista-clientes" style="margin-top:15px; max-height: 150px; overflow-y: auto;"></div>
 
