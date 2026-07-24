@@ -8,7 +8,6 @@
 <!-- CONFIGURACIÓN DE IMAGEN Y VISTA PREVIA PARA WHATSAPP -->
 <meta property="og:title" content="🛡️ SAFEGAMING SERVICE - RUCOY ONLINE">
 <meta property="og:description" content="Servicio Profesional de Skilleo, Nivel y Power Training.">
-<!-- Reemplaza esta URL por la dirección pública directa donde alojes la foto de tu logo (HTTPS) -->
 <meta property="og:image" content="https://i.imgur.com/TU_IMAGEN_AQUI.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
@@ -492,7 +491,7 @@
     * { box-sizing: border-box; }
     body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; background-color: #030008; }
 
-    /* ESTILOS DEL VIDEO DE FONDO */
+    /* ESTILOS DEL VIDEO DE FONDO CORREGIDOS PARA MÓVIL Y PC */
     #bg-video {
         position: fixed;
         top: 0;
@@ -501,6 +500,7 @@
         height: 100vh;
         object-fit: cover;
         z-index: -999;
+        pointer-events: none;
     }
 
     .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; position: relative; z-index: 1; }
@@ -571,9 +571,10 @@
 </head>
 <body>
 
-    <!-- VIDEO DE FONDO CON AUDIO HABILITADO -->
-    <video autoplay loop playsinline id="bg-video">
+    <!-- VIDEO DE FONDO COMPATIBLE CON MÓVIL Y PC -->
+    <video autoplay muted loop playsinline id="bg-video">
         <source src="video.mp4" type="video/mp4">
+        Tu navegador no soporta videos HTML5.
     </video>
 
     <div class="caja" id="contenedor">
@@ -859,11 +860,6 @@
         document.addEventListener('click', function unlockAudio() {
             const audio = document.getElementById('sonido-level');
             if(audio) { audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {}); }
-            
-            // Permitir que el video reproduzca audio al primer clic del usuario
-            const bgVideo = document.getElementById('bg-video');
-            if(bgVideo) { bgVideo.muted = false; bgVideo.play().catch(() => {}); }
-
             document.removeEventListener('click', unlockAudio);
         }, { once: true });
 
