@@ -571,8 +571,8 @@
 </head>
 <body>
 
-    <!-- VIDEO DE FONDO -->
-    <video autoplay muted loop playsinline id="bg-video">
+    <!-- VIDEO DE FONDO CON AUDIO HABILITADO -->
+    <video autoplay loop playsinline id="bg-video">
         <source src="video.mp4" type="video/mp4">
     </video>
 
@@ -859,6 +859,11 @@
         document.addEventListener('click', function unlockAudio() {
             const audio = document.getElementById('sonido-level');
             if(audio) { audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {}); }
+            
+            // Permitir que el video reproduzca audio al primer clic del usuario
+            const bgVideo = document.getElementById('bg-video');
+            if(bgVideo) { bgVideo.muted = false; bgVideo.play().catch(() => {}); }
+
             document.removeEventListener('click', unlockAudio);
         }, { once: true });
 
