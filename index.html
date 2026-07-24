@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Safegaming Service - Rucoy Online</title>
 
-<!-- CONFIGURACIÓN DE VISTA PREVIA PARA WHATSAPP Y REDES -->
 <meta property="og:title" content="🛡️ SAFEGAMING SERVICE - RUCOY ONLINE">
 <meta property="og:description" content="Servicio Profesional de Skilleo, Nivel y Power Training.">
 <meta property="og:image" content="https://i.imgur.com/TU_IMAGEN_AQUI.png">
@@ -478,7 +477,21 @@
 
 <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 0 15px 30px 15px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
+    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 0 15px 30px 15px; background-color: #030008; }
+
+    /* VIDEO DE FONDO EN PANTALLA COMPLETA */
+    #bg-video {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        min-width: 100%;
+        min-height: 100%;
+        width: auto;
+        height: auto;
+        z-index: -10;
+        transform: translate(-50%, -50%);
+        object-fit: cover;
+    }
 
     /* BARRA DE NAVEGACIÓN SUPERIOR */
     .navbar { width: 100%; max-width: 800px; display: flex; justify-content: center; align-items: center; gap: 15px; padding: 18px 10px; margin-bottom: 20px; border-bottom: 2px solid rgba(255, 140, 0, 0.4); flex-wrap: wrap; background: rgba(3, 0, 8, 0.85); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; border-radius: 0 0 12px 12px; }
@@ -575,7 +588,11 @@
 </head>
 <body>
 
-    <!-- BARRA DE NAVEGACIÓN SUPERIOR (SIN ADMIN PRO) -->
+    <video autoplay loop muted playsinline id="bg-video">
+        <source src="1001128080.mp4" type="video/mp4">
+        Tu navegador no soporta video HTML5.
+    </video>
+
     <nav class="navbar">
         <button class="nav-btn active" onclick="cambiarPestana('inicio', this)">Inicio</button>
         <button class="nav-btn" onclick="cambiarPestana('reserva', this)">Reservar tu Cupo</button>
@@ -584,7 +601,6 @@
         <button class="nav-btn" onclick="cambiarPestana('rangos', this)">Rangos</button>
     </nav>
 
-    <!-- SECCIÓN 1: INICIO -->
     <div id="sec-inicio" class="sec-tab active">
         <div class="caja">
             <div id="estado-servicio">Cargando...</div>
@@ -597,7 +613,6 @@
             </p>
             <button onclick="cambiarPestanaDirecto('reserva')" style="width:100%; padding:12px; background:#ff9d00; color:#030008; font-weight:bold; border:none; border-radius:6px; cursor:pointer; font-size:14px; margin-top:10px;">⚡ RESERVAR MI CUPO AHORA</button>
 
-            <!-- PANEL DE ADMINISTRADOR OCULTO -->
             <div id="panel-admin">
                 <h3 style="color:#00f2ff; text-align:center; margin-top:0;">⚙️ PANEL DE CONTROL ADMIN</h3>
                 <button onclick="cambiarEstado()" style="width:100%; padding:10px; background: #ff0000; color: white; font-weight:bold; cursor:pointer;">CAMBIAR ESTADO SERVICIO</button>
@@ -653,7 +668,6 @@
         </div>
     </div>
 
-    <!-- SECCIÓN 2: RESERVAR TU CUPO -->
     <div id="sec-reserva" class="sec-tab">
         <div class="caja" id="contenedor">
             <div id="vista-seguimiento">
@@ -713,14 +727,9 @@
         </div>
     </div>
 
-    <!-- SECCIÓN 3: MINIJUEGO "QUILLA EL SLIME" (NUEVAS OPCIONES + MÚSICA SOLO LEVELING) -->
     <div id="sec-minijuego" class="sec-tab">
         <div class="caja">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h1 style="color: #ff9d00; margin:0;">"Quilla el Slime"</h1>
-                <!-- CONTROL DE MÚSICA DE SOLO LEVELING -->
-                <button id="btn-musica-sl" onclick="toggleMusicaSoloLeveling()" style="background:rgba(0,242,255,0.2); border:1px solid #00f2ff; color:#00f2ff; border-radius:6px; padding:5px 10px; font-size:11px; font-weight:bold; cursor:pointer;">🎵 Solo Leveling: OFF</button>
-            </div>
+            <h1 style="color: #ff9d00; text-align:center; margin-bottom:10px;">"Quilla el Slime"</h1>
             
             <div class="game-box">
                 <p style="font-size: 11px; color: #ccc; margin-top:4px;">
@@ -751,7 +760,6 @@
         </div>
     </div>
 
-    <!-- SECCIÓN 4: TESTIMONIOS -->
     <div id="sec-testimonios" class="sec-tab">
         <div class="caja caja-referencias">
             <h1>📊 TESTIMONIOS DE CLIENTES</h1>
@@ -810,7 +818,6 @@
         </div>
     </div>
 
-    <!-- SECCIÓN 5: RANGOS Y PROGRESO -->
     <div id="sec-rangos" class="sec-tab">
         <div class="caja">
             <h1>🏆 SISTEMA DE RANGOS 🏆</h1>
@@ -838,7 +845,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE EDICIÓN ADMIN -->
     <div id="modal-editar-admin">
         <h3 style="margin-top:0; color:#00f2ff; text-align:center;">✏️ EDITAR Y ACUMULAR FOTOS</h3>
         <label>Nombre:</label>
@@ -872,7 +878,6 @@
         </div>
     </div>
 
-    <!-- VISOR EMERGENTE DE FOTOS -->
     <div id="modal-visor-foto" onclick="cerrarVisorFoto()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
         <div style="position:relative; max-width:90%; max-height:90%;">
             <span style="position:absolute; top:-30px; right:0; color:white; font-size:24px; font-weight:bold; cursor:pointer;">✖️ Cerrar</span>
@@ -880,14 +885,20 @@
         </div>
     </div>
 
-    <!-- AUDIOS DEL SISTEMA -->
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
-    <!-- MÚSICA ÉPICA SOLO LEVELING (ARISE THEME REPRODUCCIÓN EN BUCLE) -->
-    <audio id="musica-solo-leveling" loop src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a1e809.mp3?filename=action-epic-music-110821.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: v22-solo-leveling-music</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: v24-video-fix</span></div>
 
     <script>
+        // SCRIPT PARA ACTIVAR AUDIO Y VIDEO TRAS PRIMER CLIC (SUPERAR BLOQUEO DEL NAVEGADOR)
+        document.addEventListener('click', function desbanearVideoYAudio() {
+            const vid = document.getElementById('bg-video');
+            if (vid) {
+                vid.muted = false; // Quita el silencio para reproducir el audio del video
+                vid.play().catch(() => {});
+            }
+        }, { once: true });
+
         // LÓGICA DE NAVEGACIÓN ENTRE PESTAÑAS
         function cambiarPestana(idTab, btn) {
             document.querySelectorAll('.sec-tab').forEach(sec => sec.classList.remove('active'));
@@ -909,29 +920,6 @@
             cambiarPestana(idTab, null);
         }
 
-        // LÓGICA DE MÚSICA DE SOLO LEVELING
-        let musicaActiva = false;
-        function toggleMusicaSoloLeveling() {
-            const audio = document.getElementById('musica-solo-leveling');
-            const btn = document.getElementById('btn-musica-sl');
-            if (!audio || !btn) return;
-
-            if (musicaActiva) {
-                audio.pause();
-                musicaActiva = false;
-                btn.innerText = '🎵 Solo Leveling: OFF';
-                btn.style.background = 'rgba(0,242,255,0.2)';
-            } else {
-                audio.volume = 0.5;
-                audio.play().then(() => {
-                    musicaActiva = true;
-                    btn.innerText = '🔊 Solo Leveling: ON';
-                    btn.style.background = '#00f2ff';
-                    btn.style.color = '#030008';
-                }).catch(() => alert('Toca primero en la pantalla para permitir el audio.'));
-            }
-        }
-
         // LÓGICA DEL MINIJUEGO CON COMBOS Y SLIME DE HIELO
         let gamePuntos = 0;
         let gameCombo = 1;
@@ -939,7 +927,7 @@
         let gameInterval = null;
         let moveInterval = null;
         let estaCongelado = false;
-        let tipoSlimeActual = 'normal'; // 'normal', 'dorado', 'bomba', 'hielo'
+        let tipoSlimeActual = 'normal';
 
         function iniciarJuego() {
             gamePuntos = 0;
@@ -1003,7 +991,6 @@
             target.style.left = randomX + 'px';
             target.style.top = randomY + 'px';
 
-            // Probabilidades: Verde 55%, Dorado 15%, Hielo 15%, Bomba 15%
             const rand = Math.random();
             target.className = 'slime-target';
             if (rand < 0.15) {
@@ -1036,7 +1023,7 @@
                 setTimeout(() => { estaCongelado = false; }, 3000);
             } else if (tipoSlimeActual === 'bomba') {
                 gamePuntos = Math.max(0, gamePuntos - 2);
-                gameCombo = 1; // Reinicia combo si pisas bomba
+                gameCombo = 1;
             } else {
                 gamePuntos += (1 * gameCombo);
                 gameCombo++;
@@ -1276,9 +1263,7 @@
             window.renderListaImagenesEditar();
         });
 
-        const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
-        let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
-        window.onload = () => { rotar(); setInterval(rotar, 30000); calcularTotal(); };
+        window.onload = () => { calcularTotal(); };
     </script>
 </body>
 </html>
