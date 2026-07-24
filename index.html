@@ -589,7 +589,7 @@
 <body>
 
     <video autoplay loop muted playsinline id="bg-video">
-        <source src="Sung%20Jin%20Woo%20vs%20Kargalgan%20MÚSICA%20%5BVIDEO%5D%20-%20LOOKINEY%20-%20Lookiney%20(720p,%20h264).mp4" type="video/mp4">
+        <source src="Sung%20Jin%20Woo%20vs%20Kargalgan%20MUSIC%20%5B%20VIDEO%20%5D%20-%20LOOKINEY%20-%20Lookiney%20(720p,%20h264).mp4" type="video/mp4">
         Tu navegador no soporta video HTML5.
     </video>
 
@@ -887,14 +887,14 @@
 
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: v24-video-fix</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: v25-video-fix</span></div>
 
     <script>
         // SCRIPT PARA ACTIVAR AUDIO Y VIDEO TRAS PRIMER CLIC (SUPERAR BLOQUEO DEL NAVEGADOR)
         document.addEventListener('click', function desbanearVideoYAudio() {
             const vid = document.getElementById('bg-video');
             if (vid) {
-                vid.muted = false; // Quita el silencio para reproducir el audio del video
+                vid.muted = false; // Desmutea el video al primer clic del usuario
                 vid.play().catch(() => {});
             }
         }, { once: true });
