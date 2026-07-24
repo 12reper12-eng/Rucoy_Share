@@ -577,6 +577,9 @@
         Tu navegador no soporta videos HTML5.
     </video>
 
+    <!-- BOTÓN FLOTANTE PARA ACTIVAR/SILENCIAR EL AUDIO DEL VIDEO -->
+    <button onclick="toggleAudioVideo()" id="btn-audio-video" style="position:fixed; bottom:20px; right:20px; z-index:9999; background:rgba(6,2,16,0.9); border:1px solid #00f2ff; color:#00f2ff; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold; backdrop-filter:blur(4px); box-shadow: 0 0 10px rgba(0,242,255,0.3); font-size:12px;">🔇 Activar Sonido</button>
+
     <div class="caja" id="contenedor">
         <div id="vista-seguimiento">
             <h1 id="cliente-nombre">Seguimiento</h1>
@@ -813,6 +816,20 @@
     <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v17</span></div>
 
     <script>
+        // FUNCIÓN PARA CONTROLAR EL AUDIO DEL VIDEO DE FONDO
+        function toggleAudioVideo() {
+            const video = document.getElementById('bg-video');
+            const btn = document.getElementById('btn-audio-video');
+            if (video.muted) {
+                video.muted = false;
+                video.play();
+                btn.innerHTML = "🔊 Silenciar";
+            } else {
+                video.muted = true;
+                btn.innerHTML = "🔇 Activar Sonido";
+            }
+        }
+
         function cambiarModoCalculo() {
             let modo = document.getElementById("modo-calculo").value;
             document.getElementById("bloque-modo-horas").style.display = (modo === "horas") ? "block" : "none";
