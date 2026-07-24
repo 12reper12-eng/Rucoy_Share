@@ -5,10 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Safegaming Service - Rucoy Online</title>
 
-<!-- CONFIGURACIÓN DE IMAGEN Y VISTA PREVIA PARA WHATSAPP -->
+<!-- CONFIGURACIÓN DE VISTA PREVIA PARA WHATSAPP Y REDES -->
 <meta property="og:title" content="🛡️ SAFEGAMING SERVICE - RUCOY ONLINE">
 <meta property="og:description" content="Servicio Profesional de Skilleo, Nivel y Power Training.">
-<!-- Reemplaza esta URL por la dirección pública directa donde alojes la foto de tu logo (HTTPS) -->
 <meta property="og:image" content="https://i.imgur.com/TU_IMAGEN_AQUI.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
@@ -289,14 +288,6 @@
         .catch((err) => alert('Error: ' + err.message));
     };
 
-    window.toggleReferencias = () => {
-        const cont = document.getElementById('contenedor-ref-scroll');
-        const btn = document.getElementById('btn-toggle-ref');
-        const abierto = cont.style.display !== 'none';
-        cont.style.display = abierto ? 'none' : 'block';
-        btn.innerText = abierto ? `👁️ VER TESTIMONIOS (${testimoniosCache.length})` : '🔼 OCULTAR TESTIMONIOS';
-    };
-
     window.filtrarReferencias = (tipo, btn) => {
         document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
         if (btn) btn.classList.add('activo');
@@ -490,9 +481,15 @@
 
 <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
+    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 0 15px 30px 15px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
 
-    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; position: relative; }
+    /* BARRA DE NAVEGACIÓN SUPERIOR */
+    .navbar { width: 100%; max-width: 800px; display: flex; justify-content: center; align-items: center; gap: 15px; padding: 18px 10px; margin-bottom: 20px; border-bottom: 2px solid rgba(255, 140, 0, 0.4); flex-wrap: wrap; background: rgba(3, 0, 8, 0.85); backdrop-filter: blur(10px); sticky; top: 0; z-index: 100; border-radius: 0 0 12px 12px; }
+    .nav-btn { background: none; border: none; color: #ffffff; font-size: 15px; font-weight: bold; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: all 0.2s ease-in-out; text-shadow: 0 0 5px rgba(0,0,0,0.8); }
+    .nav-btn:hover { color: #ff9d00; text-shadow: 0 0 10px #ff9d00; }
+    .nav-btn.active { color: #ff9d00; border-bottom: 2px solid #ff9d00; text-shadow: 0 0 12px #ff9d00; }
+
+    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 480px; position: relative; }
     #estado-servicio { text-align: center; margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 8px; border: 1px solid #00f2ff; }
     #vista-seguimiento { display: none; text-align: center; }
     h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: default; }
@@ -503,11 +500,21 @@
     .resultado-caja { background: rgba(0, 242, 255, 0.1); border: 1px dashed rgba(0, 242, 255, 0.5); padding: 12px; margin-top: 15px; border-radius: 6px; text-align: center; }
     .total-oro { color: #ffd700; font-size: 20px; font-weight: bold; }
     .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; cursor: pointer; }
-    .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center; }
+    .footer { margin-top: 25px; color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center; }
     #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
     .lista-item { padding: 8px; border-bottom: 1px solid #333; font-size: 11px; text-align: left; }
     .tabla-rangos { width: 100%; font-size: 11px; margin-top: 15px; border-collapse: collapse; border: 1px solid #444; color: #ccc; }
-    .tabla-rangos th, .tabla-rangos td { padding: 6px; border: 1px solid #444; text-align: center; }
+    .tabla-rangos th, .tabla-rangos td { padding: 8px; border: 1px solid #444; text-align: center; }
+
+    /* ESTILOS DE SECCIONES DE NAVEGACIÓN */
+    .sec-tab { display: none; width: 100%; max-width: 480px; }
+    .sec-tab.active { display: block; }
+
+    /* ESTILOS DEL MINIJUEGO QUILLA EL SLIME */
+    .game-box { text-align: center; border: 1px dashed rgba(255, 157, 0, 0.6); padding: 15px; border-radius: 12px; background: rgba(0, 0, 0, 0.4); margin-top: 10px; }
+    .game-arena { width: 100%; height: 200px; border: 1px solid rgba(0, 242, 255, 0.4); border-radius: 10px; position: relative; overflow: hidden; background: rgba(5, 5, 15, 0.8); margin: 15px 0; }
+    .slime-target { width: 45px; height: 45px; position: absolute; cursor: pointer; border-radius: 50%; background: #22c55e; box-shadow: 0 0 15px #22c55e; display: flex; align-items: center; justify-content: center; font-size: 20px; user-select: none; transition: transform 0.05s ease; }
+    .slime-target:active { transform: scale(0.85); }
 
     /* DROP ZONE */
     .drop-zone { border: 2px dashed rgba(0, 242, 255, 0.5); background: rgba(0, 242, 255, 0.05); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: 5px; transition: 0.3s; }
@@ -515,8 +522,8 @@
     .drop-zone-text { font-size: 11px; color: #00f2ff; font-weight: bold; }
 
     /* TESTIMONIOS CON ESTRELLAS */
-    .caja-referencias { margin-top: 20px; max-width: 450px; padding: 16px 20px; height: auto !important; max-height: none !important; overflow: visible !important; }
-    .caja-referencias h1 { font-size: 16px; letter-spacing: 0.5px; }
+    .caja-referencias { max-width: 480px; padding: 20px; height: auto !important; max-height: none !important; overflow: visible !important; }
+    .caja-referencias h1 { font-size: 18px; letter-spacing: 0.5px; }
     .caja-referencias .subtitle { font-size: 11px; margin-bottom: 10px; }
     .btn-toggle-ref { width: 100%; background: transparent; border: 1px solid rgba(0,242,255,0.5); color: #00f2ff; padding: 9px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .btn-toggle-ref:hover { background: rgba(0,242,255,0.1); }
@@ -560,58 +567,174 @@
 </head>
 <body>
 
-    <div class="caja" id="contenedor">
-        <div id="vista-seguimiento">
-            <h1 id="cliente-nombre">Seguimiento</h1>
-            <div id="rango-cliente" style="font-size: 18px; margin: 5px 0;"></div>
-            <div id="reloj" style="font-size: 40px; color: #ffd700; margin: 20px 0; font-weight: bold;">00:00:00</div>
-        </div>
+    <!-- BARRA DE NAVEGACIÓN SUPERIOR ESTILO GAMER -->
+    <nav class="navbar">
+        <button class="nav-btn active" onclick="cambiarPestana('inicio', this)">Inicio</button>
+        <button class="nav-btn" onclick="cambiarPestana('reserva', this)">Reservar tu cupo</button>
+        <button class="nav-btn" onclick="cambiarPestana('minijuego', this)">Minijuego</button>
+        <button class="nav-btn" onclick="cambiarPestana('testimonios', this)">Testimonios</button>
+        <button class="nav-btn" onclick="cambiarPestana('rangos', this)">Rangos</button>
+        <button class="nav-btn" onclick="cambiarPestana('admin', this)">Admin Pro</button>
+    </nav>
 
-        <div id="vista-formulario">
+    <!-- SECCIÓN 1: INICIO -->
+    <div id="sec-inicio" class="sec-tab active">
+        <div class="caja">
             <div id="estado-servicio">Cargando...</div>
-            <h1 ondblclick="verificarAdmin()">🛡️ SAFEGAMING SERVICE 🛡️ <span id="badge-pendientes" style="display:none; background:#ff3333; color:white; font-size:11px; border-radius:10px; padding:1px 7px; vertical-align:middle;"></span></h1>
+            <h1>🛡️ SAFEGAMING SERVICE 🛡️</h1>
             <div class="subtitle">RUCOY ONLINE: PROFESIONAL</div>
-            <div class="horario-box">🕒 <b>HORARIO:</b> 9:00 AM - 7:00 PM</div>
-            
-            <label>Nombre del Personaje:</label>
-            <input type="text" id="personaje" placeholder="Ej: RucoyPro" oninput="calcularTotal()">
-            
-            <label>Elige tu Profesión:</label>
-            <select id="clase" onchange="calcularTotal()">
-                <option value="Melee">⚔️ Melee</option>
-                <option value="Distance">🏹 Distancia</option>
-                <option value="Magic">✨ Magia</option>
-            </select>
-            
-            <label>Modo de Cálculo:</label>
-            <select id="modo-calculo" onchange="cambiarModoCalculo()">
-                <option value="horas">⏱️ Por Horas Directas</option>
-                <option value="objetivo">🎯 Por Meta (De Nivel/Skill A -> B)</option>
-            </select>
+            <div class="horario-box">🕒 <b>HORARIO DE ATENCIÓN:</b> 9:00 AM - 7:00 PM</div>
+            <p style="font-size: 13px; line-height: 1.6; color: #ddd; text-align: center;">
+                Bienvenido al servicio líder de entrenamiento, subida de niveles y Power Training para <b>Rucoy Online</b>. 
+                Garantizamos máxima rapidez, confiabilidad y seguridad para tu personaje.
+            </p>
+            <button onclick="cambiarPestanaDirecto('reserva')" style="width:100%; padding:12px; background:#ff9d00; color:#030008; font-weight:bold; border:none; border-radius:6px; cursor:pointer; font-size:14px; margin-top:10px;">⚡ RESERVAR MI CUPO AHORA</button>
+        </div>
+    </div>
 
-            <div id="bloque-modo-horas">
-                <label>Cantidad de Horas:</label>
-                <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
+    <!-- SECCIÓN 2: RESERVAR TU CUPO (FORMULARIO PRINCIPAL) -->
+    <div id="sec-reserva" class="sec-tab">
+        <div class="caja" id="contenedor">
+            <div id="vista-seguimiento">
+                <h1 id="cliente-nombre">Seguimiento</h1>
+                <div id="rango-cliente" style="font-size: 18px; margin: 5px 0;"></div>
+                <div id="reloj" style="font-size: 40px; color: #ffd700; margin: 20px 0; font-weight: bold;">00:00:00</div>
             </div>
 
-            <div id="bloque-modo-objetivo" style="display:none; background:rgba(0,242,255,0.05); padding:10px; border-radius:8px; border:1px solid rgba(0,242,255,0.3); margin-top:5px;">
-                <label style="margin-top:0;">Skill/Nivel Actual:</label>
-                <input type="number" id="stat-actual" placeholder="Ej: 100" min="1" oninput="calcularTotalMeta()">
-                <label>Skill/Nivel Deseado:</label>
-                <input type="number" id="stat-deseado" placeholder="Ej: 115" min="1" oninput="calcularTotalMeta()">
-                <div id="res-meta-estimado" style="font-size:11px; color:#ffd700; margin-top:5px; text-align:center;"></div>
+            <div id="vista-formulario">
+                <h1>🎯 RESERVA TU CUPO 🎯</h1>
+                <div class="subtitle">COTIZA Y APARTA TU ENTRENAMIENTO</div>
+                
+                <label>Nombre del Personaje:</label>
+                <input type="text" id="personaje" placeholder="Ej: RucoyPro" oninput="calcularTotal()">
+                
+                <label>Elige tu Profesión:</label>
+                <select id="clase" onchange="calcularTotal()">
+                    <option value="Melee">⚔️ Melee</option>
+                    <option value="Distance">🏹 Distancia</option>
+                    <option value="Magic">✨ Magia</option>
+                </select>
+                
+                <label>Modo de Cálculo:</label>
+                <select id="modo-calculo" onchange="cambiarModoCalculo()">
+                    <option value="horas">⏱️ Por Horas Directas</option>
+                    <option value="objetivo">🎯 Por Meta (De Nivel/Skill A -> B)</option>
+                </select>
+
+                <div id="bloque-modo-horas">
+                    <label>Cantidad de Horas:</label>
+                    <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
+                </div>
+
+                <div id="bloque-modo-objetivo" style="display:none; background:rgba(0,242,255,0.05); padding:10px; border-radius:8px; border:1px solid rgba(0,242,255,0.3); margin-top:5px;">
+                    <label style="margin-top:0;">Skill/Nivel Actual:</label>
+                    <input type="number" id="stat-actual" placeholder="Ej: 100" min="1" oninput="calcularTotalMeta()">
+                    <label>Skill/Nivel Deseado:</label>
+                    <input type="number" id="stat-deseado" placeholder="Ej: 115" min="1" oninput="calcularTotalMeta()">
+                    <div id="res-meta-estimado" style="font-size:11px; color:#ffd700; margin-top:5px; text-align:center;"></div>
+                </div>
+
+                <label>Servicio:</label>
+                <select id="servicio" onchange="calcularTotal()">
+                    <option value="400">Skill Normal - 400k / hr</option>
+                    <option value="460">Power Training - 460k / hr</option>
+                    <option value="800">Subida de Nivel - 800k / hr</option>
+                    <option value="1900">Pack Maraton (5h) - 1.9KK</option>
+                    <option value="2100">Pack Ptrain Pro (5h) - 2.1KK</option>
+                </select>
+
+                <div class="resultado-caja">
+                    <div class="total-oro" id="precio-final">300k gold</div>
+                </div>
+
+                <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirYRedirigir(); return false;">💬 APARTAR CUPO POR WHATSAPP</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 3: MINIJUEGO "QUILLA EL SLIME" -->
+    <div id="sec-minijuego" class="sec-tab">
+        <div class="caja">
+            <h1 style="color: #ff9d00;">Reacción "Quilla el Slime"</h1>
+            <div class="game-box">
+                <p style="font-size: 12px; color: #ccc; margin-top:0;">Haz clic en los Slimes tan rápido como puedas antes de que se acaben los 20 segundos.</p>
+                <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">
+                    Puntuación: <span id="game-score" style="color:#ffd700;">0</span> | Tiempo restante: <span id="game-time" style="color:#ff6b6b;">20s</span>
+                </div>
+                <div class="game-arena" id="game-arena">
+                    <div id="slime-target" class="slime-target" onclick="clickSlime()" style="display:none;">🧪</div>
+                </div>
+                <button id="btn-start-game" onclick="iniciarJuego()" style="width:100%; padding:10px; background:#00f2ff; color:#030008; font-weight:bold; border:none; border-radius:6px; cursor:pointer;">🎮 INICIAR MINIJUEGO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 4: TESTIMONIOS -->
+    <div id="sec-testimonios" class="sec-tab">
+        <div class="caja caja-referencias">
+            <h1>📊 TESTIMONIOS DE CLIENTES</h1>
+            <div class="subtitle">SKILL • NIVEL • CUENTAS</div>
+            
+            <div id="contenedor-ref-scroll">
+                <div class="filtros-ref">
+                    <button class="btn-filtro activo" data-tipo="Todos" onclick="filtrarReferencias('Todos', this)">Todos</button>
+                    <button class="btn-filtro" data-tipo="Skill" onclick="filtrarReferencias('Skill', this)">⚔️ Skill</button>
+                    <button class="btn-filtro" data-tipo="Nivel" onclick="filtrarReferencias('Nivel', this)">⭐ Nivel</button>
+                    <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</option>
+                </div>
+                
+                <div class="grid-referencias" id="grid-referencias"></div>
+                
+                <button id="btn-ver-mas-ref" class="btn-ver-mas" onclick="cargarMasReferencias()">➕ VER MÁS TESTIMONIOS</button>
+                <div id="sin-referencias">Aún no hay testimonios publicados en esta categoría.</div>
             </div>
 
-            <label>Servicio:</label>
-            <select id="servicio" onchange="calcularTotal()">
-                <option value="400">Skill Normal - 400k / hr</option>
-                <option value="460">Power Training - 460k / hr</option>
-                <option value="800">Subida de Nivel - 800k / hr</option>
-                <option value="1900">Pack Maraton (5h) - 1.9KK</option>
-                <option value="2100">Pack Ptrain Pro (5h) - 2.1KK</option>
-            </select>
+            <button class="btn-toggle-ref" id="btn-toggle-form-publico" style="margin-top:15px;" onclick="toggleFormularioPublico()">✍️ DEJAR MI TESTIMONIO</button>
+            <div id="form-ref-publico" style="display:none; margin-top:14px; text-align:left;">
+                <p style="font-size:11px; color:#aaa; margin:0 0 10px 0;">Cuéntanos tu experiencia. Se revisa antes de publicarse.</p>
+                <label style="margin-top:0;">Tipo:</label>
+                <select id="pub-ref-tipo">
+                    <option value="Skill">⚔️ Skill</option>
+                    <option value="Nivel">⭐ Nivel</option>
+                    <option value="Cuenta">🎮 Cuenta</option>
+                </select>
 
-            <label>Nivel de tu Skill Actual (Para barra de rango):</label>
+                <label>Calificación de Estrellas:</label>
+                <select id="pub-ref-estrellas">
+                    <option value="5">⭐⭐⭐⭐⭐ (5 / 5 Excelente)</option>
+                    <option value="4">⭐⭐⭐⭐ (4 / 5 Muy Bueno)</option>
+                    <option value="3">⭐⭐⭐ (3 / 5 Aceptable)</option>
+                    <option value="2">⭐⭐ (2 / 5 Regular)</option>
+                    <option value="1">⭐ (1 / 5 Malo)</option>
+                </select>
+
+                <label>Tu nombre o el de tu personaje:</label>
+                <input type="text" id="pub-ref-nombre" placeholder="Ej: RucoyPro" maxlength="60">
+                <label>Antes:</label>
+                <input type="text" id="pub-ref-antes" placeholder="Ej: Skill 80 / Nivel 120" maxlength="60">
+                <label>Después:</label>
+                <input type="text" id="pub-ref-despues" placeholder="Ej: Skill 150 / Nivel 200" maxlength="60">
+                
+                <label>Evidencia / Captura de pantalla:</label>
+                <div class="drop-zone" id="drop-zone-publico" onclick="document.getElementById('file-input-publico').click()">
+                    <div class="drop-zone-text">📁 Toca para elegir foto (Móvil) o Arrastra aquí (PC)</div>
+                </div>
+                <input type="file" id="file-input-publico" accept="image/*" style="display:none;">
+                <div id="estado-subida-publico" style="font-size:11px; margin-top:5px; text-align:center;"></div>
+
+                <button onclick="enviarReferenciaPublica()" style="width:100%; padding:10px; background:#00f2ff; color:#030008; font-weight:bold; cursor:pointer; margin-top:10px;">📤 ENVIAR PARA REVISIÓN</button>
+                <div id="pub-ref-msj" style="font-size:11px; margin-top:8px; text-align:center;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 5: RANGOS Y PROGRESO -->
+    <div id="sec-rangos" class="sec-tab">
+        <div class="caja">
+            <h1>🏆 SISTEMA DE RANGOS 🏆</h1>
+            <div class="subtitle">BENEFICIOS SEGÚN TUS HORAS ACUMULADAS</div>
+            
+            <label>Consulta tu nivel de Skill (Barra de progreso):</label>
             <input type="number" id="nivel-skill" placeholder="Ej: 100" min="1" oninput="actualizarBarra()">
             <div id="contenedor-barra" style="margin-top:10px; display:none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
                 <div style="font-size: 11px; margin-bottom: 3px;">Rango Actual: <span id="nombre-rango">Bronce</span></div>
@@ -620,29 +743,34 @@
                 </div>
             </div>
 
-            <!-- TABLA DE RANGOS REORDENADA -->
             <table class="tabla-rangos">
-                <tr><th>Rango</th><th>Horas</th></tr>
-                <tr><td style="color:#c0c0c0;">⚪ PLATA</td><td>20+</td></tr>
-                <tr><td style="color:#ffd700;">🟡 ORO</td><td>30+</td></tr>
-                <tr><td style="color:#00f2ff;">💎 DIAMANTE</td><td>50+</td></tr>
-                <tr><td style="color:#00f2ff;">💎 PREMIUM</td><td>500+</td></tr>
-                <tr><td style="color:#FFD700;">👑 VIP</td><td>1000+</td></tr>
-                <tr><td style="color:#ff8c00;">🔥 LEYENDA I</td><td>1500+</td></tr>
-                <tr><td style="color:#ff4500;">⚡ LEYENDA II</td><td>2000+</td></tr>
+                <tr><th>Rango</th><th>Horas Requeridas</th></tr>
+                <tr><td style="color:#c0c0c0;">⚪ PLATA</td><td>20+ hrs</td></tr>
+                <tr><td style="color:#ffd700;">🟡 ORO</td><td>30+ hrs</td></tr>
+                <tr><td style="color:#00f2ff;">💎 DIAMANTE</td><td>50+ hrs</td></tr>
+                <tr><td style="color:#00f2ff;">💎 PREMIUM</td><td>500+ hrs</td></tr>
+                <tr><td style="color:#FFD700;">👑 VIP</td><td>1000+ hrs</td></tr>
+                <tr><td style="color:#ff8c00;">🔥 LEYENDA I</td><td>1500+ hrs</td></tr>
+                <tr><td style="color:#ff4500;">⚡ LEYENDA II</td><td>2000+ hrs</td></tr>
             </table>
+        </div>
+    </div>
 
-            <div class="resultado-caja">
-                <div class="total-oro" id="precio-final">300k gold</div>
+    <!-- SECCIÓN 6: ADMIN PRO -->
+    <div id="sec-admin" class="sec-tab">
+        <div class="caja">
+            <h1>⚙️ PANEL DE ADMINISTRADOR <span id="badge-pendientes" style="display:none; background:#ff3333; color:white; font-size:11px; border-radius:10px; padding:1px 7px; vertical-align:middle;"></span></h1>
+            <div class="subtitle">ACCESO RESTRINGIDO</div>
+            
+            <div id="admin-login-box">
+                <button onclick="verificarAdmin()" style="width:100%; padding:12px; background:#00f2ff; color:#030008; font-weight:bold; border:none; border-radius:6px; cursor:pointer;">🔑 DESBLOQUEAR PANEL DE CONTROL</button>
             </div>
 
-            <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirYRedirigir(); return false;">💬 APARTAR CUPO POR WHATSAPP</a>
-            
             <div id="panel-admin">
-                <button onclick="cambiarEstado()" style="width:100%; padding:10px; background: #ff0000; color: white; cursor:pointer;">CAMBIAR ESTADO</button>
+                <button onclick="cambiarEstado()" style="width:100%; padding:10px; background: #ff0000; color: white; cursor:pointer;">CAMBIAR ESTADO SERVICIO</button>
                 <input type="text" id="admin-nombre" placeholder="Nombre cliente" style="margin-top:10px;">
                 <input type="number" id="admin-horas" placeholder="Horas">
-                <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer;">GENERAR LINK</button>
+                <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer;">GENERAR LINK SEGUIMIENTO</button>
                 <div id="link-generado" style="color:#ffd700; font-size:11px; margin-top:10px; word-break:break-all;"></div>
                 <div id="lista-clientes" style="margin-top:15px; max-height: 150px; overflow-y: auto;"></div>
 
@@ -734,68 +862,82 @@
         </div>
     </div>
 
-    <div class="caja caja-referencias">
-        <h1>📊 TESTIMONIOS DE CLIENTES</h1>
-        <div class="subtitle">SKILL • NIVEL • CUENTAS</div>
-        <button class="btn-toggle-ref" id="btn-toggle-ref" onclick="toggleReferencias()">👁️ TESTIMONIOS PUBLICADOS (<span id="contador-ref">0</span>)</button>
-        
-        <div id="contenedor-ref-scroll">
-            <div class="filtros-ref">
-                <button class="btn-filtro activo" data-tipo="Todos" onclick="filtrarReferencias('Todos', this)">Todos</button>
-                <button class="btn-filtro" data-tipo="Skill" onclick="filtrarReferencias('Skill', this)">⚔️ Skill</button>
-                <button class="btn-filtro" data-tipo="Nivel" onclick="filtrarReferencias('Nivel', this)">⭐ Nivel</button>
-                <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</option>
-            </div>
-            
-            <div class="grid-referencias" id="grid-referencias"></div>
-            
-            <button id="btn-ver-mas-ref" class="btn-ver-mas" onclick="cargarMasReferencias()">➕ VER MÁS TESTIMONIOS</button>
-            <div id="sin-referencias">Aún no hay testimonios publicados en esta categoría.</div>
-        </div>
-
-        <button class="btn-toggle-ref" id="btn-toggle-form-publico" style="margin-top:10px;" onclick="toggleFormularioPublico()">✍️ DEJAR MI TESTIMONIO</button>
-        <div id="form-ref-publico" style="display:none; margin-top:14px; text-align:left;">
-            <p style="font-size:11px; color:#aaa; margin:0 0 10px 0;">Cuéntanos tu experiencia. Se revisa antes de publicarse.</p>
-            <label style="margin-top:0;">Tipo:</label>
-            <select id="pub-ref-tipo">
-                <option value="Skill">⚔️ Skill</option>
-                <option value="Nivel">⭐ Nivel</option>
-                <option value="Cuenta">🎮 Cuenta</option>
-            </select>
-
-            <label>Calificación de Estrellas:</label>
-            <select id="pub-ref-estrellas">
-                <option value="5">⭐⭐⭐⭐⭐ (5 / 5 Excelente)</option>
-                <option value="4">⭐⭐⭐⭐ (4 / 5 Muy Bueno)</option>
-                <option value="3">⭐⭐⭐ (3 / 5 Aceptable)</option>
-                <option value="2">⭐⭐ (2 / 5 Regular)</option>
-                <option value="1">⭐ (1 / 5 Malo)</option>
-            </select>
-
-            <label>Tu nombre o el de tu personaje:</label>
-            <input type="text" id="pub-ref-nombre" placeholder="Ej: RucoyPro" maxlength="60">
-            <label>Antes:</label>
-            <input type="text" id="pub-ref-antes" placeholder="Ej: Skill 80 / Nivel 120" maxlength="60">
-            <label>Después:</label>
-            <input type="text" id="pub-ref-despues" placeholder="Ej: Skill 150 / Nivel 200" maxlength="60">
-            
-            <label>Evidencia / Captura de pantalla:</label>
-            <div class="drop-zone" id="drop-zone-publico" onclick="document.getElementById('file-input-publico').click()">
-                <div class="drop-zone-text">📁 Toca para elegir foto (Móvil) o Arrastra aquí (PC)</div>
-            </div>
-            <input type="file" id="file-input-publico" accept="image/*" style="display:none;">
-            <div id="estado-subida-publico" style="font-size:11px; margin-top:5px; text-align:center;"></div>
-
-            <button onclick="enviarReferenciaPublica()" style="width:100%; padding:10px; background:#00f2ff; color:#030008; font-weight:bold; cursor:pointer; margin-top:10px;">📤 ENVIAR PARA REVISIÓN</button>
-            <div id="pub-ref-msj" style="font-size:11px; margin-top:8px; text-align:center;"></div>
-        </div>
-    </div>
-
     <audio id="sonido-level" src="universfield-level-up-191997.mp3" preload="auto"></audio>
 
-    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: testimonios-v17</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share<br>Atención: +58 412-3576579<br><span style="opacity:0.4;">build: v20-navbar-game</span></div>
 
     <script>
+        // LÓGICA DE NAVEGACIÓN ENTRE PESTAÑAS
+        function cambiarPestana(idTab, btn) {
+            document.querySelectorAll('.sec-tab').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+            const target = document.getElementById('sec-' + idTab);
+            if (target) target.classList.add('active');
+
+            if (btn) {
+                btn.classList.add('active');
+            } else {
+                // Selecciona por nombre si no viene el target
+                document.querySelectorAll('.nav-btn').forEach(b => {
+                    if (b.innerText.toLowerCase().includes(idTab.toLowerCase())) b.classList.add('active');
+                });
+            }
+        }
+
+        function cambiarPestanaDirecto(idTab) {
+            cambiarPestana(idTab, null);
+        }
+
+        // LÓGICA DEL MINIJUEGO "QUILLA EL SLIME"
+        let gamePuntos = 0;
+        let gameTiempo = 20;
+        let gameInterval = null;
+
+        function iniciarJuego() {
+            gamePuntos = 0;
+            gameTiempo = 20;
+            document.getElementById('game-score').innerText = gamePuntos;
+            document.getElementById('game-time').innerText = gameTiempo + 's';
+            document.getElementById('btn-start-game').style.display = 'none';
+            document.getElementById('slime-target').style.display = 'flex';
+            moverSlime();
+
+            if (gameInterval) clearInterval(gameInterval);
+            gameInterval = setInterval(() => {
+                gameTiempo--;
+                document.getElementById('game-time').innerText = gameTiempo + 's';
+
+                if (gameTiempo <= 0) {
+                    clearInterval(gameInterval);
+                    document.getElementById('slime-target').style.display = 'none';
+                    document.getElementById('btn-start-game').innerText = '🔄 JUGAR DE NUEVO';
+                    document.getElementById('btn-start-game').style.display = 'block';
+                    alert(`🎉 ¡Tiempo agotado! Eliminaste ${gamePuntos} Slimes.`);
+                }
+            }, 1000);
+        }
+
+        function moverSlime() {
+            const arena = document.getElementById('game-arena');
+            const target = document.getElementById('slime-target');
+            const maxX = arena.clientWidth - 50;
+            const maxY = arena.clientHeight - 50;
+
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
+
+            target.style.left = randomX + 'px';
+            target.style.top = randomY + 'px';
+        }
+
+        function clickSlime() {
+            gamePuntos++;
+            document.getElementById('game-score').innerText = gamePuntos;
+            moverSlime();
+        }
+
+        // CALCULADORA Y DEMÁS FUNCIONALIDADES ORIGINALES
         function cambiarModoCalculo() {
             let modo = document.getElementById("modo-calculo").value;
             document.getElementById("bloque-modo-horas").style.display = (modo === "horas") ? "block" : "none";
@@ -830,7 +972,6 @@
             
             let servicioNombre = document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text;
 
-            // Formato de mensaje tipo orden/recibo profesional
             let msg = `🛡️ *SAFEGAMING SERVICE - SOLICITUD* 🛡️\n\n` +
                       `👤 *Personaje:* ${nombre || "No especificado"}\n` +
                       `⚔️ *Clase:* ${clase}\n` +
@@ -881,6 +1022,7 @@
         function verificarAdmin() {
             let pass = prompt("Ingrese contraseña de administrador:");
             if(pass === "Iscarlos2006") {
+                document.getElementById('admin-login-box').style.display = 'none';
                 document.getElementById('panel-admin').style.display = 'block';
                 cargarAdmin();
                 if (window.renderTestimoniosAdmin) window.renderTestimoniosAdmin();
@@ -928,10 +1070,8 @@
             setTimeout(() => {
                 let esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
                 if (esMovil) {
-                    // Abre directamente la APP instalada en el teléfono
                     window.location.href = `whatsapp://send?phone=${telefono}&text=${textoCodificado}`;
                 } else {
-                    // En escritorio abre WhatsApp Web directo
                     window.open(`https://web.whatsapp.com/send?phone=${telefono}&text=${textoCodificado}`, '_blank');
                 }
             }, 300);
@@ -939,8 +1079,8 @@
 
         const params = new URLSearchParams(window.location.search);
         if(params.has('n')) {
+            cambiarPestanaDirecto('reserva');
             document.getElementById("vista-formulario").style.display = "none";
-            document.querySelector(".caja-referencias").style.display = "none";
             document.getElementById("vista-seguimiento").style.display = "block";
             document.getElementById("cliente-nombre").innerText = "Cliente: " + decodeURIComponent(params.get('n'));
             let r = params.get('r') || "Novato", c = params.get('c') || "#aaa", i = params.get('i') || "👶";
