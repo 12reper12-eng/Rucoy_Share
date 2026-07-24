@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Safegaming Service - Rucoy Online</title>
 
+<!-- CONFIGURACIÓN DE IMAGEN Y VISTA PREVIA PARA WHATSAPP -->
 <meta property="og:title" content="🛡️ SAFEGAMING SERVICE - RUCOY ONLINE">
 <meta property="og:description" content="Servicio Profesional de Skilleo, Nivel y Power Training.">
+<!-- Reemplaza esta URL por la dirección pública directa donde alojes la foto de tu logo (HTTPS) -->
 <meta property="og:image" content="https://i.imgur.com/TU_IMAGEN_AQUI.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
@@ -488,31 +490,7 @@
 
 <style>
     * { box-sizing: border-box; }
-    
-    /* ESTILOS DEL VIDEO DE FONDO Y CAPA OSCURA */
-    #bg-video {
-        position: fixed;
-        right: 0;
-        bottom: 0;
-        min-width: 100%;
-        min-height: 100%;
-        width: auto;
-        height: auto;
-        z-index: -2;
-        object-fit: cover;
-    }
-    .video-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(3, 0, 8, 0.75); /* Ajusta la opacidad aquí si lo quieres más claro u oscuro */
-        z-index: -1;
-        pointer-events: none;
-    }
-
-    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; background-color: #030008; }
+    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; background-color: #030008; background-position: center; background-size: cover; background-attachment: fixed; transition: background-image 1s ease-in-out; }
 
     .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(6, 2, 16, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(0,242,255,0.3); width: 100%; max-width: 450px; position: relative; }
     #estado-servicio { text-align: center; margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 8px; border: 1px solid #00f2ff; }
@@ -582,12 +560,6 @@
 </head>
 <body>
 
-    <video autoplay loop muted playsinline id="bg-video">
-        <source src="fondo.mp4" type="video/mp4">
-        Tu navegador no soporta video HTML5.
-    </video>
-    <div class="video-overlay"></div>
-
     <div class="caja" id="contenedor">
         <div id="vista-seguimiento">
             <h1 id="cliente-nombre">Seguimiento</h1>
@@ -648,6 +620,7 @@
                 </div>
             </div>
 
+            <!-- TABLA DE RANGOS REORDENADA -->
             <table class="tabla-rangos">
                 <tr><th>Rango</th><th>Horas</th></tr>
                 <tr><td style="color:#c0c0c0;">⚪ PLATA</td><td>20+</td></tr>
@@ -719,6 +692,7 @@
         </div>
     </div>
 
+    <!-- MODAL DE EDICIÓN ADMIN CON ESTRELLAS -->
     <div id="modal-editar-admin">
         <h3 style="margin-top:0; color:#00f2ff; text-align:center;">✏️ EDITAR Y ACUMULAR FOTOS</h3>
         <label>Nombre:</label>
@@ -752,6 +726,7 @@
         </div>
     </div>
 
+    <!-- VISOR EMERGENTE DE FOTOS -->
     <div id="modal-visor-foto" onclick="cerrarVisorFoto()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
         <div style="position:relative; max-width:90%; max-height:90%;">
             <span style="position:absolute; top:-30px; right:0; color:white; font-size:24px; font-weight:bold; cursor:pointer;">✖️ Cerrar</span>
@@ -855,6 +830,7 @@
             
             let servicioNombre = document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text;
 
+            // Formato de mensaje tipo orden/recibo profesional
             let msg = `🛡️ *SAFEGAMING SERVICE - SOLICITUD* 🛡️\n\n` +
                       `👤 *Personaje:* ${nombre || "No especificado"}\n` +
                       `⚔️ *Clase:* ${clase}\n` +
@@ -952,8 +928,10 @@
             setTimeout(() => {
                 let esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
                 if (esMovil) {
+                    // Abre directamente la APP instalada en el teléfono
                     window.location.href = `whatsapp://send?phone=${telefono}&text=${textoCodificado}`;
                 } else {
+                    // En escritorio abre WhatsApp Web directo
                     window.open(`https://web.whatsapp.com/send?phone=${telefono}&text=${textoCodificado}`, '_blank');
                 }
             }, 300);
@@ -1048,7 +1026,9 @@
             window.renderListaImagenesEditar();
         });
 
-        window.onload = () => { calcularTotal(); };
+        const fondos = ["https://assets-prd.ignimgs.com/2025/08/27/solothumb-1756317128314.png", "https://sm.ign.com/t/ign_in/photo/default/solo-leveling-arise-overdrive-blogroll-1759428421562_e9mp.1280.jpg"];
+        let i = 0; function rotar() { document.body.style.backgroundImage = "url('" + fondos[i] + "')"; i = (i + 1) % fondos.length; }
+        window.onload = () => { rotar(); setInterval(rotar, 30000); calcularTotal(); };
     </script>
 </body>
 </html>
