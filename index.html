@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Safegaming Service - Rucoy Online</title>
 
+<!-- CONFIGURACIÓN DE IMAGEN Y VISTA PREVIA PARA WHATSAPP -->
 <meta property="og:title" content="🛡️ SAFEGAMING SERVICE - RUCOY ONLINE">
 <meta property="og:description" content="Servicio Profesional de Skilleo, Nivel y Power Training.">
+<!-- Reemplaza esta URL por la dirección pública directa donde alojes la foto de tu logo (HTTPS) -->
 <meta property="og:image" content="https://i.imgur.com/TU_IMAGEN_AQUI.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
@@ -488,7 +490,7 @@
 
 <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; background-color: #030008; transition: background-image 1s ease-in-out; }
+    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; background-color: #030008; }
 
     /* ESTILOS DEL VIDEO DE FONDO */
     #bg-video {
@@ -569,6 +571,7 @@
 </head>
 <body>
 
+    <!-- VIDEO DE FONDO -->
     <video autoplay muted loop playsinline id="bg-video">
         <source src="video.mp4" type="video/mp4">
     </video>
@@ -633,6 +636,7 @@
                 </div>
             </div>
 
+            <!-- TABLA DE RANGOS REORDENADA -->
             <table class="tabla-rangos">
                 <tr><th>Rango</th><th>Horas</th></tr>
                 <tr><td style="color:#c0c0c0;">⚪ PLATA</td><td>20+</td></tr>
@@ -704,6 +708,7 @@
         </div>
     </div>
 
+    <!-- MODAL DE EDICIÓN ADMIN CON ESTRELLAS -->
     <div id="modal-editar-admin">
         <h3 style="margin-top:0; color:#00f2ff; text-align:center;">✏️ EDITAR Y ACUMULAR FOTOS</h3>
         <label>Nombre:</label>
@@ -737,6 +742,7 @@
         </div>
     </div>
 
+    <!-- VISOR EMERGENTE DE FOTOS -->
     <div id="modal-visor-foto" onclick="cerrarVisorFoto()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
         <div style="position:relative; max-width:90%; max-height:90%;">
             <span style="position:absolute; top:-30px; right:0; color:white; font-size:24px; font-weight:bold; cursor:pointer;">✖️ Cerrar</span>
@@ -840,7 +846,6 @@
             
             let servicioNombre = document.getElementById("servicio").options[document.getElementById("servicio").selectedIndex].text;
 
-            // Formato de mensaje tipo orden/recibo profesional
             let msg = `🛡️ *SAFEGAMING SERVICE - SOLICITUD* 🛡️\n\n` +
                       `👤 *Personaje:* ${nombre || "No especificado"}\n` +
                       `⚔️ *Clase:* ${clase}\n` +
