@@ -774,6 +774,39 @@
 
     #img-visor-grande { max-width: 95vw; max-height: 88vh; border: 2px solid #00f2ff; border-radius: 12px; background: #000; }
 
+    /* MODAL DE BIENVENIDA MOTIVACIONAL Y SONIDO */
+    #modal-bienvenida {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(3, 0, 8, 0.88);
+        backdrop-filter: blur(10px);
+        z-index: 99999;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .caja-bienvenida {
+        background: rgba(10, 18, 32, 0.95);
+        border: 2px solid #00f2ff;
+        box-shadow: 0 0 30px rgba(0, 242, 255, 0.4);
+        border-radius: 16px;
+        padding: 25px;
+        max-width: 420px;
+        width: 100%;
+        text-align: center;
+        animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popUp {
+        0% { transform: scale(0.8); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
     /* ADAPTACIÓN PANTALLAS PEQUEÑAS / MÓVILES */
     @media (max-width: 768px) {
         .web-container { grid-template-columns: 1fr; }
@@ -834,9 +867,26 @@
                 <option value="objetivo">🎯 Por Meta (De Nivel/Skill A -> B)</option>
             </select>
 
+            <label>Tipo de Servicio:</label>
+            <select id="servicio" onchange="actualizarInterfazServicio()">
+                <option value="400">Skill Normal - 400k / hr</option>
+                <option value="460">Power Training - 460k / hr</option>
+                <option value="800">Subida de Nivel - 800k / hr</option>
+                <option value="1900">Pack Maraton (5h) - 1.9KK</option>
+                <option value="2100">Pack Ptrain Pro (5h) - 2.1KK</option>
+            </select>
+
+            <!-- BLOQUE DE HORAS (SE OCULTA EN PACKS PREDETERMINADOS) -->
             <div id="bloque-modo-horas">
                 <label>Cantidad de Horas:</label>
                 <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
+            </div>
+
+            <!-- BLOQUE DE PACKS (SE MUESTRA SOLO CUANDO ELIGE PACK DE 5H) -->
+            <div id="bloque-modo-packs" style="display:none;">
+                <label>Cantidad de Paquetes (5 horas c/u):</label>
+                <input type="number" id="cantidad-packs" value="1" min="1" oninput="calcularTotal()">
+                <div style="font-size:10px; color:#00f2ff; margin-top:4px; font-weight:bold;">⚡ Este paquete ya incluye 5 horas prefijadas.</div>
             </div>
 
             <div id="bloque-modo-objetivo" style="display:none; background:rgba(0,242,255,0.06); padding:10px; border-radius:8px; border:1px solid rgba(0,242,255,0.3); margin-top:8px;">
@@ -846,15 +896,6 @@
                 <input type="number" id="stat-deseado" placeholder="Ej: 115" min="1" oninput="calcularTotalMeta()">
                 <div id="res-meta-estimado" style="font-size:11px; color:#ffd700; margin-top:6px; text-align:center; font-weight:bold;"></div>
             </div>
-
-            <label>Tipo de Servicio:</label>
-            <select id="servicio" onchange="calcularTotal()">
-                <option value="400">Skill Normal - 400k / hr</option>
-                <option value="460">Power Training - 460k / hr</option>
-                <option value="800">Subida de Nivel - 800k / hr</option>
-                <option value="1900">Pack Maraton (5h) - 1.9KK</option>
-                <option value="2100">Pack Ptrain Pro (5h) - 2.1KK</option>
-            </select>
         </div>
 
         <!-- COLUMNA DERECHA: SECCIONES SEPARADAS DE SKILL Y RANGOS ACUMULATIVOS -->
@@ -898,10 +939,10 @@
                 <div class="panel-titulo">💰 RESUMEN DE ORDEN</div>
                 <div class="resultado-caja">
                     <div style="font-size:11px; color:#a0aec0; margin-bottom:4px;">TOTAL ESTIMADO EN JUEGO:</div>
-                    <div class="total-oro" id="precio-final">300k gold</div>
+                    <div class="total-oro" id="precio-final">400k gold</div>
                 </div>
 
-                <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirYRedirigir(); return false;">💬 APARTAR CUPO POR WHATSAPP</a>
+                <a href="#" id="boton-whatsapp" class="btn-wa" onclick="iniciarComunicacionWA(); return false;">💬 APARTAR CUPO POR WHATSAPP</a>
             </div>
         </div>
 
@@ -1034,6 +1075,19 @@
         </div>
     </div>
 
+    <!-- MODAL POPUP DE BIENVENIDA MOTIVACIONAL PARA EL CLIENTE -->
+    <div id="modal-bienvenida">
+        <div class="caja-bienvenida">
+            <div style="font-size:38px; margin-bottom:8px;">🚀</div>
+            <h2 style="color:#00f2ff; font-size:16px; margin:0 0 10px 0; text-transform:uppercase;">¡Bienvenido a SafeGaming Service!</h2>
+            <p style="font-size:12px; color:#e2e8f0; line-height:1.5; margin-bottom:18px;">
+                Gracias por comunicarte con <b>SafeGaming Service</b>. 🛡️<br>
+                Este servicio de chat es <b>100% confiable y seguro</b>. Estamos listos para potenciar tu personaje al máximo.
+            </p>
+            <button onclick="confirmarRedireccionWA()" style="width:100%; padding:12px; background:linear-gradient(135deg, #25D366 0%, #128C7E 100%); color:white; font-weight:bold; border:none; border-radius:8px; cursor:pointer; font-size:13px; box-shadow:0 0 15px rgba(37,211,102,0.4);">💬 CONTINUAR A WHATSAPP</button>
+        </div>
+    </div>
+
     <!-- MODAL DE EDICIÓN ADMIN -->
     <div id="modal-editar-admin">
         <h3 style="margin-top:0; color:#00f2ff; text-align:center; font-size:14px;">✏️ EDITAR Y ACUMULAR FOTOS</h3>
@@ -1075,7 +1129,7 @@
         </div>
     </div>
 
-    <div class="footer">Servicio profesional de Skilleo y Share — Atención: +58 412-3576579<br><span style="opacity:0.4;">build: service-web-v2.1</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share — Atención: +58 412-3576579<br><span style="opacity:0.4;">build: service-web-v2.2</span></div>
 
     <script>
         function toggleAudioVideo() {
@@ -1093,8 +1147,32 @@
 
         function cambiarModoCalculo() {
             let modo = document.getElementById("modo-calculo").value;
-            document.getElementById("bloque-modo-horas").style.display = (modo === "horas") ? "block" : "none";
-            document.getElementById("bloque-modo-objetivo").style.display = (modo === "objetivo") ? "block" : "none";
+            if (modo === "objetivo") {
+                document.getElementById("bloque-modo-horas").style.display = "none";
+                document.getElementById("bloque-modo-packs").style.display = "none";
+                document.getElementById("bloque-modo-objetivo").style.display = "block";
+            } else {
+                document.getElementById("bloque-modo-objetivo").style.display = "none";
+                actualizarInterfazServicio();
+            }
+            calcularTotal();
+        }
+
+        function actualizarInterfazServicio() {
+            let p = parseInt(document.getElementById("servicio").value);
+            let modo = document.getElementById("modo-calculo").value;
+
+            if (modo === "horas") {
+                if (p >= 1400) {
+                    // Es un pack prefijado de 5 horas
+                    document.getElementById("bloque-modo-horas").style.display = "none";
+                    document.getElementById("bloque-modo-packs").style.display = "block";
+                } else {
+                    // Es servicio normal por horas
+                    document.getElementById("bloque-modo-horas").style.display = "block";
+                    document.getElementById("bloque-modo-packs").style.display = "none";
+                }
+            }
             calcularTotal();
         }
 
@@ -1115,11 +1193,27 @@
 
         function calcularTotal() {
             let p = parseInt(document.getElementById("servicio").value);
-            let h = parseInt(document.getElementById("horas").value) || 1;
             let clase = document.getElementById("clase").value;
             let nombre = document.getElementById("personaje").value;
             
-            let total = (p >= 1400) ? p : p * h;
+            let total = 0;
+            let horasParaRegistrar = 1;
+            let detalleHorasMsg = "";
+
+            if (p >= 1400) {
+                // Pack prefijado
+                let packs = parseInt(document.getElementById("cantidad-packs").value) || 1;
+                total = p * packs;
+                horasParaRegistrar = 5 * packs;
+                detalleHorasMsg = `${packs} Pack(s) de 5 hrs (${horasParaRegistrar} hrs totales)`;
+            } else {
+                // Por hora normal
+                let h = parseInt(document.getElementById("horas").value) || 1;
+                total = p * h;
+                horasParaRegistrar = h;
+                detalleHorasMsg = `${h} hrs`;
+            }
+
             let precioTexto = (total >= 1000) ? (total / 1000) + "KK gold" : total + "k gold";
             document.getElementById("precio-final").innerText = precioTexto;
             
@@ -1127,12 +1221,71 @@
 
             let msg = `🛡️ *SAFEGAMING SERVICE - SOLICITUD* 🛡️\n\n` +
                       `👤 *Personaje:* ${nombre || "No especificado"}\n` +
-                      `⚔️ *Clase:* ${clase}\n` +
+                      `⚔️ *Clase/Profesión:* ${clase}\n` +
                       `📋 *Servicio:* ${servicioNombre}\n` +
-                      `⏱️ *Horas:* ${h} hrs\n` +
+                      `⏱️ *Tiempo/Cantidad:* ${detalleHorasMsg}\n` +
                       `💰 *Monto Estimado:* ${precioTexto}`;
 
             document.getElementById("boton-whatsapp").dataset.msg = msg;
+            document.getElementById("boton-whatsapp").dataset.horasTotales = horasParaRegistrar;
+        }
+
+        function reproducirSonidoAscendente() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Nota 1
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(440, ctx.currentTime); // A4
+                gain1.gain.setValueAtTime(0.12, ctx.currentTime);
+                gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.start(ctx.currentTime);
+                osc1.stop(ctx.currentTime + 0.15);
+
+                // Nota 2 (subida)
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(880, ctx.currentTime + 0.12); // A5
+                gain2.gain.setValueAtTime(0.15, ctx.currentTime + 0.12);
+                gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.start(ctx.currentTime + 0.12);
+                osc2.stop(ctx.currentTime + 0.35);
+
+            } catch(e) {}
+        }
+
+        function iniciarComunicacionWA() {
+            reproducirSonidoAscendente();
+            document.getElementById("modal-bienvenida").style.display = "flex";
+        }
+
+        function confirmarRedireccionWA() {
+            let nombre = document.getElementById("personaje").value;
+            let horasTotales = parseInt(document.getElementById("boton-whatsapp").dataset.horasTotales) || 1;
+            
+            if(nombre) window.registrarCliente(nombre, horasTotales);
+
+            let msg = document.getElementById("boton-whatsapp").dataset.msg || "";
+            let telefono = "584123576579";
+            let textoCodificado = encodeURIComponent(msg);
+
+            document.getElementById("modal-bienvenida").style.display = "none";
+
+            setTimeout(() => {
+                let esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                if (esMovil) {
+                    window.location.href = `whatsapp://send?phone=${telefono}&text=${textoCodificado}`;
+                } else {
+                    window.open(`https://web.whatsapp.com/send?phone=${telefono}&text=${textoCodificado}`, '_blank');
+                }
+            }, 100);
         }
 
         function actualizarBarra() {
@@ -1199,25 +1352,6 @@
                     listaDiv.innerHTML += `<div class="lista-item" style="color:${r.color}; margin-top:5px;">${r.icono} ${d.nombre} (${d.totalHoras}h) — <b>${r.rango}</b></div>`;
                 });
             });
-        }
-
-        function reproducirYRedirigir() {
-            let nombre = document.getElementById("personaje").value;
-            let horas = parseInt(document.getElementById("horas").value) || 1;
-            if(nombre) window.registrarCliente(nombre, horas);
-
-            let msg = document.getElementById("boton-whatsapp").dataset.msg || "";
-            let telefono = "584123576579";
-            let textoCodificado = encodeURIComponent(msg);
-
-            setTimeout(() => {
-                let esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-                if (esMovil) {
-                    window.location.href = `whatsapp://send?phone=${telefono}&text=${textoCodificado}`;
-                } else {
-                    window.open(`https://web.whatsapp.com/send?phone=${telefono}&text=${textoCodificado}`, '_blank');
-                }
-            }, 300);
         }
 
         const params = new URLSearchParams(window.location.search);
