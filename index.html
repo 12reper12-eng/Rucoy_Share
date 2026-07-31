@@ -589,6 +589,13 @@
     .cal-festivo-dot { font-size: 8px; margin-top: 2px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; color: #ffd700; }
     .cal-festivos-lista { margin-top: 14px; border-top: 1px dashed rgba(0,242,255,0.4); padding-top: 10px; text-align: left; }
     .cal-festivo-item { font-size: 11px; color: #e2e8f0; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+
+    /* ESTILOS DE LA CALCULADORA RUCOY */
+    .caja-calculadora { margin-top: 0px; max-width: 450px; padding: 16px 20px; position: relative; z-index: 1; }
+    .calc-tabs { display: flex; gap: 6px; margin-bottom: 15px; justify-content: center; }
+    .btn-calc-tab { flex: 1; background: rgba(0,242,255,0.1); border: 1px solid rgba(0,242,255,0.4); color: #00f2ff; padding: 8px 4px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-calc-tab.activo { background: #00f2ff; color: #030008; box-shadow: 0 0 10px rgba(0,242,255,0.5); }
+    .calc-contenido label { margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -760,6 +767,92 @@
         <div class="cal-festivos-lista">
             <div style="font-size: 11px; color: #ffd700; font-weight: bold; margin-bottom: 6px;">🎉 FESTIVIDADES DEL MES:</div>
             <div id="cal-lista-festivos"></div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN CALCULADORA DE RUCOY ONLINE -->
+    <div class="caja caja-calculadora" id="seccion-calculadora">
+        <h1>🧮 CALCULADORA DE RUCOY ONLINE</h1>
+        <div class="subtitle">CALCULA SKILLS, EXP Y DAÑO EN TIEMPO REAL</div>
+
+        <!-- PESTAÑAS DE NAVEGACIÓN -->
+        <div class="calc-tabs">
+            <button class="btn-calc-tab activo" onclick="cambiarTabCalc('skill', this)">⚔️ Skill / Training</button>
+            <button class="btn-calc-tab" onclick="cambiarTabCalc('exp', this)">⭐ Nivel / EXP</button>
+            <button class="btn-calc-tab" onclick="cambiarTabCalc('dano', this)">💥 Daño / Combate</button>
+        </div>
+
+        <!-- MÓDULO 1: SKILL Y TRAIN -->
+        <div id="calc-tab-skill" class="calc-contenido">
+            <label>Skill Actual:</label>
+            <input type="number" id="calc-skill-actual" placeholder="Ej: 150" min="1" oninput="calcularSkillRucoy()">
+
+            <label>Skill Deseado:</label>
+            <input type="number" id="calc-skill-deseado" placeholder="Ej: 200" min="1" oninput="calcularSkillRucoy()">
+
+            <div class="resultado-caja" style="margin-top:12px;">
+                <div style="font-size:12px; color:#aaa;">Golpes Totales Requeridos:</div>
+                <div class="total-oro" id="res-golpes-totales" style="font-size:18px;">0 Golpes</div>
+                
+                <div style="display:flex; justify-content:space-around; margin-top:10px; font-size:12px;">
+                    <div>
+                        <span style="color:#00f2ff; font-weight:bold;">🗡️ Normal Train:</span><br>
+                        <span id="res-tiempo-normal" style="color:#fff; font-weight:bold;">0 hrs</span>
+                    </div>
+                    <div>
+                        <span style="color:#ffd700; font-weight:bold;">⚡ Power Train:</span><br>
+                        <span id="res-tiempo-ptrain" style="color:#fff; font-weight:bold;">0 hrs</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULO 2: NIVEL Y EXP -->
+        <div id="calc-tab-exp" class="calc-contenido" style="display:none;">
+            <label>Nivel Actual:</label>
+            <input type="number" id="calc-lvl-actual" placeholder="Ej: 200" min="1" oninput="calcularExpRucoy()">
+
+            <label>Nivel Deseado:</label>
+            <input type="number" id="calc-lvl-deseado" placeholder="Ej: 250" min="1" oninput="calcularExpRucoy()">
+
+            <div class="resultado-caja" style="margin-top:12px;">
+                <div style="font-size:12px; color:#aaa;">Experiencia Requerida:</div>
+                <div class="total-oro" id="res-exp-requerida" style="font-size:18px;">0 EXP</div>
+                <div id="res-exp-detalle" style="font-size:11px; color:#00f2ff; margin-top:5px;"></div>
+            </div>
+        </div>
+
+        <!-- MÓDULO 3: DAÑO Y COMBATE -->
+        <div id="calc-tab-dano" class="calc-contenido" style="display:none;">
+            <label>Tu Stat (Melee / Dist / Magic):</label>
+            <input type="number" id="calc-dano-stat" placeholder="Ej: 300" min="1" oninput="calcularDanoRucoy()">
+
+            <label>Ataque del Arma:</label>
+            <input type="number" id="calc-dano-arma" placeholder="Ej: 45" min="0" oninput="calcularDanoRucoy()">
+
+            <label>Armadura del Monstruo / Jugador (Defensa):</label>
+            <input type="number" id="calc-dano-def" placeholder="Ej: 100 (Opcional)" min="0" value="0" oninput="calcularDanoRucoy()">
+
+            <div class="resultado-caja" style="margin-top:12px;">
+                <div style="font-size:12px; color:#aaa;">Estimación de Daño:</div>
+                <div style="display:flex; justify-content:space-around; margin-top:8px; font-size:13px;">
+                    <div>
+                        <span style="color:#ff8585;">Mínimo:</span><br>
+                        <b id="res-dano-min" style="font-size:16px; color:#fff;">0</b>
+                    </div>
+                    <div>
+                        <span style="color:#ffd700;">Promedio:</span><br>
+                        <b id="res-dano-prom" style="font-size:16px; color:#ffd700;">0</b>
+                    </div>
+                    <div>
+                        <span style="color:#6ee7b7;">Máximo:</span><br>
+                        <b id="res-dano-max" style="font-size:16px; color:#fff;">0</b>
+                    </div>
+                </div>
+                <div style="margin-top:8px; font-size:11px; color:#a855f7;">
+                    ✨ Ataque Especial Máximo Estimado: <b id="res-dano-especial" style="color:#fff;">0</b>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1013,6 +1106,7 @@
             document.getElementById("vista-formulario").style.display = "none";
             document.querySelector(".caja-referencias").style.display = "none";
             document.querySelector(".caja-calendario").style.display = "none";
+            document.getElementById("seccion-calculadora").style.display = "none";
             document.getElementById("vista-seguimiento").style.display = "block";
             document.getElementById("cliente-nombre").innerText = "Cliente: " + decodeURIComponent(params.get('n'));
             let r = params.get('r') || "Novato", c = params.get('c') || "#aaa", i = params.get('i') || "👶";
@@ -1229,6 +1323,94 @@
             fechaCal.setMonth(fechaCal.getMonth() + dir);
             renderCalendario();
         };
+
+        // =====================================================================
+        // ---- LÓGICA DE LA CALCULADORA RUCOY ONLINE ----
+        // =====================================================================
+
+        function cambiarTabCalc(tab, btn) {
+            document.querySelectorAll('.btn-calc-tab').forEach(b => b.classList.remove('activo'));
+            btn.classList.add('activo');
+
+            document.getElementById('calc-tab-skill').style.display = (tab === 'skill') ? 'block' : 'none';
+            document.getElementById('calc-tab-exp').style.display = (tab === 'exp') ? 'block' : 'none';
+            document.getElementById('calc-tab-dano').style.display = (tab === 'dano') ? 'block' : 'none';
+        }
+
+        function calcularSkillRucoy() {
+            let sActual = parseInt(document.getElementById('calc-skill-actual').value) || 0;
+            let sDeseado = parseInt(document.getElementById('calc-skill-deseado').value) || 0;
+
+            if (sDeseado <= sActual || sActual <= 0) {
+                document.getElementById('res-golpes-totales').innerText = "0 Golpes";
+                document.getElementById('res-tiempo-normal').innerText = "0 hrs";
+                document.getElementById('res-tiempo-ptrain').innerText = "0 hrs";
+                return;
+            }
+
+            let golpesTotales = 0;
+            for (let s = sActual; s < sDeseado; s++) {
+                golpesTotales += Math.round(12 * Math.pow(s, 1.5));
+            }
+
+            let hrsNormal = (golpesTotales / 3600).toFixed(1);
+            let hrsPtrain = (golpesTotales / 7200).toFixed(1);
+
+            document.getElementById('res-golpes-totales').innerText = golpesTotales.toLocaleString() + " Golpes";
+            document.getElementById('res-tiempo-normal').innerText = hrsNormal + " hrs";
+            document.getElementById('res-tiempo-ptrain').innerText = hrsPtrain + " hrs";
+        }
+
+        function calcularExpRucoy() {
+            let lActual = parseInt(document.getElementById('calc-lvl-actual').value) || 0;
+            let lDeseado = parseInt(document.getElementById('calc-lvl-deseado').value) || 0;
+
+            if (lDeseado <= lActual || lActual <= 0) {
+                document.getElementById('res-exp-requerida').innerText = "0 EXP";
+                document.getElementById('res-exp-detalle').innerText = "";
+                return;
+            }
+
+            let expActual = (100 / 3) * Math.pow(lActual, 3);
+            let expDeseada = (100 / 3) * Math.pow(lDeseado, 3);
+            let expFaltante = Math.round(expDeseada - expActual);
+
+            document.getElementById('res-exp-requerida').innerText = expFaltante.toLocaleString() + " EXP";
+            
+            if (expFaltante >= 1000000) {
+                let enMillones = (expFaltante / 1000000).toFixed(2);
+                document.getElementById('res-exp-detalle').innerText = `Equivale a aprox. ${enMillones} Millones de EXP`;
+            } else {
+                document.getElementById('res-exp-detalle').innerText = "";
+            }
+        }
+
+        function calcularDanoRucoy() {
+            let stat = parseInt(document.getElementById('calc-dano-stat').value) || 0;
+            let arma = parseInt(document.getElementById('calc-dano-arma').value) || 0;
+            let def = parseInt(document.getElementById('calc-dano-def').value) || 0;
+
+            if (stat <= 0) {
+                document.getElementById('res-dano-min').innerText = "0";
+                document.getElementById('res-dano-prom').innerText = "0";
+                document.getElementById('res-dano-max').innerText = "0";
+                document.getElementById('res-dano-especial').innerText = "0";
+                return;
+            }
+
+            let maxBase = (stat * arma) / 10;
+            let minBase = (stat * arma) / 20;
+
+            let maxFinal = Math.max(1, Math.round(maxBase - def));
+            let minFinal = Math.max(1, Math.round(minBase - def));
+            let promFinal = Math.round((maxFinal + minFinal) / 2);
+            let especialMax = Math.round(maxFinal * 1.5);
+
+            document.getElementById('res-dano-min').innerText = minFinal;
+            document.getElementById('res-dano-prom').innerText = promFinal;
+            document.getElementById('res-dano-max').innerText = maxFinal;
+            document.getElementById('res-dano-especial').innerText = especialMax;
+        }
 
         window.onload = () => { 
             calcularTotal(); 
