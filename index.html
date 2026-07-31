@@ -65,13 +65,12 @@
 
     let testimoniosCache = [];
     let pendientesCache = [];
-    let clientesCache = {};
     let limiteTestimonios = 6;
     let filtroActual = 'Todos';
     let primeraCargaPendientes = true;
 
     function iconoTipo(tipo) {
-        return tipo === 'Skill' ? '⚔️' : tipo === 'Nivel' ? '⭐' : tipo === 'Cuenta' ? '🎮' : tipo === 'Horas' ? '⏱️' : '📌';
+        return tipo === 'Skill' ? '⚔️' : tipo === 'Nivel' ? '⭐' : tipo === 'Cuenta' ? '🎮' : '📌';
     }
 
     function renderEstrellas(cant) {
@@ -329,17 +328,6 @@
         document.getElementById('modal-visor-foto').style.display = 'none';
     };
 
-    function obtenerDatosClientePorNombre(nombre) {
-        if (!nombre) return null;
-        const nombreLower = nombre.toLowerCase().trim();
-        for (let k in clientesCache) {
-            if (clientesCache[k].nombre && clientesCache[k].nombre.toLowerCase().trim() === nombreLower) {
-                return clientesCache[k];
-            }
-        }
-        return null;
-    }
-
     function renderTestimoniosPublico() {
         const grid = document.getElementById('grid-referencias');
         const vacio = document.getElementById('sin-referencias');
@@ -380,13 +368,6 @@
                 ? `<div class="tarjeta-ref-comentario">💬 "${t.comentario}"</div>` 
                 : '';
 
-            let datosCliente = obtenerDatosClientePorNombre(t.nombre);
-            let badgeHorasHtml = '';
-            if (datosCliente && datosCliente.totalHoras) {
-                let r = obtenerRango(datosCliente.totalHoras);
-                badgeHorasHtml = `<div style="font-size:10px; color:${r.color}; margin-top:4px; font-weight:bold;">${r.icono} ${datosCliente.totalHoras} hrs compradas (${r.rango})</div>`;
-            }
-
             return `
             <div class="tarjeta-ref">
                 <div class="tarjeta-ref-header">
@@ -394,8 +375,7 @@
                     <span class="estrellas-rating">${renderEstrellas(t.estrellas)}</span>
                 </div>
                 <div class="tarjeta-ref-nombre">${t.nombre}</div>
-                ${badgeHorasHtml}
-                <div class="tarjeta-ref-progreso" style="margin-top:6px;">
+                <div class="tarjeta-ref-progreso">
                     <span class="antes">🔴 Antes: ${t.antes}</span>
                     <span class="despues">🟢 Después: ${t.despues}</span>
                 </div>
@@ -454,17 +434,6 @@
             }).join('');
     }
     window.renderPendientesAdmin = renderPendientesAdmin;
-
-    onValue(ref(db, 'clientes'), (snap) => {
-        clientesCache = {};
-        const data = snap.val();
-        if (data) {
-            Object.keys(data).forEach(key => {
-                clientesCache[key] = data[key];
-            });
-        }
-        renderTestimoniosPublico();
-    });
 
     onValue(ref(db, 'testimonios'), (snap) => {
         testimoniosCache = [];
@@ -755,7 +724,7 @@
     .tarjeta-ref-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
     .tarjeta-ref-tipo { font-size: 10px; color: #ffd700; font-weight: 800; }
     .estrellas-rating { color: #ffd700; font-size: 11px; }
-    .tarjeta-ref-nombre { font-size: 13px; font-weight: 800; margin-bottom: 2px; }
+    .tarjeta-ref-nombre { font-size: 13px; font-weight: 800; margin-bottom: 6px; }
     .tarjeta-ref-progreso { font-size: 11px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; margin-bottom: 8px; }
     .tarjeta-ref-progreso .antes { color: #ff6b6b; display: block; }
     .tarjeta-ref-progreso .despues { color: #51cf66; display: block; }
@@ -1026,7 +995,6 @@
                     <option value="Skill">⚔️ Skill</option>
                     <option value="Nivel">⭐ Nivel</option>
                     <option value="Cuenta">🎮 Cuenta</option>
-                    <option value="Horas">⏱️ Horas / Fidelidad</option>
                 </select>
 
                 <label style="font-size:10px;">Estrellas:</label>
@@ -1075,7 +1043,6 @@
                     <button class="btn-filtro" data-tipo="Skill" onclick="filtrarReferencias('Skill', this)">⚔️ Skill</button>
                     <button class="btn-filtro" data-tipo="Nivel" onclick="filtrarReferencias('Nivel', this)">⭐ Nivel</button>
                     <button class="btn-filtro" data-tipo="Cuenta" onclick="filtrarReferencias('Cuenta', this)">🎮 Cuenta</button>
-                    <button class="btn-filtro" data-tipo="Horas" onclick="filtrarReferencias('Horas', this)">⏱️ Horas</button>
                 </div>
                 
                 <div class="grid-referencias" id="grid-referencias"></div>
@@ -1096,7 +1063,6 @@
                             <option value="Skill">⚔️ Skill</option>
                             <option value="Nivel">⭐ Nivel</option>
                             <option value="Cuenta">🎮 Cuenta</option>
-                            <option value="Horas">⏱️ Horas / Fidelidad</option>
                         </select>
                     </div>
                     <div>
@@ -1143,12 +1109,12 @@
 
     <!-- MODAL POPUP DE BIENVENIDA MOTIVACIONAL PARA EL CLIENTE -->
     <div id="modal-bienvenida">
-        <div class="caja-bienvenida" id="caja-bienvenida-interna">
+        <div class="caja-bienvenida">
             <div style="font-size:38px; margin-bottom:8px;">🚀</div>
             <h2 style="color:#00f2ff; font-size:16px; margin:0 0 10px 0; text-transform:uppercase;">¡Bienvenido a SafeGaming Service!</h2>
             <p style="font-size:12px; color:#e2e8f0; line-height:1.5; margin-bottom:18px;">
                 Gracias por comunicarte con <b>SafeGaming Service</b>. 🛡️<br>
-                Este servicio de chat es <b>100% confiable y seguro</b>. Estamos listos para potenciar tu personaje al máximo.
+                Este servicio de share es <b>100% confiable y seguro</b>. Estamos listos para potenciar tu personaje al máximo.
             </p>
             <button onclick="confirmarRedireccionWA()" style="width:100%; padding:12px; background:linear-gradient(135deg, #25D366 0%, #128C7E 100%); color:white; font-weight:bold; border:none; border-radius:8px; cursor:pointer; font-size:13px; box-shadow:0 0 15px rgba(37,211,102,0.4);">💬 CONTINUAR A WHATSAPP</button>
         </div>
@@ -1197,7 +1163,7 @@
         </div>
     </div>
 
-    <div class="footer">Servicio profesional de Skilleo y Share — Atención: +58 412-3576579<br><span style="opacity:0.4;">build: service-web-v2.4</span></div>
+    <div class="footer">Servicio profesional de Skilleo y Share — Atención: +58 412-3576579<br><span style="opacity:0.4;">build: service-web-v2.3</span></div>
 
     <script>
         function toggleAudioVideo() {
@@ -1232,9 +1198,11 @@
 
             if (modo === "horas") {
                 if (p >= 1400) {
+                    // Es un pack prefijado de 5 horas
                     document.getElementById("bloque-modo-horas").style.display = "none";
                     document.getElementById("bloque-modo-packs").style.display = "block";
                 } else {
+                    // Es servicio normal por horas
                     document.getElementById("bloque-modo-horas").style.display = "block";
                     document.getElementById("bloque-modo-packs").style.display = "none";
                 }
@@ -1267,11 +1235,13 @@
             let detalleHorasMsg = "";
 
             if (p >= 1400) {
+                // Pack prefijado
                 let packs = parseInt(document.getElementById("cantidad-packs").value) || 1;
                 total = p * packs;
                 horasParaRegistrar = 5 * packs;
                 detalleHorasMsg = `${packs} Pack(s) de 5 hrs (${horasParaRegistrar} hrs totales)`;
             } else {
+                // Por hora normal
                 let h = parseInt(document.getElementById("horas").value) || 1;
                 total = p * h;
                 horasParaRegistrar = h;
@@ -1298,10 +1268,11 @@
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 
+                // Nota 1
                 const osc1 = ctx.createOscillator();
                 const gain1 = ctx.createGain();
                 osc1.type = 'sine';
-                osc1.frequency.setValueAtTime(440, ctx.currentTime);
+                osc1.frequency.setValueAtTime(440, ctx.currentTime); // A4
                 gain1.gain.setValueAtTime(0.12, ctx.currentTime);
                 gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
                 osc1.connect(gain1);
@@ -1309,10 +1280,11 @@
                 osc1.start(ctx.currentTime);
                 osc1.stop(ctx.currentTime + 0.15);
 
+                // Nota 2 (subida)
                 const osc2 = ctx.createOscillator();
                 const gain2 = ctx.createGain();
                 osc2.type = 'sine';
-                osc2.frequency.setValueAtTime(880, ctx.currentTime + 0.12);
+                osc2.frequency.setValueAtTime(880, ctx.currentTime + 0.12); // A5
                 gain2.gain.setValueAtTime(0.15, ctx.currentTime + 0.12);
                 gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
                 osc2.connect(gain2);
@@ -1328,19 +1300,8 @@
             document.getElementById("modal-bienvenida").style.display = "flex";
         }
 
-        window.addEventListener('click', function(evento) {
-            const modalBienvenida = document.getElementById("modal-bienvenida");
-            const cajaInterna = document.getElementById("caja-bienvenida-interna");
-            
-            if (modalBienvenida && modalBienvenida.style.display === "flex") {
-                if (!cajaInterna.contains(evento.target)) {
-                    modalBienvenida.style.display = "none";
-                }
-            }
-        });
-
         function confirmarRedireccionWA() {
-            let nombre = document.getElementById("personaje").value.trim();
+            let nombre = document.getElementById("personaje").value;
             let horasTotales = parseInt(document.getElementById("boton-whatsapp").dataset.horasTotales) || 1;
             
             if(nombre) window.registrarCliente(nombre, horasTotales);
