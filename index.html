@@ -36,7 +36,9 @@
         let el = document.getElementById("estado-servicio");
         if(el) {
             el.innerText = window.estaDisponible ? "🟢 SERVICIO DISPONIBLE" : "🔴 NO DISPONIBLE";
-            el.style.background = window.estaDisponible ? "rgba(0, 255, 0, 0.25)" : "rgba(255, 0, 0, 0.25)";
+            el.style.background = window.estaDisponible ? "rgba(0, 255, 128, 0.15)" : "rgba(255, 51, 85, 0.15)";
+            el.style.borderColor = window.estaDisponible ? "#00ff80" : "#ff3355";
+            el.style.color = window.estaDisponible ? "#00ff80" : "#ff3355";
         }
         const btnWa = document.getElementById("boton-whatsapp");
         if(btnWa) btnWa.style.pointerEvents = window.estaDisponible ? "auto" : "none";
@@ -133,11 +135,11 @@
 
         try {
             const imagenBase64 = await procesarImagenBase64(file);
-            elementoEstado.style.color = '#4caf50';
+            elementoEstado.style.color = '#00ff80';
             elementoEstado.innerText = '✅ Imagen agregada con éxito.';
             callbackURL(imagenBase64);
         } catch (error) {
-            elementoEstado.style.color = '#ff6b6b';
+            elementoEstado.style.color = '#ff4d4d';
             elementoEstado.innerText = '❌ Error al procesar la imagen. Intenta de nuevo.';
         }
     };
@@ -152,7 +154,7 @@
         const msj = document.getElementById('pub-ref-msj');
         
         if (!nombre || !antes || !despues) { 
-            msj.style.color = '#ff6b6b'; 
+            msj.style.color = '#ff4d4d'; 
             msj.innerText = 'Completa los campos de Nombre, Antes y Después.'; 
             return; 
         }
@@ -161,7 +163,7 @@
 
         push(ref(db, 'pendientes'), { tipo, estrellas, nombre, antes, despues, capturas, fecha: Date.now() })
         .then(() => {
-            msj.style.color = '#4caf50';
+            msj.style.color = '#00ff80';
             msj.innerText = '¡Gracias! Tu testimonio quedó en revisión.';
             document.getElementById('pub-ref-nombre').value = '';
             document.getElementById('pub-ref-antes').value = '';
@@ -169,7 +171,7 @@
             document.getElementById('estado-subida-publico').innerText = '';
             window.capturaPublicaTemporal = '';
         })
-        .catch(() => { msj.style.color = '#ff6b6b'; msj.innerText = 'Error al enviar.'; });
+        .catch(() => { msj.style.color = '#ff4d4d'; msj.innerText = 'Error al enviar.'; });
     };
 
     window.toggleFormularioPublico = () => {
@@ -351,21 +353,23 @@
             const fotos = obtenerListaCapturas(t);
             const htmlFotos = fotos.length > 0 
                 ? `<div class="galeria-evidencias">
-                    <div style="font-size:10px; color:#ffd700; margin-top:6px;">📸 Evidencias acumuladas (${fotos.length}):</div>
+                    <div style="font-size:10px; color:#ffd700; margin-top:6px; font-weight:bold;">📸 EVIDENCIAS (${fotos.length}):</div>
                     <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-top:4px;">
-                        ${fotos.map((url, idx) => `<button onclick="abrirVisorFoto('${url}')" class="btn-evidencia" style="cursor:pointer;">Ver Foto ${idx + 1}</button>`).join('')}
+                        ${fotos.map((url, idx) => `<button onclick="abrirVisorFoto('${url}')" class="btn-evidencia">Ver Foto ${idx + 1}</button>`).join('')}
                     </div>
                    </div>`
                 : '';
 
             return `
             <div class="tarjeta-ref">
-                <div class="tarjeta-ref-tipo">${iconoTipo(t.tipo)} ${(t.tipo || '').toUpperCase()}</div>
-                <div class="estrellas-rating">${renderEstrellas(t.estrellas)}</div>
+                <div class="tarjeta-ref-header">
+                    <span class="tarjeta-ref-tipo">${iconoTipo(t.tipo)} ${(t.tipo || '').toUpperCase()}</span>
+                    <span class="estrellas-rating">${renderEstrellas(t.estrellas)}</span>
+                </div>
                 <div class="tarjeta-ref-nombre">${t.nombre}</div>
                 <div class="tarjeta-ref-progreso">
-                    <span class="antes">Antes: ${t.antes}</span>
-                    <span class="despues">Después: ${t.despues}</span>
+                    <span class="antes">🔴 Antes: ${t.antes}</span>
+                    <span class="despues">🟢 Después: ${t.despues}</span>
                 </div>
                 ${htmlFotos}
                 <div class="tarjeta-ref-fecha">🗓️ ${formatearFecha(t.fecha)}</div>
@@ -489,9 +493,20 @@
 
 <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; background-color: #030008; }
+    
+    body { 
+        margin: 0; 
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+        color: #ffffff; 
+        min-height: 100vh; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        padding: 20px 12px; 
+        background-color: #030008; 
+    }
 
-    /* ESTILOS DEL VIDEO DE FONDO CORREGIDOS PARA MÓVIL Y PC */
+    /* VIDEO DE FONDO Y OVERLAY PERFECCIONADO */
     #bg-video {
         position: fixed;
         top: 0;
@@ -501,75 +516,333 @@
         object-fit: cover;
         z-index: -999;
         pointer-events: none;
+        filter: brightness(0.65) contrast(1.1);
     }
 
-    .caja { border: 2px solid rgba(0, 242, 255, 0.7); padding: 25px; border-radius: 16px; background: rgba(3, 1, 8, 0.95); backdrop-filter: blur(12px); box-shadow: 0 0 35px rgba(0,242,255,0.35); width: 100%; max-width: 450px; position: relative; z-index: 1; margin-bottom: 20px; }
-    #estado-servicio { text-align: center; margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 8px; border: 1px solid #00f2ff; background: rgba(0, 242, 255, 0.15); }
+    /* CONTENEDOR TIPO CYBERPUNK HUD */
+    .caja { 
+        border: 1.5px solid rgba(0, 242, 255, 0.6); 
+        padding: 24px; 
+        border-radius: 20px; 
+        background: rgba(6, 2, 16, 0.88); 
+        backdrop-filter: blur(16px); 
+        -webkit-backdrop-filter: blur(16px);
+        box-shadow: 0 0 30px rgba(0, 242, 255, 0.25), inset 0 0 15px rgba(0, 242, 255, 0.1); 
+        width: 100%; 
+        max-width: 460px; 
+        position: relative; 
+        z-index: 1; 
+        margin-bottom: 20px; 
+        transition: all 0.3s ease;
+    }
+
+    #estado-servicio { 
+        text-align: center; 
+        margin-bottom: 18px; 
+        font-weight: 800; 
+        padding: 10px; 
+        border-radius: 10px; 
+        border: 1px solid #00f2ff; 
+        background: rgba(0, 242, 255, 0.1); 
+        letter-spacing: 1px;
+        font-size: 13px;
+        text-shadow: 0 0 8px currentColor;
+    }
+
     #vista-seguimiento { display: none; text-align: center; }
-    h1 { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; font-size: 24px; margin: 0 0 5px 0; text-align: center; cursor: default; }
-    .subtitle { color: #ffd700; font-weight: bold; margin-bottom: 15px; font-size: 13px; text-align: center; }
-    .horario-box { background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.5); border-radius: 8px; padding: 8px; margin-bottom: 15px; text-align: center; font-size: 12px; color: #ffd700; font-weight: bold; }
     
-    /* MEJORA DE VISIBILIDAD DE ETIQUETAS, INPUTS Y SELECTS */
-    label { display: block; margin: 12px 0 5px 0; font-size: 13px; color: #ffffff; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-    input, select { padding: 11px; width: 100%; border-radius: 6px; border: 1px solid #00f2ff; background: rgba(10, 20, 38, 0.95); color: #ffffff; margin-bottom: 5px; cursor: pointer; font-size: 14px; font-weight: 500; }
-    input::placeholder { color: #8fa3c7; opacity: 1; }
-    select option { background: #070d1a; color: #ffffff; }
-
-    .resultado-caja { background: rgba(0, 242, 255, 0.15); border: 1px dashed rgba(0, 242, 255, 0.8); padding: 14px; margin-top: 15px; border-radius: 6px; text-align: center; }
-    .total-oro { color: #ffd700; font-size: 22px; font-weight: bold; text-shadow: 0 0 8px rgba(255,215,0,0.4); }
-    .btn-wa { background: #25D366; color: white; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; display: block; text-align: center; margin-top: 15px; cursor: pointer; box-shadow: 0 0 12px rgba(37,211,102,0.4); }
-    .footer { margin-top: 20px; color: rgba(255, 255, 255, 0.9); font-size: 12px; text-align: center; position: relative; z-index: 1; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); }
-    #panel-admin { display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; }
-    .lista-item { padding: 8px; border-bottom: 1px solid #333; font-size: 11px; text-align: left; }
-    .tabla-rangos { width: 100%; font-size: 11px; margin-top: 15px; border-collapse: collapse; border: 1px solid rgba(0,242,255,0.4); color: #ffffff; background: rgba(0,0,0,0.5); }
-    .tabla-rangos th, .tabla-rangos td { padding: 7px; border: 1px solid rgba(0,242,255,0.3); text-align: center; }
-    .tabla-rangos th { color: #00f2ff; background: rgba(0,242,255,0.1); }
-
-    /* DROP ZONE */
-    .drop-zone { border: 2px dashed rgba(0, 242, 255, 0.7); background: rgba(0, 242, 255, 0.08); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: 5px; transition: 0.3s; }
-    .drop-zone:hover, .drop-zone.dragover { background: rgba(0, 242, 255, 0.25); border-color: #00f2ff; }
-    .drop-zone-text { font-size: 11px; color: #00f2ff; font-weight: bold; }
-
-    /* TESTIMONIOS CON ESTRELLAS */
-    .caja-referencias { margin-top: 0px; max-width: 450px; padding: 16px 20px; height: auto !important; max-height: none !important; overflow: visible !important; position: relative; z-index: 1; }
-    .caja-referencias h1 { font-size: 16px; letter-spacing: 0.5px; }
-    .caja-referencias .subtitle { font-size: 11px; margin-bottom: 10px; }
-    .btn-toggle-ref { width: 100%; background: rgba(0,242,255,0.1); border: 1px solid rgba(0,242,255,0.7); color: #00f2ff; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .btn-toggle-ref:hover { background: rgba(0,242,255,0.25); }
+    h1 { 
+        color: #00f2ff; 
+        text-shadow: 0 0 12px rgba(0,242,255,0.7); 
+        font-size: 22px; 
+        font-weight: 900;
+        margin: 0 0 4px 0; 
+        text-align: center; 
+        letter-spacing: 0.5px;
+        cursor: default; 
+    }
     
-    #contenedor-ref-scroll { display: block; margin-top: 14px; height: auto; max-height: none; overflow: visible; }
-    .filtros-ref { display: flex; gap: 6px; margin-bottom: 12px; justify-content: center; flex-wrap: wrap; }
-    .btn-filtro { background: rgba(0,242,255,0.12); border: 1px solid rgba(0,242,255,0.5); color: #00f2ff; padding: 6px 12px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.2s; font-weight: bold; }
-    .btn-filtro.activo { background: #00f2ff; color: #030008; font-weight: bold; box-shadow: 0 0 10px rgba(0,242,255,0.6); }
+    .subtitle { 
+        color: #ffd700; 
+        font-weight: 700; 
+        margin-bottom: 15px; 
+        font-size: 12px; 
+        text-align: center; 
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
 
-    .grid-referencias { display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; height: auto !important; max-height: none !important; overflow: visible !important; }
-    .tarjeta-ref { background: rgba(0,242,255,0.12); border: 1px solid rgba(0,242,255,0.5); border-radius: 10px; padding: 12px 10px; text-align: center; width: 100%; display: block !important; }
-    .tarjeta-ref-tipo { font-size: 10px; color: #ffd700; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 3px; }
-    .estrellas-rating { color: #ffd700; font-size: 14px; letter-spacing: 2px; margin-bottom: 5px; }
-    .tarjeta-ref-nombre { font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #fff; }
-    .tarjeta-ref-progreso { font-size: 12px; color: #e2e8f0; line-height: 1.6; font-weight: 500; }
-    .tarjeta-ref-progreso .antes { color: #ff8585; display: block; font-weight: bold; }
-    .tarjeta-ref-progreso .despues { color: #6ee7b7; font-weight: bold; display: block; }
+    .horario-box { 
+        background: rgba(255, 215, 0, 0.08); 
+        border: 1px solid rgba(255, 215, 0, 0.4); 
+        border-radius: 8px; 
+        padding: 8px; 
+        margin-bottom: 18px; 
+        text-align: center; 
+        font-size: 12px; 
+        color: #ffd700; 
+        font-weight: 600; 
+    }
     
-    .btn-evidencia { display: inline-block; background: rgba(0, 242, 255, 0.25); border: 1px solid #00f2ff; color: #00f2ff; padding: 5px 10px; border-radius: 4px; font-size: 10px; text-decoration: none; font-weight: bold; transition: 0.2s; }
+    /* INPUTS Y SELECTS RETOCADOS */
+    label { 
+        display: block; 
+        margin: 14px 0 6px 2px; 
+        font-size: 12px; 
+        color: #00f2ff; 
+        font-weight: 700; 
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    input, select { 
+        padding: 12px 14px; 
+        width: 100%; 
+        border-radius: 8px; 
+        border: 1px solid rgba(0, 242, 255, 0.4); 
+        background: rgba(10, 18, 32, 0.85); 
+        color: #ffffff; 
+        margin-bottom: 5px; 
+        font-size: 14px; 
+        font-weight: 600; 
+        outline: none;
+        transition: all 0.25s ease;
+    }
+
+    input:focus, select:focus {
+        border-color: #00f2ff;
+        box-shadow: 0 0 12px rgba(0, 242, 255, 0.5);
+        background: rgba(12, 24, 45, 0.95);
+    }
+
+    input::placeholder { color: #61759b; }
+    select option { background: #080f1e; color: #ffffff; }
+
+    /* CAJA DE RESULTADO FINAL */
+    .resultado-caja { 
+        background: radial-gradient(circle, rgba(0, 242, 255, 0.15) 0%, rgba(0, 0, 0, 0.4) 100%); 
+        border: 1px dashed rgba(0, 242, 255, 0.6); 
+        padding: 16px; 
+        margin-top: 20px; 
+        border-radius: 12px; 
+        text-align: center; 
+    }
+
+    .total-oro { 
+        color: #ffd700; 
+        font-size: 26px; 
+        font-weight: 900; 
+        text-shadow: 0 0 12px rgba(255, 215, 0, 0.6); 
+        letter-spacing: 0.5px;
+    }
+
+    .btn-wa { 
+        background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); 
+        color: #ffffff; 
+        padding: 14px; 
+        text-decoration: none; 
+        font-weight: 800; 
+        border-radius: 10px; 
+        display: block; 
+        text-align: center; 
+        margin-top: 16px; 
+        cursor: pointer; 
+        box-shadow: 0 4px 18px rgba(37, 211, 102, 0.4); 
+        transition: transform 0.2s, box-shadow 0.2s;
+        letter-spacing: 0.5px;
+        font-size: 14px;
+    }
+
+    .btn-wa:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 22px rgba(37, 211, 102, 0.6);
+    }
+
+    .footer { 
+        margin-top: 20px; 
+        color: rgba(255, 255, 255, 0.7); 
+        font-size: 12px; 
+        text-align: center; 
+        position: relative; 
+        z-index: 1; 
+        line-height: 1.5;
+    }
+
+    #panel-admin { display: none; margin-top: 20px; border-top: 1px solid rgba(0,242,255,0.3); padding-top: 15px; }
+    .lista-item { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 11px; text-align: left; }
+    
+    /* TABLA DE RANGOS MEJORADA */
+    .tabla-rangos { 
+        width: 100%; 
+        font-size: 11px; 
+        margin-top: 16px; 
+        border-collapse: separate; 
+        border-spacing: 0;
+        border: 1px solid rgba(0, 242, 255, 0.3); 
+        border-radius: 8px;
+        overflow: hidden;
+        color: #ffffff; 
+        background: rgba(0, 0, 0, 0.4); 
+    }
+
+    .tabla-rangos th, .tabla-rangos td { padding: 8px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .tabla-rangos th { color: #00f2ff; background: rgba(0, 242, 255, 0.12); font-weight: bold; letter-spacing: 0.5px; }
+    .tabla-rangos tr:last-child td { border-bottom: none; }
+
+    /* DROP ZONES PARA SUBIR FOTOS */
+    .drop-zone { 
+        border: 2px dashed rgba(0, 242, 255, 0.5); 
+        background: rgba(0, 242, 255, 0.05); 
+        padding: 14px; 
+        border-radius: 10px; 
+        text-align: center; 
+        cursor: pointer; 
+        margin-top: 6px; 
+        transition: all 0.3s ease; 
+    }
+
+    .drop-zone:hover, .drop-zone.dragover { 
+        background: rgba(0, 242, 255, 0.2); 
+        border-color: #00f2ff; 
+    }
+
+    .drop-zone-text { font-size: 11px; color: #00f2ff; font-weight: 700; }
+
+    /* SECCIÓN TESTIMONIOS Y REVIEWS */
+    .caja-referencias { margin-top: 0px; max-width: 460px; padding: 20px; }
+    .caja-referencias h1 { font-size: 18px; }
+
+    .btn-toggle-ref { 
+        width: 100%; 
+        background: rgba(0, 242, 255, 0.08); 
+        border: 1px solid rgba(0, 242, 255, 0.5); 
+        color: #00f2ff; 
+        padding: 11px; 
+        border-radius: 10px; 
+        font-size: 12px; 
+        font-weight: 800; 
+        cursor: pointer; 
+        transition: all 0.25s ease; 
+    }
+
+    .btn-toggle-ref:hover { 
+        background: rgba(0, 242, 255, 0.2); 
+        box-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
+    }
+    
+    #contenedor-ref-scroll { display: block; margin-top: 14px; }
+    .filtros-ref { display: flex; gap: 6px; margin-bottom: 14px; justify-content: center; flex-wrap: wrap; }
+    
+    .btn-filtro { 
+        background: rgba(255, 255, 255, 0.05); 
+        border: 1px solid rgba(0, 242, 255, 0.3); 
+        color: #a0aec0; 
+        padding: 6px 14px; 
+        border-radius: 20px; 
+        font-size: 11px; 
+        cursor: pointer; 
+        transition: all 0.25s ease; 
+        font-weight: 700; 
+    }
+
+    .btn-filtro.activo { 
+        background: #00f2ff; 
+        color: #030008; 
+        border-color: #00f2ff;
+        box-shadow: 0 0 12px rgba(0, 242, 255, 0.6); 
+    }
+
+    .grid-referencias { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+    
+    /* TARJETA DE TESTIMONIO TIPO BADGE */
+    .tarjeta-ref { 
+        background: rgba(12, 22, 40, 0.7); 
+        border: 1px solid rgba(0, 242, 255, 0.35); 
+        border-radius: 12px; 
+        padding: 14px; 
+        text-align: left; 
+        width: 100%; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .tarjeta-ref-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+
+    .tarjeta-ref-tipo { font-size: 10px; color: #ffd700; font-weight: 800; letter-spacing: 0.5px; }
+    .estrellas-rating { color: #ffd700; font-size: 12px; letter-spacing: 2px; }
+    .tarjeta-ref-nombre { font-size: 14px; font-weight: 800; margin-bottom: 8px; color: #ffffff; }
+    
+    .tarjeta-ref-progreso { 
+        font-size: 12px; 
+        background: rgba(0,0,0,0.3);
+        padding: 8px;
+        border-radius: 6px;
+        line-height: 1.5; 
+    }
+
+    .tarjeta-ref-progreso .antes { color: #ff6b6b; display: block; font-weight: 600; }
+    .tarjeta-ref-progreso .despues { color: #51cf66; font-weight: 600; display: block; }
+    
+    .btn-evidencia { 
+        display: inline-block; 
+        background: rgba(0, 242, 255, 0.15); 
+        border: 1px solid #00f2ff; 
+        color: #00f2ff; 
+        padding: 4px 10px; 
+        border-radius: 6px; 
+        font-size: 10px; 
+        font-weight: 700; 
+        transition: all 0.2s ease; 
+    }
+
     .btn-evidencia:hover { background: #00f2ff; color: #030008; }
-    .tarjeta-ref-fecha { font-size: 10px; color: #aaa; margin-top: 8px; }
-    #sin-referencias { display: none; text-align: center; color: #aaa; padding: 15px 5px; font-size: 12px; }
+    .tarjeta-ref-fecha { font-size: 10px; color: #718096; margin-top: 8px; text-align: right; }
     
-    .btn-ver-mas { display: none; width: 100%; margin-top: 10px; background: rgba(255, 215, 0, 0.2); border: 1px solid #ffd700; color: #ffd700; padding: 9px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+    #sin-referencias { display: none; text-align: center; color: #718096; padding: 15px 5px; font-size: 12px; }
+    
+    .btn-ver-mas { 
+        display: none; 
+        width: 100%; 
+        margin-top: 12px; 
+        background: rgba(255, 215, 0, 0.1); 
+        border: 1px solid #ffd700; 
+        color: #ffd700; 
+        padding: 10px; 
+        border-radius: 8px; 
+        font-size: 11px; 
+        font-weight: 800; 
+        cursor: pointer; 
+    }
 
-    .form-admin-ref { border-top: 1px dashed #444; margin-top: 15px; padding-top: 12px; }
+    .form-admin-ref { border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 15px; padding-top: 12px; }
     .form-admin-ref h3 { font-size: 13px; color: #00f2ff; margin: 0 0 8px 0; text-align: left; }
 
-    #modal-editar-admin { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:999; width:90%; max-width:400px; background:#0a0314; border:2px solid #00f2ff; padding:20px; border-radius:12px; box-shadow: 0 0 25px rgba(0,242,255,0.5); }
+    #modal-editar-admin { 
+        display:none; 
+        position:fixed; 
+        top:50%; 
+        left:50%; 
+        transform:translate(-50%,-50%); 
+        z-index:999; 
+        width:90%; 
+        max-width:420px; 
+        background:#070210; 
+        border:2px solid #00f2ff; 
+        padding:20px; 
+        border-radius:16px; 
+        box-shadow: 0 0 35px rgba(0,242,255,0.6); 
+    }
 
     #img-visor-grande {
         max-width: 95vw;
         max-height: 88vh;
         border: 2px solid #00f2ff;
-        border-radius: 8px;
-        box-shadow: 0 0 25px rgba(0,242,255,0.6);
+        border-radius: 12px;
+        box-shadow: 0 0 30px rgba(0,242,255,0.7);
         object-fit: contain;
         background: #000;
     }
@@ -584,7 +857,7 @@
     </video>
 
     <!-- BOTÓN FLOTANTE PARA ACTIVAR/SILENCIAR EL AUDIO DEL VIDEO -->
-    <button onclick="toggleAudioVideo()" id="btn-audio-video" style="position:fixed; bottom:20px; right:20px; z-index:9999; background:rgba(6,2,16,0.9); border:1px solid #00f2ff; color:#00f2ff; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold; backdrop-filter:blur(4px); box-shadow: 0 0 10px rgba(0,242,255,0.3); font-size:12px;">🔇 Activar Sonido</button>
+    <button onclick="toggleAudioVideo()" id="btn-audio-video" style="position:fixed; bottom:20px; right:20px; z-index:9999; background:rgba(6,2,16,0.9); border:1px solid #00f2ff; color:#00f2ff; padding:8px 14px; border-radius:10px; cursor:pointer; font-weight:bold; backdrop-filter:blur(8px); box-shadow: 0 0 12px rgba(0,242,255,0.3); font-size:12px;">🔇 Activar Sonido</button>
 
     <div class="caja" id="contenedor">
         <div id="vista-seguimiento">
@@ -620,12 +893,12 @@
                 <input type="number" id="horas" value="1" min="1" oninput="calcularTotal()">
             </div>
 
-            <div id="bloque-modo-objetivo" style="display:none; background:rgba(0,242,255,0.08); padding:10px; border-radius:8px; border:1px solid rgba(0,242,255,0.4); margin-top:5px;">
+            <div id="bloque-modo-objetivo" style="display:none; background:rgba(0,242,255,0.06); padding:12px; border-radius:10px; border:1px solid rgba(0,242,255,0.3); margin-top:8px;">
                 <label style="margin-top:0;">Skill/Nivel Actual:</label>
                 <input type="number" id="stat-actual" placeholder="Ej: 100" min="1" oninput="calcularTotalMeta()">
                 <label>Skill/Nivel Deseado:</label>
                 <input type="number" id="stat-deseado" placeholder="Ej: 115" min="1" oninput="calcularTotalMeta()">
-                <div id="res-meta-estimado" style="font-size:12px; color:#ffd700; margin-top:5px; text-align:center; font-weight:bold;"></div>
+                <div id="res-meta-estimado" style="font-size:12px; color:#ffd700; margin-top:6px; text-align:center; font-weight:bold;"></div>
             </div>
 
             <label>Servicio:</label>
@@ -639,10 +912,10 @@
 
             <label>Nivel de tu Skill Actual (Para barra de rango):</label>
             <input type="number" id="nivel-skill" placeholder="Ej: 100" min="1" oninput="actualizarBarra()">
-            <div id="contenedor-barra" style="margin-top:10px; display:none; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px; border: 1px solid rgba(0,242,255,0.3);">
-                <div style="font-size: 12px; margin-bottom: 5px; font-weight: bold; color: #fff;">Rango Actual: <span id="nombre-rango">Bronce</span></div>
-                <div style="width: 100%; height: 12px; background: #222; border-radius: 6px; overflow: hidden; border: 1px solid #444;">
-                    <div id="barra-progreso" style="width: 0%; height: 100%; background: #cd7f32; transition: width 0.3s, background 0.3s;"></div>
+            <div id="contenedor-barra" style="margin-top:10px; display:none; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; border: 1px solid rgba(0,242,255,0.3);">
+                <div style="font-size: 12px; margin-bottom: 6px; font-weight: bold; color: #fff;">Rango Actual: <span id="nombre-rango">Bronce</span></div>
+                <div style="width: 100%; height: 12px; background: #111; border-radius: 6px; overflow: hidden; border: 1px solid #333;">
+                    <div id="barra-progreso" style="width: 0%; height: 100%; background: #cd7f32; transition: width 0.4s ease, background 0.4s ease;"></div>
                 </div>
             </div>
 
@@ -665,10 +938,10 @@
             <a href="#" id="boton-whatsapp" class="btn-wa" onclick="reproducirYRedirigir(); return false;">💬 APARTAR CUPO POR WHATSAPP</a>
             
             <div id="panel-admin">
-                <button onclick="cambiarEstado()" style="width:100%; padding:10px; background: #ff0000; color: white; cursor:pointer; font-weight:bold;">CAMBIAR ESTADO</button>
+                <button onclick="cambiarEstado()" style="width:100%; padding:10px; background: #ff0000; color: white; cursor:pointer; font-weight:bold; border:none; border-radius:6px;">CAMBIAR ESTADO</button>
                 <input type="text" id="admin-nombre" placeholder="Nombre cliente" style="margin-top:10px;">
                 <input type="number" id="admin-horas" placeholder="Horas">
-                <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer; font-weight:bold;">GENERAR LINK</button>
+                <button onclick="generarLink()" style="width:100%; padding:10px; cursor:pointer; font-weight:bold; background:#00f2ff; border:none; border-radius:6px; margin-top:5px;">GENERAR LINK</button>
                 <div id="link-generado" style="color:#ffd700; font-size:11px; margin-top:10px; word-break:break-all;"></div>
                 <div id="lista-clientes" style="margin-top:15px; max-height: 150px; overflow-y: auto;"></div>
 
@@ -708,7 +981,7 @@
                     <div id="contador-fotos-admin-nuevo" style="font-size:10px; color:#ffd700; margin-top:3px;"></div>
                     <div id="estado-subida-admin" style="font-size:11px; margin-top:3px; text-align:center;"></div>
 
-                    <button onclick="agregarTestimonioAdmin()" style="width:100%; padding:10px; background:#00f2ff; color:#030008; font-weight:bold; cursor:pointer; margin-top:8px;">➕ PUBLICAR TESTIMONIO</button>
+                    <button onclick="agregarTestimonioAdmin()" style="width:100%; padding:10px; background:#00f2ff; color:#030008; font-weight:bold; cursor:pointer; margin-top:8px; border:none; border-radius:6px;">➕ PUBLICAR TESTIMONIO</button>
                     <div id="lista-referencias-admin" style="margin-top:15px; max-height: 220px; overflow-y: auto;">
                         <div style="font-size:11px; color:#00f2ff; margin-bottom:5px;"><b>Testimonios publicados:</b></div>
                         <div id="contenido-lista-ref"></div>
@@ -753,7 +1026,7 @@
     </div>
 
     <!-- VISOR EMERGENTE DE FOTOS -->
-    <div id="modal-visor-foto" onclick="cerrarVisorFoto()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
+    <div id="modal-visor-foto" onclick="cerrarVisorFoto()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
         <div style="position:relative; max-width:90%; max-height:90%;">
             <span style="position:absolute; top:-30px; right:0; color:white; font-size:24px; font-weight:bold; cursor:pointer;">✖️ Cerrar</span>
             <img id="img-visor-grande" src="">
@@ -779,7 +1052,7 @@
             <div id="sin-referencias">Aún no hay testimonios publicados en esta categoría.</div>
         </div>
 
-        <button class="btn-toggle-ref" id="btn-toggle-form-publico" style="margin-top:10px;" onclick="toggleFormularioPublico()">✍️ DEJAR MI TESTIMONIO</button>
+        <button class="btn-toggle-ref" id="btn-toggle-form-publico" style="margin-top:12px;" onclick="toggleFormularioPublico()">✍️ DEJAR MI TESTIMONIO</button>
         <div id="form-ref-publico" style="display:none; margin-top:14px; text-align:left;">
             <p style="font-size:11px; color:#aaa; margin:0 0 10px 0;">Cuéntanos tu experiencia. Se revisa antes de publicarse.</p>
             <label style="margin-top:0;">Tipo:</label>
@@ -812,7 +1085,7 @@
             <input type="file" id="file-input-publico" accept="image/*" style="display:none;">
             <div id="estado-subida-publico" style="font-size:11px; margin-top:5px; text-align:center;"></div>
 
-            <button onclick="enviarReferenciaPublica()" style="width:100%; padding:10px; background:#00f2ff; color:#030008; font-weight:bold; cursor:pointer; margin-top:10px;">📤 ENVIAR PARA REVISIÓN</button>
+            <button onclick="enviarReferenciaPublica()" style="width:100%; padding:11px; background:#00f2ff; color:#030008; font-weight:bold; cursor:pointer; margin-top:12px; border:none; border-radius:8px;">📤 ENVIAR PARA REVISIÓN</button>
             <div id="pub-ref-msj" style="font-size:11px; margin-top:8px; text-align:center;"></div>
         </div>
     </div>
