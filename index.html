@@ -1109,7 +1109,7 @@
 
     <!-- MODAL POPUP DE BIENVENIDA MOTIVACIONAL PARA EL CLIENTE -->
     <div id="modal-bienvenida">
-        <div class="caja-bienvenida">
+        <div class="caja-bienvenida" id="caja-bienvenida-interna">
             <div style="font-size:38px; margin-bottom:8px;">🚀</div>
             <h2 style="color:#00f2ff; font-size:16px; margin:0 0 10px 0; text-transform:uppercase;">¡Bienvenido a SafeGaming Service!</h2>
             <p style="font-size:12px; color:#e2e8f0; line-height:1.5; margin-bottom:18px;">
@@ -1299,6 +1299,19 @@
             reproducirSonidoAscendente();
             document.getElementById("modal-bienvenida").style.display = "flex";
         }
+
+        // Lógica agregada para cerrar el modal al hacer clic fuera de la caja interna
+        window.addEventListener('click', function(evento) {
+            const modalBienvenida = document.getElementById("modal-bienvenida");
+            const cajaInterna = document.getElementById("caja-bienvenida-interna");
+            
+            // Si el modal está visible y se hace clic en el fondo oscuro (fuera de la caja)
+            if (modalBienvenida && modalBienvenida.style.display === "flex") {
+                if (!cajaInterna.contains(evento.target)) {
+                    modalBienvenida.style.display = "none";
+                }
+            }
+        });
 
         function confirmarRedireccionWA() {
             let nombre = document.getElementById("personaje").value;
