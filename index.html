@@ -573,6 +573,22 @@
         object-fit: contain;
         background: #000;
     }
+
+    /* ESTILOS DEL CALENDARIO EN TIEMPO REAL */
+    .caja-calendario { margin-top: 0px; max-width: 450px; padding: 16px 20px; position: relative; z-index: 1; }
+    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .cal-btn { background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
+    .cal-btn:hover { background: #00f2ff; color: #000; }
+    .cal-title { font-size: 14px; font-weight: bold; color: #ffd700; text-shadow: 0 0 5px rgba(255,215,0,0.5); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+    .cal-day-head { font-size: 10px; font-weight: bold; color: #00f2ff; padding: 4px 0; }
+    .cal-day { font-size: 11px; padding: 8px 2px; border-radius: 6px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); position: relative; cursor: pointer; min-height: 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .cal-day.empty { background: transparent; border: none; cursor: default; }
+    .cal-day.hoy { border: 2px solid #00f2ff; background: rgba(0, 242, 255, 0.25); font-weight: bold; color: #fff; box-shadow: 0 0 8px rgba(0,242,255,0.5); }
+    .cal-day.festivo { border: 1px solid #ffd700; background: rgba(255, 215, 0, 0.2); font-weight: bold; color: #ffd700; }
+    .cal-festivo-dot { font-size: 8px; margin-top: 2px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; color: #ffd700; }
+    .cal-festivos-lista { margin-top: 14px; border-top: 1px dashed rgba(0,242,255,0.4); padding-top: 10px; text-align: left; }
+    .cal-festivo-item { font-size: 11px; color: #e2e8f0; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
 </style>
 </head>
 <body>
@@ -715,6 +731,35 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN CALENDARIO EN TIEMPO REAL CON FESTIVIDADES -->
+    <div class="caja caja-calendario">
+        <h1>📅 CALENDARIO DE EVENTOS Y FESTIVOS</h1>
+        <div class="subtitle">FECHAS OFICIALES Y DÍAS FERIADOS</div>
+        
+        <div class="cal-header">
+            <button class="cal-btn" onclick="navegarMes(-1)">◀ Anterior</button>
+            <div class="cal-title" id="cal-mes-ano">---</div>
+            <button class="cal-btn" onclick="navegarMes(1)">Siguiente ▶</button>
+        </div>
+
+        <div class="cal-grid" id="cal-dias-semana">
+            <div class="cal-day-head">Dom</div>
+            <div class="cal-day-head">Lun</div>
+            <div class="cal-day-head">Mar</div>
+            <div class="cal-day-head">Mié</div>
+            <div class="cal-day-head">Jue</div>
+            <div class="cal-day-head">Vie</div>
+            <div class="cal-day-head">Sáb</div>
+        </div>
+
+        <div class="cal-grid" id="cal-malla-dias" style="margin-top: 5px;"></div>
+
+        <div class="cal-festivos-lista">
+            <div style="font-size: 11px; color: #ffd700; font-weight: bold; margin-bottom: 6px;">🎉 FESTIVIDADES DEL MES:</div>
+            <div id="cal-lista-festivos"></div>
         </div>
     </div>
 
@@ -967,6 +1012,7 @@
         if(params.has('n')) {
             document.getElementById("vista-formulario").style.display = "none";
             document.querySelector(".caja-referencias").style.display = "none";
+            document.querySelector(".caja-calendario").style.display = "none";
             document.getElementById("vista-seguimiento").style.display = "block";
             document.getElementById("cliente-nombre").innerText = "Cliente: " + decodeURIComponent(params.get('n'));
             let r = params.get('r') || "Novato", c = params.get('c') || "#aaa", i = params.get('i') || "👶";
@@ -1052,7 +1098,142 @@
             window.renderListaImagenesEditar();
         });
 
-        window.onload = () => { calcularTotal(); };
+        // =====================================================================
+        // ---- LÓGICA DEL CALENDARIO EN TIEMPO REAL CON FESTIVIDADES ----
+        // =====================================================================
+
+        let fechaCal = new Date();
+
+        function calcularPascua(year) {
+            const a = year % 19;
+            const b = Math.floor(year / 100);
+            const c = year % 100;
+            const d = Math.floor(b / 4);
+            const e = b % 4;
+            const f = Math.floor((b + 8) / 25);
+            const g = Math.floor((b - f + 1) / 3);
+            const h = (19 * a + b - d - g + 15) % 30;
+            const i = Math.floor(c / 4);
+            const k = c % 4;
+            const l = (32 + 2 * e + 2 * i - h - k) % 7;
+            const m = Math.floor((a + 11 * h + 22 * l) / 451);
+            const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+            const day = ((h + l - 7 * m + 114) % 31) + 1;
+            return new Date(year, month, day);
+        }
+
+        function obtenerFestivos(year) {
+            const festivos = {
+                "0-1": "🎆 Año Nuevo",
+                "0-6": "👑 Reyes Magos",
+                "0-14": "🕊️ Divina Pastora",
+                "3-19": "📜 Declaración de Independencia",
+                "4-1": "🛠️ Día del Trabajador",
+                "5-24": "⚔️ Batalla de Carabobo",
+                "6-5": "🇻🇪 Día de la Independencia",
+                "6-24": "🎩 Natalicio de Simón Bolívar",
+                "7-3": "🛡️ Día del Guardia Nacional",
+                "9-12": "🏹 Día de la Resistencia Indígena",
+                "9-31": "🎃 Halloween",
+                "10-1": "🕯️ Día de Todos los Santos",
+                "10-18": "🪕 Virgen de Chiquinquirá",
+                "11-24": "🎄 Nochebuena",
+                "11-25": "🎅 Navidad",
+                "11-31": "🍾 Fin de Año"
+            };
+
+            const pascua = calcularPascua(year);
+            
+            const juevesSanto = new Date(pascua);
+            juevesSanto.setDate(pascua.getDate() - 3);
+            festivos[`${juevesSanto.getMonth()}-${juevesSanto.getDate()}`] = "✝️ Jueves Santo";
+
+            const viernesSanto = new Date(pascua);
+            viernesSanto.setDate(pascua.getDate() - 2);
+            festivos[`${viernesSanto.getMonth()}-${viernesSanto.getDate()}`] = "✝️ Viernes Santo";
+
+            const lunesCarnaval = new Date(pascua);
+            lunesCarnaval.setDate(pascua.getDate() - 48);
+            festivos[`${lunesCarnaval.getMonth()}-${lunesCarnaval.getDate()}`] = "🎭 Lunes de Carnaval";
+
+            const martesCarnaval = new Date(pascua);
+            martesCarnaval.setDate(pascua.getDate() - 47);
+            festivos[`${martesCarnaval.getMonth()}-${martesCarnaval.getDate()}`] = "🎭 Martes de Carnaval";
+
+            return festivos;
+        }
+
+        function renderCalendario() {
+            const year = fechaCal.getFullYear();
+            const month = fechaCal.getMonth();
+            const hoy = new Date();
+
+            const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            
+            document.getElementById("cal-mes-ano").innerText = `${nombresMeses[month]} ${year}`;
+
+            const primerDia = new Date(year, month, 1).getDay();
+            const totalDias = new Date(year, month + 1, 0).getDate();
+            const festivosMap = obtenerFestivos(year);
+
+            const malla = document.getElementById("cal-malla-dias");
+            const listaFestivosDiv = document.getElementById("cal-lista-festivos");
+            malla.innerHTML = "";
+            listaFestivosDiv.innerHTML = "";
+
+            let festivosEncontrados = [];
+
+            for (let i = 0; i < primerDia; i++) {
+                const cellEmpty = document.createElement("div");
+                cellEmpty.className = "cal-day empty";
+                malla.appendChild(cellEmpty);
+            }
+
+            for (let d = 1; d <= totalDias; d++) {
+                const cell = document.createElement("div");
+                cell.className = "cal-day";
+                
+                const esHoy = (hoy.getFullYear() === year && hoy.getMonth() === month && hoy.getDate() === d);
+                if (esHoy) cell.classList.add("hoy");
+
+                const keyFestivo = `${month}-${d}`;
+                const nombreFestivo = festivosMap[keyFestivo];
+
+                let htmlDia = `<span>${d}</span>`;
+
+                if (nombreFestivo) {
+                    cell.classList.add("festivo");
+                    htmlDia += `<span class="cal-festivo-dot" title="${nombreFestivo}">${nombreFestivo.split(' ')[0]}</span>`;
+                    festivosEncontrados.push({ dia: d, nombre: nombreFestivo });
+                }
+
+                cell.innerHTML = htmlDia;
+                malla.appendChild(cell);
+            }
+
+            if (festivosEncontrados.length === 0) {
+                listaFestivosDiv.innerHTML = `<div style="font-size:11px; color:#888;">No hay días festivos oficiales registrados para este mes.</div>`;
+            } else {
+                festivosEncontrados.forEach(item => {
+                    listaFestivosDiv.innerHTML += `
+                        <div class="cal-festivo-item">
+                            <span style="color:#00f2ff; font-weight:bold;">${item.dia} de ${nombresMeses[month]}:</span> 
+                            <span>${item.nombre}</span>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        window.navegarMes = (dir) => {
+            fechaCal.setMonth(fechaCal.getMonth() + dir);
+            renderCalendario();
+        };
+
+        window.onload = () => { 
+            calcularTotal(); 
+            renderCalendario();
+        };
     </script>
 </body>
 </html>
