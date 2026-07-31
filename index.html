@@ -42,6 +42,23 @@
         if(btnWa) btnWa.style.pointerEvents = window.estaDisponible ? "auto" : "none";
     });
 
+    window.esAdmin = false;
+
+    // Sincronización de Disponibilidad en Calendario desde Firebase
+    window.diasNoDisponiblesFB = {};
+    const calRef = ref(db, 'disponibilidad_calendario');
+    onValue(calRef, (snapshot) => {
+        window.diasNoDisponiblesFB = snapshot.val() || {};
+        if (window.renderCalendario) window.renderCalendario();
+    });
+
+    window.cambiarEstadoDiaAdmin = (fechaClave) => {
+        if (!window.esAdmin) return;
+        const estadoActual = window.diasNoDisponiblesFB[fechaClave];
+        const nuevoEstado = !estadoActual;
+        set(ref(db, `disponibilidad_calendario/${fechaClave}`), nuevoEstado ? true : null);
+    };
+
     window.cambiarEstado = () => set(estadoRef, !window.estaDisponible);
 
     window.registrarCliente = (nombre, horas) => {
@@ -574,8 +591,12 @@
         background: #000;
     }
 
-    /* ESTILOS DEL CALENDARIO EN TIEMPO REAL */
+    /* ESTILOS DEL CALENDARIO EN TIEMPO REAL CON PESTAÑA DESPLEGABLE */
     .caja-calendario { margin-top: 0px; max-width: 450px; padding: 16px 20px; position: relative; z-index: 1; }
+    .btn-desplegar-cal { width: 100%; background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+    .btn-desplegar-cal:hover { background: rgba(0, 242, 255, 0.3); }
+    .cal-desplegable-contenido { display: none; margin-top: 15px; }
+    
     .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .cal-btn { background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
     .cal-btn:hover { background: #00f2ff; color: #000; }
@@ -585,17 +606,22 @@
     .cal-day { font-size: 11px; padding: 8px 2px; border-radius: 6px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); position: relative; cursor: pointer; min-height: 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .cal-day.empty { background: transparent; border: none; cursor: default; }
     .cal-day.hoy { border: 2px solid #00f2ff; background: rgba(0, 242, 255, 0.25); font-weight: bold; color: #fff; box-shadow: 0 0 8px rgba(0,242,255,0.5); }
+    .cal-day.disponible { background: rgba(46, 125, 50, 0.35) !important; border: 1px solid #4caf50 !important; color: #fff; }
+    .cal-day.no-disponible { background: rgba(198, 40, 40, 0.45) !important; border: 1px solid #f44336 !important; color: #ff8585; }
     .cal-day.festivo { border: 1px solid #ffd700; background: rgba(255, 215, 0, 0.2); font-weight: bold; color: #ffd700; }
     .cal-festivo-dot { font-size: 8px; margin-top: 2px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; color: #ffd700; }
     .cal-festivos-lista { margin-top: 14px; border-top: 1px dashed rgba(0,242,255,0.4); padding-top: 10px; text-align: left; }
     .cal-festivo-item { font-size: 11px; color: #e2e8f0; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
 
-    /* ESTILOS DE LA CALCULADORA RUCOY */
+    /* ESTILOS DE LA CALCULADORA RUCOY Y PLANES */
     .caja-calculadora { margin-top: 0px; max-width: 450px; padding: 16px 20px; position: relative; z-index: 1; }
     .calc-tabs { display: flex; gap: 6px; margin-bottom: 15px; justify-content: center; }
     .btn-calc-tab { flex: 1; background: rgba(0,242,255,0.1); border: 1px solid rgba(0,242,255,0.4); color: #00f2ff; padding: 8px 4px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .btn-calc-tab.activo { background: #00f2ff; color: #030008; box-shadow: 0 0 10px rgba(0,242,255,0.5); }
     .calc-contenido label { margin-top: 8px; }
+
+    .tarjeta-plan-recomendado { background: rgba(255, 215, 0, 0.08); border: 1px solid #ffd700; border-radius: 8px; padding: 12px; margin-top: 15px; text-align: center; }
+    .tarjeta-plan-recomendado h4 { color: #ffd700; margin: 0 0 6px 0; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -741,36 +767,46 @@
         </div>
     </div>
 
-    <!-- SECCIÓN CALENDARIO EN TIEMPO REAL CON FESTIVIDADES -->
+    <!-- SECCIÓN CALENDARIO DESPLEGABLE Y EDITABLE EN TIEMPO REAL -->
     <div class="caja caja-calendario">
-        <h1>📅 CALENDARIO DE EVENTOS Y FESTIVOS</h1>
-        <div class="subtitle">FECHAS OFICIALES Y DÍAS FERIADOS</div>
-        
-        <div class="cal-header">
-            <button class="cal-btn" onclick="navegarMes(-1)">◀ Anterior</button>
-            <div class="cal-title" id="cal-mes-ano">---</div>
-            <button class="cal-btn" onclick="navegarMes(1)">Siguiente ▶</button>
-        </div>
+        <button type="button" class="btn-desplegar-cal" onclick="toggleCalendarioDesplegable()">
+            <span>📅 CALENDARIO Y DISPONIBILIDAD</span>
+            <span id="flecha-cal-icono">▼</span>
+        </button>
 
-        <div class="cal-grid" id="cal-dias-semana">
-            <div class="cal-day-head">Dom</div>
-            <div class="cal-day-head">Lun</div>
-            <div class="cal-day-head">Mar</div>
-            <div class="cal-day-head">Mié</div>
-            <div class="cal-day-head">Jue</div>
-            <div class="cal-day-head">Vie</div>
-            <div class="cal-day-head">Sáb</div>
-        </div>
+        <div id="cal-desplegable-contenido" class="cal-desplegable-contenido">
+            <div class="subtitle" style="margin-top:5px;">FECHAS OFICIALES, EVENTOS Y DISPONIBILIDAD</div>
+            
+            <div id="admin-aviso-cal" style="display:none; font-size:11px; color:#4caf50; font-weight:bold; text-align:center; margin-bottom:8px;">
+                🔓 MODO ADMIN ACTIVO: Toca cualquier día para cambiar entre Disponible / No disponible.
+            </div>
 
-        <div class="cal-grid" id="cal-malla-dias" style="margin-top: 5px;"></div>
+            <div class="cal-header">
+                <button class="cal-btn" onclick="navegarMes(-1)">◀ Anterior</button>
+                <div class="cal-title" id="cal-mes-ano">---</div>
+                <button class="cal-btn" onclick="navegarMes(1)">Siguiente ▶</button>
+            </div>
 
-        <div class="cal-festivos-lista">
-            <div style="font-size: 11px; color: #ffd700; font-weight: bold; margin-bottom: 6px;">🎉 FESTIVIDADES DEL MES:</div>
-            <div id="cal-lista-festivos"></div>
+            <div class="cal-grid" id="cal-dias-semana">
+                <div class="cal-day-head">Dom</div>
+                <div class="cal-day-head">Lun</div>
+                <div class="cal-day-head">Mar</div>
+                <div class="cal-day-head">Mié</div>
+                <div class="cal-day-head">Jue</div>
+                <div class="cal-day-head">Vie</div>
+                <div class="cal-day-head">Sáb</div>
+            </div>
+
+            <div class="cal-grid" id="cal-malla-dias" style="margin-top: 5px;"></div>
+
+            <div class="cal-festivos-lista">
+                <div style="font-size: 11px; color: #ffd700; font-weight: bold; margin-bottom: 6px;">🎉 FESTIVIDADES Y EVENTOS DEL MES:</div>
+                <div id="cal-lista-festivos"></div>
+            </div>
         </div>
     </div>
 
-    <!-- SECCIÓN CALCULADORA DE RUCOY ONLINE -->
+    <!-- SECCIÓN CALCULADORA DE RUCOY ONLINE CON GENERADOR DE PLANES -->
     <div class="caja caja-calculadora" id="seccion-calculadora">
         <h1>🧮 CALCULADORA DE RUCOY ONLINE</h1>
         <div class="subtitle">CALCULA SKILLS, EXP Y DAÑO EN TIEMPO REAL</div>
@@ -804,6 +840,13 @@
                         <span id="res-tiempo-ptrain" style="color:#fff; font-weight:bold;">0 hrs</span>
                     </div>
                 </div>
+            </div>
+
+            <!-- BLOQUE DINÁMICO DE PLAN RECOMENDADO -->
+            <div id="tarjeta-plan-calc" class="tarjeta-plan-recomendado" style="display:none;">
+                <h4>🎯 PLAN RECOMENDADO CON SAFEGAMING SERVICE</h4>
+                <div id="plan-calc-detalle" style="font-size:12px; color:#fff; line-height:1.5;"></div>
+                <a id="btn-wa-plan-calc" href="#" target="_blank" class="btn-wa" style="margin-top:10px; font-size:12px; padding:10px;">💬 CONTRATAR ESTE PLAN POR WHATSAPP</a>
             </div>
         </div>
 
@@ -1050,10 +1093,13 @@
         function verificarAdmin() {
             let pass = prompt("Ingrese contraseña de administrador:");
             if(pass === "Iscarlos2006") {
+                window.esAdmin = true;
                 document.getElementById('panel-admin').style.display = 'block';
+                document.getElementById('admin-aviso-cal').style.display = 'block';
                 cargarAdmin();
                 if (window.renderTestimoniosAdmin) window.renderTestimoniosAdmin();
                 if (window.renderPendientesAdmin) window.renderPendientesAdmin();
+                if (window.renderCalendario) window.renderCalendario();
             } else { alert("Contraseña incorrecta"); }
         }
 
@@ -1193,10 +1239,19 @@
         });
 
         // =====================================================================
-        // ---- LÓGICA DEL CALENDARIO EN TIEMPO REAL CON FESTIVIDADES ----
+        // ---- LÓGICA DEL CALENDARIO DESPLEGABLE Y EDITABLE ----
         // =====================================================================
 
         let fechaCal = new Date();
+
+        function toggleCalendarioDesplegable() {
+            const cont = document.getElementById("cal-desplegable-contenido");
+            const icono = document.getElementById("flecha-cal-icono");
+            const estaAbierto = cont.style.display === "block";
+            
+            cont.style.display = estaAbierto ? "none" : "block";
+            icono.innerText = estaAbierto ? "▼" : "▲";
+        }
 
         function calcularPascua(year) {
             const a = year % 19;
@@ -1290,6 +1345,15 @@
                 const esHoy = (hoy.getFullYear() === year && hoy.getMonth() === month && hoy.getDate() === d);
                 if (esHoy) cell.classList.add("hoy");
 
+                const fechaClave = `${year}-${month + 1}-${d}`;
+                const estaBloqueado = window.diasNoDisponiblesFB[fechaClave];
+
+                if (estaBloqueado) {
+                    cell.classList.add("no-disponible");
+                } else {
+                    cell.classList.add("disponible");
+                }
+
                 const keyFestivo = `${month}-${d}`;
                 const nombreFestivo = festivosMap[keyFestivo];
 
@@ -1302,6 +1366,14 @@
                 }
 
                 cell.innerHTML = htmlDia;
+
+                // Evento para modificar disponibilidad si es Admin
+                cell.onclick = () => {
+                    if (window.esAdmin) {
+                        window.cambiarEstadoDiaAdmin(fechaClave);
+                    }
+                };
+
                 malla.appendChild(cell);
             }
 
@@ -1318,6 +1390,7 @@
                 });
             }
         }
+        window.renderCalendario = renderCalendario;
 
         window.navegarMes = (dir) => {
             fechaCal.setMonth(fechaCal.getMonth() + dir);
@@ -1325,7 +1398,7 @@
         };
 
         // =====================================================================
-        // ---- LÓGICA DE LA CALCULADORA RUCOY ONLINE ----
+        // ---- LÓGICA DE LA CALCULADORA RUCOY ONLINE Y GENERADOR DE PLANES ----
         // =====================================================================
 
         function cambiarTabCalc(tab, btn) {
@@ -1341,10 +1414,15 @@
             let sActual = parseInt(document.getElementById('calc-skill-actual').value) || 0;
             let sDeseado = parseInt(document.getElementById('calc-skill-deseado').value) || 0;
 
+            const cajaPlan = document.getElementById('tarjeta-plan-calc');
+            const detallePlan = document.getElementById('plan-calc-detalle');
+            const btnWA = document.getElementById('btn-wa-plan-calc');
+
             if (sDeseado <= sActual || sActual <= 0) {
                 document.getElementById('res-golpes-totales').innerText = "0 Golpes";
                 document.getElementById('res-tiempo-normal').innerText = "0 hrs";
                 document.getElementById('res-tiempo-ptrain').innerText = "0 hrs";
+                cajaPlan.style.display = "none";
                 return;
             }
 
@@ -1359,6 +1437,33 @@
             document.getElementById('res-golpes-totales').innerText = golpesTotales.toLocaleString() + " Golpes";
             document.getElementById('res-tiempo-normal').innerText = hrsNormal + " hrs";
             document.getElementById('res-tiempo-ptrain').innerText = hrsPtrain + " hrs";
+
+            // Lógica de Plan Recomendado
+            let diff = sDeseado - sActual;
+            let tipoPlan = "";
+            let tiempoEstimado = "";
+
+            if (hrsPtrain <= 15) {
+                tipoPlan = "⚡ Plan Express (Skilleo Rápido)";
+                tiempoEstimado = "1 a 3 Días";
+            } else if (hrsPtrain <= 50) {
+                tipoPlan = "🔥 Plan Avanzado (Crecimiento Constante)";
+                tiempoEstimado = "1 a 2 Semanas";
+            } else {
+                tipoPlan = "🏆 Plan PRO / Intensivo (Sube sin esfuerzo)";
+                tiempoEstimado = "3+ Semanas";
+            }
+
+            detallePlan.innerHTML = `
+                <b>Avanzarás:</b> +${diff} Skills (De ${sActual} a ${sDeseado})<br>
+                <b>Recomendación:</b> ${tipoPlan}<br>
+                <b>Tiempo estimado en Power Train:</b> ~${hrsPtrain} Horas (${tiempoEstimado})
+            `;
+
+            let msjWA = encodeURIComponent(`Hola Safegaming Service, calculé mi stat en la web. Mi skill actual es ${sActual}, quiero subir a ${sDeseado} (+${diff} skills, ~${hrsPtrain}h Ptrain). Me interesa contratar el ${tipoPlan}.`);
+            btnWA.href = `https://wa.me/584123576579?text=${msjWA}`;
+
+            cajaPlan.style.display = "block";
         }
 
         function calcularExpRucoy() {
